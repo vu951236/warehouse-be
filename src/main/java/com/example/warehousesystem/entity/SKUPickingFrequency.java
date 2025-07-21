@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "sku_picking_frequency")
+@Table(name = "sku_pickingfrequency")
 public class SKUPickingFrequency {
 
     @Id

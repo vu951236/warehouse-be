@@ -1,4 +1,4 @@
-package com.example.Backend_SmartVetSystem.config;
+package com.example.warehousesystem.config;
 
 import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
