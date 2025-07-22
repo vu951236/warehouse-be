@@ -27,6 +27,9 @@ public class ApplicationInitConfig {
     @NonFinal
     static final String ADMIN_PASSWORD = "admin";
 
+    @NonFinal
+    static final String ADMIN_EMAIL = "admin@example.com";
+
     @Bean
     @ConditionalOnProperty(
             prefix = "spring",
@@ -39,6 +42,7 @@ public class ApplicationInitConfig {
             if (userRepository.findByUsername(ADMIN_USER_NAME).isEmpty()) {
                 User user = User.builder()
                         .username(ADMIN_USER_NAME)
+                        .email(ADMIN_EMAIL)
                         .fullName("Admin")
                         .passwordHash(passwordEncoder.encode(ADMIN_PASSWORD))
                         .role(Role.admin)
