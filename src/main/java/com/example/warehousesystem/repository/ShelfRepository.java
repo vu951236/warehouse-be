@@ -9,7 +9,6 @@ import java.util.List;
 @Repository
 public interface ShelfRepository extends JpaRepository<Shelf, Integer> {
 
-    List<Shelf> findByWarehouseId(Integer warehouseId);
-
-    Shelf findByShelfCode(String shelfCode);
+    // Lấy toàn bộ kệ
+    List<Shelf> findAllByOrderByIdAsc();
 }

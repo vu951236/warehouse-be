@@ -19,6 +19,9 @@ public class Shelf {
     @Column(name = "shelf_code", nullable = false, length = 50)
     private String shelfCode;
 
+    @Column(name = "bin_count", nullable = false)
+    private Integer binCount;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "warehouse_id", nullable = false)
     private Warehouse warehouse;

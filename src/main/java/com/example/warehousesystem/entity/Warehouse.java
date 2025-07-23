@@ -24,6 +24,9 @@ public class Warehouse {
     @Column(name = "location", columnDefinition = "TEXT")
     private String location;
 
+    @Column(name = "shelf_count", nullable = false)
+    private Integer shelfCount;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
