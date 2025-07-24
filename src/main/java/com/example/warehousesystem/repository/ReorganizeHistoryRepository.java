@@ -11,6 +11,8 @@ import java.util.List;
 public interface ReorganizeHistoryRepository extends JpaRepository<ReorganizeHistory, Integer> {
     List<ReorganizeHistory> findByExecutedById(Integer userId);
 
-    
     List<ReorganizeHistory> findByExecutionTimeBetween(LocalDateTime start, LocalDateTime end);
+
+    // Tìm các lần phân bổ lại gần đây
+    List<ReorganizeHistory> findByExecutedByIdOrderByExecutionTimeDesc(Integer userId);
 }

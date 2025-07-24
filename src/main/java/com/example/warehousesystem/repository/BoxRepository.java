@@ -31,11 +31,18 @@ public interface BoxRepository extends JpaRepository<Box, Integer> {
     @Query("SELECT SUM(b.usedCapacity) FROM Box b")
     Integer getTotalUsedCapacity();
 
+    //Tìm box theo skuid
     List<Box> findBySku_Id(Integer skuId);
 
+    //Tìm box theo binid
     List<Box> findByBin_Id(Integer binId);
 
     // Tìm thùng chứa 1 loại SKU còn chỗ trống
     @Query("SELECT b FROM Box b WHERE b.sku.id = :skuId AND b.usedCapacity < b.capacity")
     List<Box> findAvailableBoxesBySku(@Param("skuId") Integer skuId);
+
+    // tìm bin nào chứa các id các box nhập vào
+    @Query("SELECT b FROM Box b JOIN FETCH b.bin WHERE b.id IN :boxIds")
+    List<Box> findBoxesWithBin(@Param("boxIds") List<Integer> boxIds);
+
 }

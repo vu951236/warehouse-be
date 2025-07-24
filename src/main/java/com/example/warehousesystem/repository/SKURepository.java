@@ -13,6 +13,7 @@ import java.util.List;
 @Repository
 public interface SKURepository extends JpaRepository<SKU, Integer> {
 
+    //Đếm theo loại
     @Query("SELECT i.sku.type AS type, COUNT(i.id) AS count " +
             "FROM Item i " +
             "GROUP BY i.sku.type")
@@ -37,8 +38,6 @@ public interface SKURepository extends JpaRepository<SKU, Integer> {
     // Tìm theo tên gần đúng
     List<SKU> findByNameContainingIgnoreCase(String keyword);
 
-    boolean existsBySkuCode(String skuCode);
-
     // Tìm kiếm nâng cao
     @Query("""
         SELECT s FROM SKU s 
@@ -50,4 +49,16 @@ public interface SKURepository extends JpaRepository<SKU, Integer> {
     // Lấy unit volume của một SKU
     @Query("SELECT s.unitVolume FROM SKU s WHERE s.id = :skuId")
     Float findUnitVolumeById(@Param("skuId") Integer skuId);
+
+    // Tìm kiếm theo mã, tên, loại, màu
+    @Query("SELECT s FROM SKU s WHERE " +
+            "(:code IS NULL OR s.skuCode LIKE %:code%) AND " +
+            "(:name IS NULL OR s.name LIKE %:name%) AND " +
+            "(:type IS NULL OR s.type LIKE %:type%)")
+    List<SKU> search(@Param("code") String code,
+                     @Param("name") String name,
+                     @Param("type") String type);
+
+    // Kiểm tra SKU đã tồn tại chưa
+    boolean existsBySkuCode(String skuCode);
 }

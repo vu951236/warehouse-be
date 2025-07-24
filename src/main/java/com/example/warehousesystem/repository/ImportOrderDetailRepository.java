@@ -57,7 +57,7 @@ public interface ImportOrderDetailRepository extends JpaRepository<ImportOrderDe
     // Tìm chi tiết theo id phiếu nhập
     List<ImportOrderDetail> findByImportOrderId(Integer importOrderId);
 
-    // Xoá tất cả chi tiết của phiếu nhập (nếu chỉnh sửa toàn bộ)
+    // Xoá tất cả chi tiết của phiếu nhập
     void deleteByImportOrderId(Integer importOrderId);
 }
 

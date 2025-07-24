@@ -26,7 +26,7 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
 
     boolean existsByBarcode(String barcode); // đảm bảo không trùng mã vạch
 
-    // Tìm theo mã vạch và Sku_Id
+    // Tìm theo các thông tin nhập vào
     Item findByBarcode(String barcode);
 
     List<Item> findBySku_Id(Integer skuId);
@@ -36,6 +36,8 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
     List<Item> findByStatus(Item.Status status);
 
     List<Item> findBySku(SKU sku);
+
+    List<Item> findByBoxId(Integer boxId);
 
     // Đếm số lượng item trong một bin cụ thể
     @Query("SELECT COUNT(i) FROM Item i WHERE i.box.bin.id = :binId AND i.status = 'available'")
@@ -47,4 +49,25 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
 
     @Query("SELECT i FROM Item i WHERE i.createdAt BETWEEN :start AND :end AND i.status = 'available'")
     List<Item> findImportedItemsBetween(LocalDateTime start, LocalDateTime end);
+
+    //Tìm hàng tồn khi dựa trên skuid
+    @Query("SELECT i FROM Item i WHERE i.sku.id = :skuId AND i.status = 'available'")
+    List<Item> findAvailableItemsBySkuId(@Param("skuId") Integer skuId);
+
+    //Tìm hàng dựa vào id của box và bin
+    @Query("SELECT i FROM Item i WHERE i.id IN :ids")
+    List<Item> findItemsWithBoxAndBin(@Param("ids") List<Integer> ids);
+
+    //Đếm số lượng item theo SKU và trạng thái
+    @Query("SELECT COUNT(i) FROM Item i WHERE i.sku.id = :skuId AND i.status = :status")
+    Long countBySkuIdAndStatus(@Param("skuId") Integer skuId, @Param("status") Item.Status status);
+
+    // Tìm tất cả sản phẩm lỗi
+    @Query("SELECT i FROM Item i WHERE i.status = 'damaged'")
+    List<Item> findAllDamaged();
+
+    // Tìm kiếm sản phẩm lỗi theo barcode hoặc SKU name
+    @Query("SELECT i FROM Item i WHERE i.status = 'damaged' " +
+            "AND (:keyword IS NULL OR i.barcode LIKE %:keyword% OR i.sku.name LIKE %:keyword%)")
+    List<Item> searchDamagedItems(@Param("keyword") String keyword);
 }
