@@ -1,0 +1,18 @@
+package com.example.warehousesystem.dto.response;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class AuthenticationResponse {
+
+    private String token;           // JWT token chính
+    private String refreshToken;    // Token để làm mới phiên
+    private boolean authenticated;  // Cờ xác thực thành công
+
+}

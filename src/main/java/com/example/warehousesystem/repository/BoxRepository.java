@@ -1,8 +1,6 @@
 package com.example.warehousesystem.repository;
 
-import com.example.warehousesystem.entity.Bin;
 import com.example.warehousesystem.entity.Box;
-import com.example.warehousesystem.entity.SKU;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,36 +11,41 @@ import java.util.Optional;
 
 @Repository
 public interface BoxRepository extends JpaRepository<Box, Integer> {
+    //Tình trạng sức chứa
+    @Query("SELECT b FROM Box b " +
+            "JOIN FETCH b.bin bn " +
+            "JOIN FETCH bn.shelf s " +
+            "JOIN FETCH s.warehouse w " +
+            "WHERE w.id = :warehouseId")
+    List<Box> findByWarehouseId(@Param("warehouseId") Integer warehouseId);
 
-    // Tổng usedCapacity trong 1 Bin
-    @Query("SELECT SUM(b.usedCapacity) FROM Box b WHERE b.bin.id = :binId")
-    Integer getTotalUsedCapacityByBinId(Integer binId);
+    //Nhập kho item
+    @Query("""
+    SELECT b FROM Box b
+    WHERE b.id = :boxId AND (b.capacity - b.usedCapacity) >= :required
+""")
+    Optional<Box> findAvailableBox(@Param("boxId") Integer boxId, @Param("required") Integer required);
 
-    // Lấy box theo bin và SKU
-    List<Box> findByBinAndSku(Bin bin, SKU sku);
+    //[Thuật toán] Phân bổ hàng vào kho tối ưu
+    @Query("""
+    SELECT b FROM Box b
+    JOIN FETCH b.bin bin
+    JOIN FETCH b.sku s
+    WHERE s.skuCode = :skuCode
+    AND b.capacity > b.usedCapacity
+    ORDER BY (b.capacity - b.usedCapacity) DESC
+""")
+    List<Box> findBoxesBySkuAndRemainingCapacity(@Param("skuCode") String skuCode);
 
-    // Tìm box chứa SKU còn chỗ trống
-    List<Box> findBySkuAndUsedCapacityLessThan(SKU sku, Integer capacity);
+    //[Thuật toán] Phân bổ hàng vào kho tối ưu
+    @Query("""
+    SELECT b FROM Box b
+    JOIN FETCH b.bin bin
+    WHERE b.sku IS NULL
+    AND b.capacity > b.usedCapacity
+    ORDER BY (b.capacity - b.usedCapacity) DESC
+""")
+    List<Box> findEmptyBoxes();
 
-    // Tìm tất cả box trong bin
-    List<Box> findByBin(Bin bin);
-
-    //Tổng usedCapacity đã sử dụng trong tất cả các Box
-    @Query("SELECT SUM(b.usedCapacity) FROM Box b")
-    Integer getTotalUsedCapacity();
-
-    //Tìm box theo skuid
-    List<Box> findBySku_Id(Integer skuId);
-
-    //Tìm box theo binid
-    List<Box> findByBin_Id(Integer binId);
-
-    // Tìm thùng chứa 1 loại SKU còn chỗ trống
-    @Query("SELECT b FROM Box b WHERE b.sku.id = :skuId AND b.usedCapacity < b.capacity")
-    List<Box> findAvailableBoxesBySku(@Param("skuId") Integer skuId);
-
-    // tìm bin nào chứa các id các box nhập vào
-    @Query("SELECT b FROM Box b JOIN FETCH b.bin WHERE b.id IN :boxIds")
-    List<Box> findBoxesWithBin(@Param("boxIds") List<Integer> boxIds);
 
 }

@@ -1,84 +1,62 @@
 package com.example.warehousesystem.repository;
 
 import com.example.warehousesystem.entity.ExportOrder;
-import com.example.warehousesystem.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ExportOrderRepository extends JpaRepository<ExportOrder, Integer> {
 
-    // Thống kê số đơn xuất theo ngày
-    @Query("SELECT DATE(eo.createdAt), COUNT(eo.id) " +
-            "FROM ExportOrder eo " +
-            "GROUP BY DATE(eo.createdAt) " +
-            "ORDER BY DATE(eo.createdAt)")
-    List<Object[]> countExportOrdersByDate();
+    // Chart thông tin xuất kho
+    @Query(value = """
+    SELECT 
+        TO_CHAR(eo.created_at, 'YYYY-MM-DD') AS export_date,
+        COUNT(DISTINCT eo.id) AS total_orders,
+        SUM(eod.quantity) AS total_items
+    FROM exportorder eo
+    JOIN exportorderdetail eod ON eo.id = eod.export_order_id
+    JOIN sku s ON eod.sku_id = s.id
+    JOIN box b ON b.sku_id = s.id
+    JOIN bin bi ON b.bin_id = bi.id
+    JOIN shelf sh ON bi.shelf_id = sh.id
+    JOIN warehouse w ON sh.warehouse_id = w.id
+    WHERE (:warehouseId IS NULL OR w.id = :warehouseId)
+      AND eo.created_at BETWEEN TO_DATE(:fromDate, 'YYYY-MM-DD') AND TO_DATE(:toDate, 'YYYY-MM-DD')
+    GROUP BY TO_CHAR(eo.created_at, 'YYYY-MM-DD')
+    ORDER BY TO_CHAR(eo.created_at, 'YYYY-MM-DD')
+""", nativeQuery = true)
+    List<Object[]> getExportChartData(
+            @Param("warehouseId") Integer warehouseId,
+            @Param("fromDate") String fromDate,
+            @Param("toDate") String toDate
+    );
 
-    // Thống kê số đơn xuất theo trạng thái
-    @Query("SELECT eo.status, COUNT(eo.id) " +
-            "FROM ExportOrder eo " +
-            "GROUP BY eo.status")
-    List<Object[]> countExportOrdersByStatus();
+    // Chart thông tin tổng kết+Chỉ số tối ưu hoá nhập – xuất
+    @Query(value = """
+    SELECT 
+        DATE(eo.created_at) AS export_date,
+        COUNT(DISTINCT eo.id) AS total_export_orders,
+        COALESCE(SUM(eod.quantity), 0) AS total_export_items
+    FROM exportorder eo
+    LEFT JOIN exportorderdetail eod ON eo.id = eod.export_order_id
+    WHERE (:warehouseId IS NULL OR EXISTS (
+        SELECT 1
+        FROM box b
+        JOIN bin bi ON b.bin_id = bi.id
+        JOIN shelf s ON bi.shelf_id = s.id
+        JOIN warehouse w ON s.warehouse_id = w.id
+        WHERE b.sku_id = eod.sku_id AND w.id = :warehouseId
+    ))
+    AND eo.created_at BETWEEN :startDate AND :endDate
+    GROUP BY export_date
+    ORDER BY export_date
+""", nativeQuery = true)
+    List<Object[]> getExportStatistics(
+            @Param("warehouseId") Integer warehouseId,
+            @Param("startDate") String startDate,
+            @Param("endDate") String endDate
+    );
 
-    // Thống kê số đơn xuất theo nguồn (manual, haravan)
-    @Query("SELECT eo.source, COUNT(eo.id) " +
-            "FROM ExportOrder eo " +
-            "GROUP BY eo.source")
-    List<Object[]> countExportOrdersBySource();
-
-    // Đếm số đơn xuất trong khoảng thời gian
-    long countByCreatedAtBetween(LocalDateTime startDate, LocalDateTime endDate);
-
-    // Tìm theo mã đơn hàng (order code)
-    List<ExportOrder> findByOrderCodeContainingIgnoreCase(String orderCode);
-
-    // Tìm theo trạng thái
-    List<ExportOrder> findByStatus(ExportOrder.Status status);
-
-    // Tìm theo người tạo
-    List<ExportOrder> findByCreatedBy(User createdBy);
-
-    // Tìm theo ngày tạo trong khoảng
-    @Query("SELECT eo FROM ExportOrder eo WHERE eo.createdAt BETWEEN :start AND :end")
-    List<ExportOrder> findByCreatedAtBetween(@Param("start") LocalDateTime start,
-                                             @Param("end") LocalDateTime end);
-
-    // Tìm tất cả theo nhiều điều kiện
-    @Query("""
-        SELECT eo FROM ExportOrder eo 
-        WHERE (:orderCode IS NULL OR LOWER(eo.orderCode) LIKE LOWER(CONCAT('%', :orderCode, '%')))
-        AND (:status IS NULL OR eo.status = :status)
-        AND (:createdBy IS NULL OR eo.createdBy = :createdBy)
-        AND (:startDate IS NULL OR eo.createdAt >= :startDate)
-        AND (:endDate IS NULL OR eo.createdAt <= :endDate)
-    """)
-    List<ExportOrder> searchOrders(@Param("orderCode") String orderCode,
-                                   @Param("status") ExportOrder.Status status,
-                                   @Param("createdBy") User createdBy,
-                                   @Param("startDate") LocalDateTime startDate,
-                                   @Param("endDate") LocalDateTime endDate);
-
-    // lấy các ExportOrder dựa theo SKU
-    @Query("SELECT DISTINCT eo FROM ExportOrder eo JOIN ExportOrderDetail eod ON eo.id = eod.exportOrder.id WHERE eod.sku.id = :skuId")
-    List<ExportOrder> findExportOrdersBySkuId(@Param("skuId") Integer skuId);
-
-    // Danh sách đơn hàng "confirmed" có từ khóa ưu tiên trong note
-    @Query("SELECT eo FROM ExportOrder eo " +
-            "WHERE eo.status = com.example.warehousesystem.entity.ExportOrder.Status.confirmed " +
-            "AND LOWER(eo.note) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "ORDER BY eo.createdAt ASC")
-    List<ExportOrder> findPriorityOrders(@Param("keyword") String keyword);
-
-    // Lấy cả đơn thường và đơn gấp
-    @Query("SELECT eo FROM ExportOrder eo " +
-            "WHERE eo.status = com.example.warehousesystem.entity.ExportOrder.Status.confirmed " +
-            "ORDER BY CASE " +
-            "WHEN LOWER(eo.note) LIKE '%gấp%' THEN 0 " +
-            "WHEN LOWER(eo.note) LIKE '%ưu tiên%' THEN 1 " +
-            "ELSE 2 END, eo.createdAt ASC")
-    List<ExportOrder> findAllOrdersWithPriority();
 }
