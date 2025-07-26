@@ -47,5 +47,16 @@ public interface BoxRepository extends JpaRepository<Box, Integer> {
 """)
     List<Box> findEmptyBoxes();
 
+    //[Thuật toán] Đường đi lấy hàng tối ưu
+    @Query("""
+    SELECT b FROM Box b
+    JOIN FETCH b.bin bin
+    JOIN FETCH bin.shelf shelf
+    JOIN FETCH shelf.warehouse
+    WHERE b.sku.id IN :skuIds AND b.usedCapacity > 0
+""")
+    List<Box> findAvailableBoxesBySkuIds(@Param("skuIds") List<Integer> skuIds);
+
+
 
 }

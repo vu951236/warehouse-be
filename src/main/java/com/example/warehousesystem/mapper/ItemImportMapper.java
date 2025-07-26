@@ -6,7 +6,7 @@ import com.example.warehousesystem.entity.Box;
 import com.example.warehousesystem.entity.Item;
 import com.example.warehousesystem.entity.Shelf;
 
-public class ItemMapper {
+public class ItemImportMapper {
     public static ImportItemResponse toResponse(Item item) {
         Box box = item.getBox();
         Bin bin = box.getBin();

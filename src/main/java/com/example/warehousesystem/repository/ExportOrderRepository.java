@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.awt.print.Pageable;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ExportOrderRepository extends JpaRepository<ExportOrder, Integer> {
@@ -59,4 +61,28 @@ public interface ExportOrderRepository extends JpaRepository<ExportOrder, Intege
             @Param("endDate") String endDate
     );
 
+    //Tìm kiếm đơn xuất
+    @Query("""
+        SELECT eo FROM ExportOrder eo
+        WHERE (:source IS NULL OR eo.source = :source)
+          AND (:status IS NULL OR eo.status = :status)
+          AND (:createdBy IS NULL OR eo.createdBy.username = :createdBy)
+          AND (:startDate IS NULL OR eo.createdAt >= :startDate)
+          AND (:endDate IS NULL OR eo.createdAt <= :endDate)
+    """)
+    List<ExportOrder> searchExportOrders(
+            @Param("source") com.example.warehousesystem.entity.ExportOrder.Source source,
+            @Param("status") com.example.warehousesystem.entity.ExportOrder.Status status,
+            @Param("createdBy") String createdBy,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
+
+    //[Thuật toán] Ưu tiên đơn hàng gấp
+    @Query("""
+    SELECT eo FROM ExportOrder eo
+    WHERE eo.status = :status
+    ORDER BY eo.createdAt ASC
+""")
+    List<ExportOrder> findUrgentOrders(@Param("status") ExportOrder.Status status, Pageable pageable);
 }
