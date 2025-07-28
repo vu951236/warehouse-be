@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+//Đổi mật khẩu(đã đăng nhập)
 public class UserUpdatePasswordRequest {
     private String oldPassword;
     private String newPassword;

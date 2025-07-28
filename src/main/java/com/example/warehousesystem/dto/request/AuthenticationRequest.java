@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+//Đăng nhập
 public class AuthenticationRequest {
     private String username;
     private String password;

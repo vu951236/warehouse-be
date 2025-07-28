@@ -9,8 +9,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+//Xuất hàng bằng excel
 public class ExportExcelItemRequest {
     private Integer exportOrderId;
-    private List<ExcelItemDTO> items;
+    private List<ExcelItemDTO> items;//file ExcelItemDTO
     private Integer userId;
 }

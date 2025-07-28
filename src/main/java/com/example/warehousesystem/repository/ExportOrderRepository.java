@@ -11,10 +11,10 @@ import java.util.List;
 
 public interface ExportOrderRepository extends JpaRepository<ExportOrder, Integer> {
 
-    // Chart thông tin xuất kho
+    // Chart thông tin xuất kho (MySQL version)
     @Query(value = """
     SELECT 
-        TO_CHAR(eo.created_at, 'YYYY-MM-DD') AS export_date,
+        DATE_FORMAT(eo.created_at, '%Y-%m-%d') AS export_date,
         COUNT(DISTINCT eo.id) AS total_orders,
         SUM(eod.quantity) AS total_items
     FROM exportorder eo
@@ -25,9 +25,9 @@ public interface ExportOrderRepository extends JpaRepository<ExportOrder, Intege
     JOIN shelf sh ON bi.shelf_id = sh.id
     JOIN warehouse w ON sh.warehouse_id = w.id
     WHERE (:warehouseId IS NULL OR w.id = :warehouseId)
-      AND eo.created_at BETWEEN TO_DATE(:fromDate, 'YYYY-MM-DD') AND TO_DATE(:toDate, 'YYYY-MM-DD')
-    GROUP BY TO_CHAR(eo.created_at, 'YYYY-MM-DD')
-    ORDER BY TO_CHAR(eo.created_at, 'YYYY-MM-DD')
+      AND eo.created_at BETWEEN STR_TO_DATE(:fromDate, '%Y-%m-%d') AND STR_TO_DATE(:toDate, '%Y-%m-%d')
+    GROUP BY DATE_FORMAT(eo.created_at, '%Y-%m-%d')
+    ORDER BY DATE_FORMAT(eo.created_at, '%Y-%m-%d')
 """, nativeQuery = true)
     List<Object[]> getExportChartData(
             @Param("warehouseId") Integer warehouseId,

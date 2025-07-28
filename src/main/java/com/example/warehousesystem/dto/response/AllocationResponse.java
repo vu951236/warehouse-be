@@ -8,6 +8,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+//Phân bổ hàng tối ưu
 public class AllocationResponse {
     private String skuCode;
     private Integer totalAllocated;

@@ -6,6 +6,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+//Xuất hàng
 public class ExportItemResponse {
     private Integer itemId;
     private String barcode;

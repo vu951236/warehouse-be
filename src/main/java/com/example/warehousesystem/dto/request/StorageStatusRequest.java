@@ -6,6 +6,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+//Tình trạng sức chứa
 public class StorageStatusRequest {
     private Integer warehouseId; // lọc theo warehouse
 }

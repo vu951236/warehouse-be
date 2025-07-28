@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+//Cập nhập thông tin tài khoản
 public class UserUpdateRequest {
     private String email;
     private String fullName;

@@ -6,6 +6,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+//Biểu đồ xuất hàng
 public class ExportChartResponse {
     private String exportDate;
     private Long totalItems;

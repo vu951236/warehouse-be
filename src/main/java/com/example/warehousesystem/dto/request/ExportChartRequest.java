@@ -6,6 +6,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+//Biểu đồ xuất hàng
 public class ExportChartRequest {
     private Integer warehouseId;
     private String fromDate;    // yyyy-MM-dd

@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+//Đổi mật khẩu(chưa đăng nhập)
 public class ResetPasswordRequest {
     private String email;
     private String code;         // Mã xác minh được gửi qua email

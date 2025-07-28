@@ -9,6 +9,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+//Phân bổ hàng tối ưu
 public class PickingRouteRequest {
 
     private List<SKURequest> skuList;

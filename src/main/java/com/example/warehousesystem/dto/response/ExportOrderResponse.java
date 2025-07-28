@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
+//Đơn xuất
 public class ExportOrderResponse {
     private Integer id;
     private String orderCode;

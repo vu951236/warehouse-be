@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
+//Chi tiết đơn xuất
 public class ExportOrderDetailResponse {
     private Integer skuId;
     private String skuCode;

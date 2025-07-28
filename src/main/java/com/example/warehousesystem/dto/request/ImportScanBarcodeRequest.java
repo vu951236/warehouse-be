@@ -9,8 +9,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+//Nhập kho bằng mã QR
 public class ImportScanBarcodeRequest {
     private Integer importOrderId;
-    private List<ScanBarcodeDTO> scannedItems;
+    private List<ScanBarcodeDTO> scannedItems;// file ScanBarcodeDTO
     private Integer userId;
 }

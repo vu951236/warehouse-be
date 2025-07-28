@@ -10,10 +10,10 @@ import java.util.List;
 
 public interface ImportOrderRepository extends JpaRepository<ImportOrder, Integer> {
 
-    //Chart thông tin nhập kho
+    // Chart thông tin nhập kho
     @Query(value = """
     SELECT 
-        TO_CHAR(io.created_at, 'YYYY-MM-DD') AS import_date,
+        DATE_FORMAT(io.created_at, '%Y-%m-%d') AS import_date,
         COUNT(DISTINCT io.id) AS total_orders,
         SUM(od.quantity) AS total_items
     FROM importorder io
@@ -24,9 +24,9 @@ public interface ImportOrderRepository extends JpaRepository<ImportOrder, Intege
     JOIN shelf sh ON bi.shelf_id = sh.id
     JOIN warehouse w ON sh.warehouse_id = w.id
     WHERE (:warehouseId IS NULL OR w.id = :warehouseId)
-      AND io.created_at BETWEEN TO_DATE(:fromDate, 'YYYY-MM-DD') AND TO_DATE(:toDate, 'YYYY-MM-DD')
-    GROUP BY TO_CHAR(io.created_at, 'YYYY-MM-DD')
-    ORDER BY TO_CHAR(io.created_at, 'YYYY-MM-DD')
+      AND io.created_at BETWEEN STR_TO_DATE(:fromDate, '%Y-%m-%d') AND STR_TO_DATE(:toDate, '%Y-%m-%d')
+    GROUP BY DATE_FORMAT(io.created_at, '%Y-%m-%d')
+    ORDER BY DATE_FORMAT(io.created_at, '%Y-%m-%d')
 """, nativeQuery = true)
     List<Object[]> getImportChartData(
             @Param("warehouseId") Integer warehouseId,

@@ -6,6 +6,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+//Xem thông tin xuất hàng theo SKU
 public class SearchExportBySKURequest {
     private String skuCode;
     private String fromDate; // yyyy-MM-dd

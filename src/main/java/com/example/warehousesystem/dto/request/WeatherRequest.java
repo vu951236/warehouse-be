@@ -6,6 +6,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+//Thời tiết
 public class WeatherRequest {
     private Integer warehouseId; // tuỳ chọn: nếu null thì lấy toàn bộ
 }

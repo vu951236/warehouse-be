@@ -6,6 +6,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+//Xuất hàng vật phẩm
 public class ExportItemRequest {
     private Integer exportOrderId;
     private Integer exportOrderDetailId;
