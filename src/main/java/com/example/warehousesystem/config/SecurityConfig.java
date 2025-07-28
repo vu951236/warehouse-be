@@ -35,7 +35,6 @@ public class SecurityConfig {
             "/user/forgot-password",
             "/user/verify-code",
             "/user/reset-password",
-            "/charts/import"
     };
 
     @Bean
