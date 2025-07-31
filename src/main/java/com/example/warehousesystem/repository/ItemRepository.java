@@ -32,19 +32,28 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
 
     //Tìm kiếm item
     @Query("""
-        SELECT i FROM Item i
-        JOIN i.box b
-        JOIN i.sku s
-        LEFT JOIN ExportOrderDetail eod ON eod.sku.id = s.id
-        LEFT JOIN ImportOrderDetail iod ON iod.sku.id = s.id
-        WHERE (:itemId IS NULL OR i.id = :itemId)
-        AND (:boxId IS NULL OR b.id = :boxId)
-        AND (:skuId IS NULL OR s.id = :skuId)
-        AND (:barcode IS NULL OR i.barcode LIKE %:barcode%)
-        AND (:exportOrderId IS NULL OR eod.exportOrder.id = :exportOrderId)
-        AND (:importOrderId IS NULL OR iod.importOrder.id = :importOrderId)
-    """)
-    List<Item> searchItems(Integer boxId, Integer skuId, String barcode, Integer exportOrderId, Integer importOrderId);
+    SELECT i FROM Item i
+    JOIN i.box b
+    JOIN i.sku s
+    LEFT JOIN ExportOrderDetail eod ON eod.sku.id = s.id
+    LEFT JOIN ImportOrderDetail iod ON iod.sku.id = s.id
+    WHERE (:itemId IS NULL OR i.id = :itemId)
+    AND (:boxId IS NULL OR b.id = :boxId)
+    AND (:skuId IS NULL OR s.id = :skuId)
+    AND (:barcode IS NULL OR i.barcode LIKE %:barcode%)
+    AND (:status IS NULL OR i.status = :status)
+    AND (:exportOrderId IS NULL OR eod.exportOrder.id = :exportOrderId)
+    AND (:importOrderId IS NULL OR iod.importOrder.id = :importOrderId)
+""")
+    List<Item> searchItems(
+            Integer itemId,
+            Integer boxId,
+            Integer skuId,
+            String barcode,
+            Item.Status status,
+            Integer exportOrderId,
+            Integer importOrderId
+    );
 
     //Xóa shelf,bin,box
     List<Item> findByBoxIdInAndIsDeletedFalse(List<Integer> boxIds);

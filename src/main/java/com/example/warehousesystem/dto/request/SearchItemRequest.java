@@ -1,5 +1,6 @@
 package com.example.warehousesystem.dto.request;
 
+import com.example.warehousesystem.entity.Item;
 import lombok.*;
 
 @Getter
@@ -12,6 +13,7 @@ public class SearchItemRequest {
     private Integer boxId;
     private Integer skuId;
     private String barcode;
+    private Item.Status status;
     private Integer exportOrderId;
     private Integer importOrderId;
 }

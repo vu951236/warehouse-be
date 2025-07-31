@@ -37,4 +37,8 @@ public interface ShelfRepository extends JpaRepository<Shelf, Integer> {
 
     @Query("SELECT s FROM Shelf s JOIN FETCH s.warehouse WHERE s.id = :id")
     Optional<Shelf> findWithWarehouseById(Integer id);
+
+    //[ Thuật toán] Phân bổ lại vị trí SKU theo độ picking hằng tháng
+    @Query("SELECT s FROM Shelf s WHERE s.isDeleted = false ORDER BY s.id ASC")
+    List<Shelf> findAvailableShelvesOrderedById();
 }
