@@ -34,7 +34,8 @@ public interface BinRepository extends JpaRepository<Bin, Integer> {
         JOIN FETCH b.shelf s
         JOIN Box bx ON bx.bin = b
         JOIN SKU sku ON bx.sku = sku
-        WHERE (:shelfId IS NULL OR s.id = :shelfId)
+        WHERE b.isDeleted = false 
+          AND (:shelfId IS NULL OR s.id = :shelfId)
           AND (:binId IS NULL OR b.id = :binId)
           AND (:boxId IS NULL OR bx.id = :boxId)
           AND (:skuId IS NULL OR sku.id = :skuId)
@@ -52,7 +53,8 @@ public interface BinRepository extends JpaRepository<Bin, Integer> {
     @Query("""
     SELECT b FROM Bin b
     JOIN FETCH b.shelf
-    WHERE b.id = :id
+    WHERE b.isDeleted = false 
+    AND b.id = :id
 """)
     Optional<Bin> findWithShelfById(@Param("id") Integer id);
 

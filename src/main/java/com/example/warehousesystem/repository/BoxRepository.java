@@ -27,7 +27,8 @@ AND (bx.capacity - bx.usedCapacity) >= :requiredVolume
     SELECT b FROM Box b
     JOIN FETCH b.bin bin
     JOIN FETCH b.sku s
-    WHERE s.skuCode = :skuCode
+    WHERE b.isDeleted = false 
+    AND s.skuCode = :skuCode
     AND b.capacity > b.usedCapacity
     ORDER BY (b.capacity - b.usedCapacity) DESC
 """)
@@ -37,7 +38,8 @@ AND (bx.capacity - bx.usedCapacity) >= :requiredVolume
     @Query("""
     SELECT b FROM Box b
     JOIN FETCH b.bin bin
-    WHERE b.sku IS NULL
+    WHERE b.isDeleted = false 
+    AND b.sku IS NULL
     AND b.capacity > b.usedCapacity
     ORDER BY (b.capacity - b.usedCapacity) DESC
 """)
@@ -49,7 +51,8 @@ AND (bx.capacity - bx.usedCapacity) >= :requiredVolume
     JOIN FETCH b.bin bin
     JOIN FETCH bin.shelf shelf
     JOIN FETCH shelf.warehouse
-    WHERE b.sku.id IN :skuIds AND b.usedCapacity > 0
+    WHERE b.isDeleted = false 
+    AND b.sku.id IN :skuIds AND b.usedCapacity > 0
 """)
     List<Box> findAvailableBoxesBySkuIds(@Param("skuIds") List<Integer> skuIds);
 
@@ -59,7 +62,8 @@ AND (bx.capacity - bx.usedCapacity) >= :requiredVolume
         JOIN FETCH bx.bin b
         JOIN FETCH bx.sku s
         LEFT JOIN Item i ON i.box = bx
-        WHERE (:binId IS NULL OR b.id = :binId)
+        WHERE b.isDeleted = false 
+          AND(:binId IS NULL OR b.id = :binId)
           AND (:boxId IS NULL OR bx.id = :boxId)
           AND (:skuId IS NULL OR s.id = :skuId)
           AND (:itemId IS NULL OR i.id = :itemId)
@@ -75,7 +79,8 @@ AND (bx.capacity - bx.usedCapacity) >= :requiredVolume
         SELECT b FROM Box b
         JOIN FETCH b.bin bi
         JOIN FETCH b.sku s
-        WHERE b.id = :id
+        WHERE b.isDeleted = false 
+        AND b.id = :id
     """)
     Optional<Box> findWithBinAndSkuById(Integer id);
 

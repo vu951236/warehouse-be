@@ -1,9 +1,7 @@
 package com.example.warehousesystem.mapper;
 
-import com.example.warehousesystem.dto.response.ImportOrderDetailResponse;
 import com.example.warehousesystem.dto.response.ImportOrderResponse;
 import com.example.warehousesystem.entity.ImportOrder;
-import com.example.warehousesystem.entity.ImportOrderDetail;
 import org.springframework.stereotype.Component;
 
 @Component

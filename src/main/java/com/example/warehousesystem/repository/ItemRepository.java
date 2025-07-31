@@ -1,8 +1,6 @@
 package com.example.warehousesystem.repository;
 
-import com.example.warehousesystem.entity.Bin;
 import com.example.warehousesystem.entity.Item;
-import com.example.warehousesystem.entity.SKU;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -17,12 +15,12 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
     boolean existsByBarcode(String barcode);
 
     //Xuất kho item
-    @Query("SELECT COUNT(i) > 0 FROM Item i WHERE i.barcode = :barcode AND i.status = 'available'")
+    @Query("SELECT COUNT(i) > 0 FROM Item i WHERE i.isDeleted = false AND i.barcode = :barcode AND i.status = 'available'")
     boolean isBarcodeAvailableForExport(@Param("barcode") String barcode);
 
     //Xuất kho item
     @Modifying
-    @Query("UPDATE Item i SET i.status = 'exported' WHERE i.barcode = :barcode")
+    @Query("UPDATE Item i SET i.status = 'exported' WHERE i.isDeleted = false AND i.barcode = :barcode")
     void markItemAsExported(@Param("barcode") String barcode);
 
     //[Thuật toán] Quét mã xếp item về đơn hàng sau khi lấy hàng khỏi kệ
@@ -35,7 +33,8 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
     JOIN i.sku s
     LEFT JOIN ExportOrderDetail eod ON eod.sku.id = s.id
     LEFT JOIN ImportOrderDetail iod ON iod.sku.id = s.id
-    WHERE (:itemId IS NULL OR i.id = :itemId)
+    WHERE i.isDeleted = false
+    AND (:itemId IS NULL OR i.id = :itemId)
     AND (:boxId IS NULL OR b.id = :boxId)
     AND (:skuId IS NULL OR s.id = :skuId)
     AND (:barcode IS NULL OR i.barcode LIKE %:barcode%)

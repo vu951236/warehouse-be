@@ -18,7 +18,8 @@ public interface ShelfRepository extends JpaRepository<Shelf, Integer> {
     JOIN Bin b ON b.shelf = s
     JOIN Box bx ON bx.bin = b
     JOIN SKU sku ON bx.sku = sku
-    WHERE (:shelfId IS NULL OR s.id = :shelfId)
+    WHERE s.isDeleted = false 
+      AND (:shelfId IS NULL OR s.id = :shelfId)
       AND (:warehouseId IS NULL OR w.id = :warehouseId)
       AND (:binId IS NULL OR b.id = :binId)
       AND (:boxId IS NULL OR bx.id = :boxId)
@@ -35,7 +36,7 @@ public interface ShelfRepository extends JpaRepository<Shelf, Integer> {
     //Thêm kệ hàng
     boolean existsByShelfCode(String shelfCode);
 
-    @Query("SELECT s FROM Shelf s JOIN FETCH s.warehouse WHERE s.id = :id")
+    @Query("SELECT s FROM Shelf s JOIN FETCH s.warehouse WHERE s.isDeleted = false AND s.id = :id")
     Optional<Shelf> findWithWarehouseById(Integer id);
 
     //[ Thuật toán] Phân bổ lại vị trí SKU theo độ picking hằng tháng
