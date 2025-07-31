@@ -22,10 +22,6 @@ AND (bx.capacity - bx.usedCapacity) >= :requiredVolume
 """)
     List<Box> findAvailableBoxes(@Param("skuId") Integer skuId, @Param("requiredVolume") Integer requiredVolume);
 
-
-    //Nhập kho item
-    //logic tăng sức chứa của box dựa trên số item nhập*unitVolume của Sku
-
     //[Thuật toán] Phân bổ hàng vào kho tối ưu
     @Query("""
     SELECT b FROM Box b
