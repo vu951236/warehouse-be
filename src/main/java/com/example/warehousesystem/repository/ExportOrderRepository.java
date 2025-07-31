@@ -10,8 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ExportOrderRepository extends JpaRepository<ExportOrder, Integer> {
-
-    // Chart thông tin xuất kho (MySQL version)
+    // Chart thông tin xuất kho
     @Query(value = """
     SELECT 
         DATE_FORMAT(eo.created_at, '%Y-%m-%d') AS export_date,

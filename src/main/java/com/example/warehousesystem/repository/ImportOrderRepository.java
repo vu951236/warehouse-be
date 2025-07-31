@@ -76,5 +76,4 @@ public interface ImportOrderRepository extends JpaRepository<ImportOrder, Intege
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
     );
-
 }

@@ -13,10 +13,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ItemRepository extends JpaRepository<Item, Integer> {
-
     //Nhập kho item
-    @Query("SELECT COUNT(i) > 0 FROM Item i WHERE i.barcode = :barcode")
-    boolean existsByBarcode(@Param("barcode") String barcode);
+    boolean existsByBarcode(String barcode);
 
     //Xuất kho item
     @Query("SELECT COUNT(i) > 0 FROM Item i WHERE i.barcode = :barcode AND i.status = 'available'")

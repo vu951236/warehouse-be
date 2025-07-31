@@ -12,11 +12,6 @@ import java.util.List;
 
 
 public interface ImportOrderDetailRepository extends JpaRepository<ImportOrderDetail, Integer> {
-    //Nhập kho item
-    @Modifying
-    @Query("UPDATE ImportOrderDetail d SET d.receivedQuantity = d.receivedQuantity + :qty WHERE d.id = :detailId")
-    void increaseReceivedQuantity(@Param("detailId") Integer detailId, @Param("qty") Integer qty);
-
     //Xem thông tin nhập theo SKU
     @Query("""
     SELECT iod, io, wh.name

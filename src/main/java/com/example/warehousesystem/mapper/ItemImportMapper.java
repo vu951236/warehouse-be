@@ -1,25 +1,38 @@
 package com.example.warehousesystem.mapper;
 
-import com.example.warehousesystem.dto.response.ImportItemResponse;
-import com.example.warehousesystem.entity.Bin;
-import com.example.warehousesystem.entity.Box;
-import com.example.warehousesystem.entity.Item;
-import com.example.warehousesystem.entity.Shelf;
+import com.example.warehousesystem.entity.*;
+
+import java.time.LocalDateTime;
 
 public class ItemImportMapper {
-    public static ImportItemResponse toResponse(Item item) {
-        Box box = item.getBox();
-        Bin bin = box.getBin();
-        Shelf shelf = bin.getShelf();
-        return ImportItemResponse.builder()
-                .itemId(item.getId())
-                .barcode(item.getBarcode())
-                .boxId(box.getId())
-                .boxCode(String.valueOf(box.getId()))
-                .skuCode(item.getSku().getSkuCode())
-                .shelfCode(shelf.getShelfCode())
-                .binCode(bin.getBinCode())
+
+    public static ImportOrder toImportOrder(ImportOrder.Source source, String note, User user) {
+        return ImportOrder.builder()
+                .source(source)
+                .status(ImportOrder.Status.confirmed)
+                .createdBy(user)
+                .createdAt(LocalDateTime.now())
+                .note(note)
+                .build();
+    }
+
+    public static ImportOrderDetail toDetail(ImportOrder order, SKU sku, Integer quantity) {
+        return ImportOrderDetail.builder()
+                .importOrder(order)
+                .sku(sku)
+                .quantity(quantity)
+                .receivedQuantity(0)
+                .build();
+    }
+
+    public static Item toItem(Box box, SKU sku, String barcode) {
+        return Item.builder()
+                .box(box)
+                .sku(sku)
+                .barcode(barcode)
+                .status(Item.Status.available)
+                .createdAt(LocalDateTime.now())
+                .isDeleted(false)
                 .build();
     }
 }
-

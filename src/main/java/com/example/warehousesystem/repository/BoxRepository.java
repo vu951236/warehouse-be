@@ -13,20 +13,18 @@ import java.util.Optional;
 
 @Repository
 public interface BoxRepository extends JpaRepository<Box, Integer> {
-    //Tình trạng sức chứa
-    @Query("SELECT b FROM Box b " +
-            "JOIN FETCH b.bin bn " +
-            "JOIN FETCH bn.shelf s " +
-            "JOIN FETCH s.warehouse w " +
-            "WHERE w.id = :warehouseId")
-    List<Box> findByWarehouseId(@Param("warehouseId") Integer warehouseId);
-
     //Nhập kho item
     @Query("""
-    SELECT b FROM Box b
-    WHERE b.id = :boxId AND (b.capacity - b.usedCapacity) >= :required
+SELECT bx FROM Box bx 
+WHERE bx.isDeleted = false 
+AND bx.sku.id = :skuId 
+AND (bx.capacity - bx.usedCapacity) >= :requiredVolume
 """)
-    Optional<Box> findAvailableBox(@Param("boxId") Integer boxId, @Param("required") Integer required);
+    List<Box> findAvailableBoxes(@Param("skuId") Integer skuId, @Param("requiredVolume") Integer requiredVolume);
+
+
+    //Nhập kho item
+    //logic tăng sức chứa của box dựa trên số item nhập*unitVolume của Sku
 
     //[Thuật toán] Phân bổ hàng vào kho tối ưu
     @Query("""

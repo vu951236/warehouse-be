@@ -10,6 +10,24 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BinRepository extends JpaRepository<Bin, Integer> {
+    //Nhập kho item
+    @Query("""
+    SELECT b FROM Bin b 
+    WHERE b.isDeleted = false 
+    AND b.capacity > (
+        SELECT COALESCE(SUM(bx.usedCapacity), 0) 
+        FROM Box bx 
+        WHERE bx.bin = b AND bx.isDeleted = false
+    )
+    """)
+        List<Bin> findBinsWithAvailableCapacity();
+    //Nhập kho item
+    @Query("""
+    SELECT COALESCE(SUM(bx.usedCapacity), 0) FROM Box bx 
+    WHERE bx.bin.id = :binId AND bx.isDeleted = false
+    """)
+        Integer getUsedCapacityInBin(@Param("binId") Integer binId);
+
     //Tìm kiếm bin
     @Query("""
         SELECT DISTINCT b FROM Bin b
