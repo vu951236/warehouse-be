@@ -37,7 +37,4 @@ public interface ShelfRepository extends JpaRepository<Shelf, Integer> {
 
     @Query("SELECT s FROM Shelf s JOIN FETCH s.warehouse WHERE s.id = :id")
     Optional<Shelf> findWithWarehouseById(Integer id);
-
-
-
 }

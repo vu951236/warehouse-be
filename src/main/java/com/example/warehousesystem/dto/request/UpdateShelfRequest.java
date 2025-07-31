@@ -1,8 +1,12 @@
 package com.example.warehousesystem.dto.request;
 
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class UpdateShelfRequest {
     private Integer id;            // ID của Shelf cần sửa
     private String shelfCode;

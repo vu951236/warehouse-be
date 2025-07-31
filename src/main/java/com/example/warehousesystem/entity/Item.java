@@ -42,4 +42,7 @@ public class Item {
         returned,
         exported
     }
+
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
 }

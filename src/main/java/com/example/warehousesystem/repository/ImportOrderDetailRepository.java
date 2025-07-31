@@ -1,6 +1,7 @@
 package com.example.warehousesystem.repository;
 
 import com.example.warehousesystem.entity.ImportOrderDetail;
+import com.example.warehousesystem.entity.SKU;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -40,6 +41,5 @@ public interface ImportOrderDetailRepository extends JpaRepository<ImportOrderDe
     //Xem thông tin các lần nhập
     @Query("SELECT d FROM ImportOrderDetail d WHERE d.importOrder.id = :orderId")
     List<ImportOrderDetail> findByImportOrderId(@Param("orderId") Integer orderId);
-
 }
 

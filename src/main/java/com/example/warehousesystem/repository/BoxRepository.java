@@ -1,7 +1,9 @@
 package com.example.warehousesystem.repository;
 
 import com.example.warehousesystem.entity.Box;
+import com.example.warehousesystem.entity.SKU;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -57,6 +59,32 @@ public interface BoxRepository extends JpaRepository<Box, Integer> {
 """)
     List<Box> findAvailableBoxesBySkuIds(@Param("skuIds") List<Integer> skuIds);
 
+    //Tìm kiếm Box
+    @Query("""
+        SELECT DISTINCT bx FROM Box bx
+        JOIN FETCH bx.bin b
+        JOIN FETCH bx.sku s
+        LEFT JOIN Item i ON i.box = bx
+        WHERE (:binId IS NULL OR b.id = :binId)
+          AND (:boxId IS NULL OR bx.id = :boxId)
+          AND (:skuId IS NULL OR s.id = :skuId)
+          AND (:itemId IS NULL OR i.id = :itemId)
+    """)
+    List<Box> searchBoxes(
+            @Param("binId") Integer binId,
+            @Param("boxId") Integer boxId,
+            @Param("skuId") Integer skuId,
+            @Param("itemId") Integer itemId
+    );
 
+    @Query("""
+        SELECT b FROM Box b
+        JOIN FETCH b.bin bi
+        JOIN FETCH b.sku s
+        WHERE b.id = :id
+    """)
+    Optional<Box> findWithBinAndSkuById(Integer id);
 
+    //Xóa shelf,bin
+    List<Box> findByBinIdInAndIsDeletedFalse(List<Integer> binIds);
 }

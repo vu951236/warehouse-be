@@ -1,6 +1,7 @@
 package com.example.warehousesystem.repository;
 
 import com.example.warehousesystem.entity.ExportOrderDetail;
+import com.example.warehousesystem.entity.SKU;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -50,6 +51,4 @@ public interface ExportOrderDetailRepository extends JpaRepository<ExportOrderDe
         ORDER BY d.exportOrder.createdAt ASC
     """)
     List<ExportOrderDetail> findEligibleDetailsForSku(@Param("skuId") Integer skuId);
-
-
 }

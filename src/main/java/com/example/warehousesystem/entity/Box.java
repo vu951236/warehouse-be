@@ -29,4 +29,7 @@ public class Box {
 
     @Column(name = "used_capacity", nullable = false)
     private Integer usedCapacity = 0;
+
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
 }

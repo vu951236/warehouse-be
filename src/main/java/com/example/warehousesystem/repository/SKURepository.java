@@ -23,4 +23,27 @@ public interface SKURepository extends JpaRepository<SKU, Integer> {
     """, nativeQuery = true)
     List<Object[]> getCurrentStockRatioChart();
 
+    //Tìm kiếm SKU
+    @Query("""
+    SELECT DISTINCT s FROM SKU s
+    LEFT JOIN Item i ON i.sku = s
+    LEFT JOIN Box b ON b.sku = s
+    LEFT JOIN ImportOrderDetail iod ON iod.sku = s
+    LEFT JOIN ExportOrderDetail eod ON eod.sku = s
+    WHERE (:skuId IS NULL OR s.id = :skuId)
+      AND (:itemId IS NULL OR i.id = :itemId)
+      AND (:boxId IS NULL OR b.id = :boxId)
+      AND (:importOrderId IS NULL OR iod.importOrder.id = :importOrderId)
+      AND (:exportOrderId IS NULL OR eod.exportOrder.id = :exportOrderId)
+""")
+    List<SKU> searchSkuByConditions(
+            @Param("skuId") Integer skuId,
+            @Param("itemId") Integer itemId,
+            @Param("boxId") Integer boxId,
+            @Param("importOrderId") Integer importOrderId,
+            @Param("exportOrderId") Integer exportOrderId
+    );
+
+    //Thêm SKU
+    boolean existsBySkuCode(String skuCode);
 }

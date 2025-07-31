@@ -1,0 +1,12 @@
+package com.example.warehousesystem.dto.request;
+
+import lombok.*;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class DeleteBinRequest {
+    private Integer Id;
+}
