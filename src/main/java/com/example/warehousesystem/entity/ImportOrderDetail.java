@@ -26,4 +26,9 @@ public class ImportOrderDetail {
 
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
+
+    @Builder.Default
+    @Column(name = "received_quantity", nullable = false)
+    private Integer receivedQuantity = 0; // Giá trị mặc định là 0
+
 }
