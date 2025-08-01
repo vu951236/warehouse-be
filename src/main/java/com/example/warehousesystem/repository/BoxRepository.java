@@ -15,35 +15,12 @@ import java.util.Optional;
 public interface BoxRepository extends JpaRepository<Box, Integer> {
     //Nhập kho item
     @Query("""
-SELECT bx FROM Box bx 
-WHERE bx.isDeleted = false 
-AND bx.sku.id = :skuId 
-AND (bx.capacity - bx.usedCapacity) >= :requiredVolume
-""")
+    SELECT bx FROM Box bx 
+    WHERE bx.isDeleted = false 
+    AND bx.sku.id = :skuId 
+    AND (bx.capacity - bx.usedCapacity) >= :requiredVolume
+    """)
     List<Box> findAvailableBoxes(@Param("skuId") Integer skuId, @Param("requiredVolume") Integer requiredVolume);
-
-    //[Thuật toán] Phân bổ hàng vào kho tối ưu
-    @Query("""
-    SELECT b FROM Box b
-    JOIN FETCH b.bin bin
-    JOIN FETCH b.sku s
-    WHERE b.isDeleted = false 
-    AND s.skuCode = :skuCode
-    AND b.capacity > b.usedCapacity
-    ORDER BY (b.capacity - b.usedCapacity) DESC
-""")
-    List<Box> findBoxesBySkuAndRemainingCapacity(@Param("skuCode") String skuCode);
-
-    //[Thuật toán] Phân bổ hàng vào kho tối ưu
-    @Query("""
-    SELECT b FROM Box b
-    JOIN FETCH b.bin bin
-    WHERE b.isDeleted = false 
-    AND b.sku IS NULL
-    AND b.capacity > b.usedCapacity
-    ORDER BY (b.capacity - b.usedCapacity) DESC
-""")
-    List<Box> findEmptyBoxes();
 
     //[Thuật toán] Đường đi lấy hàng tối ưu
     @Query("""
@@ -52,7 +29,9 @@ AND (bx.capacity - bx.usedCapacity) >= :requiredVolume
     JOIN FETCH bin.shelf shelf
     JOIN FETCH shelf.warehouse
     WHERE b.isDeleted = false 
-    AND b.sku.id IN :skuIds AND b.usedCapacity > 0
+    AND b.sku.id IN :skuIds 
+    AND b.usedCapacity > 0
+    ORDER BY shelf.id ASC
 """)
     List<Box> findAvailableBoxesBySkuIds(@Param("skuIds") List<Integer> skuIds);
 

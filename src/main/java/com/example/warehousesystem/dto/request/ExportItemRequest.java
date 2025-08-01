@@ -2,6 +2,8 @@ package com.example.warehousesystem.dto.request;
 
 import lombok.*;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -9,7 +11,6 @@ import lombok.*;
 //Xuất hàng vật phẩm
 public class ExportItemRequest {
     private Integer exportOrderId;
-    private Integer exportOrderDetailId;
-    private String barcode;
+    private List<String> barcodes;         // Danh sách mã barcode cần xuất
     private Integer userId;
 }

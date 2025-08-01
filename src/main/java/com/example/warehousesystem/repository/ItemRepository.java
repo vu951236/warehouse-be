@@ -15,16 +15,13 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
     boolean existsByBarcode(String barcode);
 
     //Xuất kho item
-    @Query("SELECT COUNT(i) > 0 FROM Item i WHERE i.isDeleted = false AND i.barcode = :barcode AND i.status = 'available'")
-    boolean isBarcodeAvailableForExport(@Param("barcode") String barcode);
-
-    //Xuất kho item
-    @Modifying
-    @Query("UPDATE Item i SET i.status = 'exported' WHERE i.isDeleted = false AND i.barcode = :barcode")
-    void markItemAsExported(@Param("barcode") String barcode);
-
-    //[Thuật toán] Quét mã xếp item về đơn hàng sau khi lấy hàng khỏi kệ
-    Optional<Item> findByBarcode(String barcode);
+    @Query("""
+    SELECT i FROM Item i
+    JOIN FETCH i.sku
+    JOIN FETCH i.box b
+    WHERE i.barcode IN :barcodes AND i.isDeleted = false
+""")
+    List<Item> findItemsByBarcodes(@Param("barcodes") List<String> barcodes);
 
     //Tìm kiếm item
     @Query("""

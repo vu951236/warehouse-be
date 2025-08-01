@@ -1,5 +1,6 @@
 package com.example.warehousesystem.dto.request;
 
+import com.example.warehousesystem.entity.ExportOrder;
 import lombok.*;
 
 @Data
@@ -7,6 +8,6 @@ import lombok.*;
 @AllArgsConstructor
 //Ưu tiên đơn hàng gấp
 public class UrgentOrderRequest {
-    private String status;           // draft / confirmed / cancelled
+    private ExportOrder.Status status;     // draft, confirmed, cancelled
     private Integer maxResults;      // Giới hạn số đơn cần lấy
 }

@@ -14,7 +14,6 @@ public class SearchImportBySKUMapper {
                 .importOrderId(order.getId())
                 .importDate(order.getCreatedAt().toString())
                 .quantity(detail.getQuantity())
-                .receivedQuantity(detail.getReceivedQuantity())
                 .status(order.getStatus().name())
                 .createdBy(order.getCreatedBy().getFullName())
                 .warehouseName(warehouseName)

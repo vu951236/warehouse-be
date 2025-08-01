@@ -26,7 +26,4 @@ public class ExportOrderDetail {
 
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
-
-    @Column(name = "allocated_quantity", nullable = false)
-    private Integer allocatedQuantity;
 }

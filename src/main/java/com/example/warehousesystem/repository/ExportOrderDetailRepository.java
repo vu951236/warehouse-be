@@ -11,12 +11,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ExportOrderDetailRepository extends JpaRepository<ExportOrderDetail, Integer> {
-
-    //Xuất kho item
-    @Modifying
-    @Query("UPDATE ExportOrderDetail d SET d.quantity = d.quantity - :qty WHERE d.id = :detailId AND d.quantity >= :qty")
-    void decreaseExportQuantity(@Param("detailId") Integer detailId, @Param("qty") Integer qty);
-
     //Xem thông tin xuất theo SKU
     @Query("""
     SELECT eod, eo, wh.name
@@ -38,17 +32,8 @@ public interface ExportOrderDetailRepository extends JpaRepository<ExportOrderDe
             @Param("toDate") LocalDateTime toDate
     );
 
-    //Xem thông tin các lần xuất
+    //Xuất kho item + Xem thông tin các lần xuất
     @Query("SELECT d FROM ExportOrderDetail d WHERE d.exportOrder.id = :orderId")
     List<ExportOrderDetail> findByExportOrderId(@Param("orderId") Integer orderId);
 
-    //[Thuật toán] Quét mã xếp item về đơn hàng sau khi lấy hàng khỏi kệ
-    @Query("""
-        SELECT d FROM ExportOrderDetail d
-        WHERE d.sku.id = :skuId
-          AND d.exportOrder.status = 'confirmed'
-          AND d.allocatedQuantity < d.quantity
-        ORDER BY d.exportOrder.createdAt ASC
-    """)
-    List<ExportOrderDetail> findEligibleDetailsForSku(@Param("skuId") Integer skuId);
 }

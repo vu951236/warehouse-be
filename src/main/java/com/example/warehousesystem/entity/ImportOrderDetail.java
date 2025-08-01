@@ -26,7 +26,4 @@ public class ImportOrderDetail {
 
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
-
-    @Column(name = "received_quantity", nullable = false)
-    private Integer receivedQuantity = 0;
 }
