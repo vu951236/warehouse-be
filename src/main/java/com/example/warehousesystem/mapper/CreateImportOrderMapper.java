@@ -35,7 +35,6 @@ public class CreateImportOrderMapper {
                         .skuCode(detail.getSku().getSkuCode())
                         .skuName(detail.getSku().getName())
                         .quantity(detail.getQuantity())
-                        .receivedQuantity(detail.getReceivedQuantity())
                         .build()).collect(Collectors.toList()))
                 .build();
     }

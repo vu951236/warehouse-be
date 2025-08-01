@@ -21,7 +21,6 @@ public class ItemImportMapper {
                 .importOrder(order)
                 .sku(sku)
                 .quantity(quantity)
-                .receivedQuantity(0)
                 .build();
     }
 
