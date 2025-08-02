@@ -15,9 +15,9 @@ public interface ShelfRepository extends JpaRepository<Shelf, Integer> {
     @Query("""
     SELECT DISTINCT s FROM Shelf s
     JOIN FETCH s.warehouse w
-    JOIN Bin b ON b.shelf = s
-    JOIN Box bx ON bx.bin = b
-    JOIN SKU sku ON bx.sku = sku
+    LEFT JOIN Bin b ON b.shelf = s AND b.isDeleted = false
+    LEFT JOIN Box bx ON bx.bin = b AND bx.isDeleted = false
+    LEFT JOIN SKU sku ON bx.sku = sku
     WHERE s.isDeleted = false 
       AND (:shelfId IS NULL OR s.id = :shelfId)
       AND (:warehouseId IS NULL OR w.id = :warehouseId)
@@ -42,4 +42,6 @@ public interface ShelfRepository extends JpaRepository<Shelf, Integer> {
     //[ Thuật toán] Phân bổ lại vị trí SKU theo độ picking hằng tháng
     @Query("SELECT s FROM Shelf s WHERE s.isDeleted = false ORDER BY s.id ASC")
     List<Shelf> findAvailableShelvesOrderedById();
+
+    List<Shelf> findAllByIsDeletedFalse();
 }
