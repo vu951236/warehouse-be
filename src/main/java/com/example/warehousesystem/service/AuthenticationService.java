@@ -86,9 +86,9 @@ public class AuthenticationService {
 
     public AuthenticationResponse login(AuthenticationRequest request) {
         var user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, "No Bin with available capacity"));
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-            throw new AppException(ErrorCode.INVALID_PASSWORD);
+            throw new AppException(ErrorCode.INVALID_PASSWORD, "No Bin with available capacity");
         }
 
         var token = generateToken(user);
@@ -136,15 +136,15 @@ public class AuthenticationService {
         JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
         SignedJWT signedJWT = SignedJWT.parse(token);
 
-        if (!signedJWT.verify(verifier)) throw new AppException(ErrorCode.UNAUTHENTICATED);
+        if (!signedJWT.verify(verifier)) throw new AppException(ErrorCode.UNAUTHENTICATED, "No Bin with available capacity");
         if (signedJWT.getJWTClaimsSet().getExpirationTime().before(new Date()))
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+            throw new AppException(ErrorCode.UNAUTHENTICATED, "No Bin with available capacity");
         if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+            throw new AppException(ErrorCode.UNAUTHENTICATED, "No Bin with available capacity");
 
         if (isRefresh) {
             String type = (String) signedJWT.getJWTClaimsSet().getClaim("type");
-            if (!"refresh_token".equals(type)) throw new AppException(ErrorCode.UNAUTHENTICATED);
+            if (!"refresh_token".equals(type)) throw new AppException(ErrorCode.UNAUTHENTICATED, "No Bin with available capacity");
         }
 
         return signedJWT;
@@ -154,7 +154,7 @@ public class AuthenticationService {
         SignedJWT signedJWT = verifyToken(refreshToken, true);
         String username = signedJWT.getJWTClaimsSet().getSubject();
         var user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, "No Bin with available capacity"));
 
         return AuthenticationResponse.builder()
                 .authenticated(true)

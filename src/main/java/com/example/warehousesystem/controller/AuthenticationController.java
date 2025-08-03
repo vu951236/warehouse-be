@@ -63,7 +63,7 @@ public class AuthenticationController {
     public ApiResponse<AuthenticationResponse> refreshToken(
             @CookieValue(name = "refresh_token", required = false) String refreshToken) throws ParseException, JOSEException {
         if (refreshToken == null) {
-            throw new AppException(ErrorCode.INVALID_REFRESH_TOKEN);
+            throw new AppException(ErrorCode.INVALID_REFRESH_TOKEN, "No Bin with available capacity");
         }
         var newAccessToken = authenticationService.refreshAccessToken(refreshToken);
         return ApiResponse.<AuthenticationResponse>builder()

@@ -1,7 +1,7 @@
 package com.example.warehousesystem.exception;
 
 public class AppException extends RuntimeException {
-    public AppException(ErrorCode errorCode) {
+    public AppException(ErrorCode errorCode, String noBinWithAvailableCapacity) {
         super(errorCode.getMessage());
         this.errorCode = errorCode;
     }

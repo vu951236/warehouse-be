@@ -18,6 +18,12 @@ public enum ErrorCode {
     APPLICATION_NOT_FOUND(1012, "Application not found", HttpStatus.NOT_FOUND),
     RESOURCE_NOT_FOUND(4004, "Resource not found", HttpStatus.NOT_FOUND),
     WAREHOUSE_NOT_FOUND(4005, "Warehouse not found", HttpStatus.NOT_FOUND),
+    BARCODE_EXISTS(5000, "Barcode already exists", HttpStatus.CONFLICT),
+    SKU_NOT_FOUND(5001, "SKU not found", HttpStatus.NOT_FOUND),
+    NO_BIN_CAPACITY(5002, "No available Bin with enough capacity", HttpStatus.BAD_REQUEST),
+    NO_BOX_CAPACITY(5003, "No suitable Box found or created", HttpStatus.BAD_REQUEST),
+
+
 
     ;
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

@@ -70,7 +70,7 @@ public class ShelfService {
 
         // Lấy warehouse theo ID
         Warehouse warehouse = warehouseRepository.findById(request.getWarehouseId())
-                .orElseThrow(() -> new AppException(ErrorCode.WAREHOUSE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.WAREHOUSE_NOT_FOUND, "No Bin with available capacity"));
 
         // Tạo đối tượng Shelf
         Shelf shelf = CreateShelfMapper.toEntity(request, warehouse);
@@ -100,7 +100,7 @@ public class ShelfService {
     @Transactional
     public void deleteShelf(Integer shelfId) {
         Shelf shelf = shelfRepository.findWithWarehouseById(shelfId)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "No Bin with available capacity"));
 
         // Lấy các bin chưa bị xoá
         List<Bin> bins = binRepository.findByShelfIdAndIsDeletedFalse(shelfId);
@@ -137,11 +137,11 @@ public class ShelfService {
         // Tìm kệ theo ID và chưa bị xoá
         Shelf shelf = shelfRepository.findById(request.getId())
                 .filter(s -> !Boolean.TRUE.equals(s.getIsDeleted()))
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "No Bin with available capacity"));
 
         // Tìm warehouse mới (nếu có)
         Warehouse warehouse = warehouseRepository.findById(request.getWarehouseId())
-                .orElseThrow(() -> new AppException(ErrorCode.WAREHOUSE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.WAREHOUSE_NOT_FOUND, "No Bin with available capacity"));
 
         // Cập nhật thông tin kệ
         shelf.setShelfCode(request.getShelfCode());
