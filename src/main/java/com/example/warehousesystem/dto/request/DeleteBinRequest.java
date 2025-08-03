@@ -8,5 +8,5 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class DeleteBinRequest {
-    private Integer Id;
+    private String binCode;
 }

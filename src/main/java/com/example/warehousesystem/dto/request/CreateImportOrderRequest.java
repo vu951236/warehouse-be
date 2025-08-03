@@ -20,7 +20,7 @@ public class CreateImportOrderRequest {
     @AllArgsConstructor
     @Builder
     public static class Detail {
-        private Integer skuId;
+        private String skuCode;
         private Integer quantity;
     }
 }

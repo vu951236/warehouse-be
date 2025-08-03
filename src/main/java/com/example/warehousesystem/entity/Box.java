@@ -16,6 +16,9 @@ public class Box {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "box_code", nullable = false, length = 50)
+    private String boxCode;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bin_id", nullable = false)
     private Bin bin;

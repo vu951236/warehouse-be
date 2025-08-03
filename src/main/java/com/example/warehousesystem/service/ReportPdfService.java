@@ -93,14 +93,14 @@ public class ReportPdfService {
 
         // 3. Tình trạng sức chứa
         document.add(new Paragraph("🏗️ Tình trạng sức chứa:").setBold());
-        Object[] raw = warehouseRepository.getWarehouseStorageStatusById(request.getWarehouseId());
+        WarehouseStorageStatusProjection raw = warehouseRepository.getWarehouseStorageStatusById(request.getWarehouseId());
         if (raw != null) {
             StorageStatusResponse status = StorageStatusMapper.toResponse(
-                    (String) raw[0],
-                    ((Number) raw[1]).doubleValue(),
-                    ((Number) raw[2]).intValue(),
-                    ((Number) raw[3]).doubleValue(),
-                    ((Number) raw[4]).doubleValue()
+                    raw.getWarehouseName(),
+                    raw.getUsedCapacity(),
+                    raw.getShelfCount(),
+                    raw.getTotalBinCount(),
+                    raw.getBinCapacity()
             );
 
             document.add(new Paragraph("Kho: " + status.getWarehouseName()));

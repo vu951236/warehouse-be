@@ -17,8 +17,8 @@ public class ExportOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "order_code", nullable = false, length = 100)
-    private String orderCode;
+    @Column(name = "export_code", nullable = false, length = 100)
+    private String exportCode;
 
     @Column(name = "destination", nullable = false, length = 255)
     private String destination;
@@ -41,6 +41,9 @@ public class ExportOrder {
     @Column(name = "note", columnDefinition = "TEXT")
     private String note;
 
+    @Column(name = "urgent", nullable = false)
+    private Boolean urgent;
+
     public enum Source {
         manual,
         haravan
@@ -52,3 +55,4 @@ public class ExportOrder {
         cancelled
     }
 }
+

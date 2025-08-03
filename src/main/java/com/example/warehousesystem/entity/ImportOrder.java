@@ -17,6 +17,9 @@ public class ImportOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "import_code", nullable = false, length = 100)
+    private String importCode;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "source", nullable = false, length = 20)
     private Source source;

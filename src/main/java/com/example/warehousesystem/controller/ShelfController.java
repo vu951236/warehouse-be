@@ -3,7 +3,6 @@ package com.example.warehousesystem.controller;
 import com.example.warehousesystem.dto.request.CreateShelfRequest;
 import com.example.warehousesystem.dto.request.DeleteShelfRequest;
 import com.example.warehousesystem.dto.request.SearchShelfRequest;
-import com.example.warehousesystem.dto.request.UpdateShelfRequest;
 import com.example.warehousesystem.dto.response.ShelfResponse;
 import com.example.warehousesystem.service.ShelfService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -35,14 +34,8 @@ public class ShelfController {
 
     @DeleteMapping("/delete")
     public ResponseEntity<?> deleteShelf(@RequestBody DeleteShelfRequest request) {
-        shelfService.deleteShelf(request.getId());
+        shelfService.deleteShelf(request.getShelfCode());
         return ResponseEntity.ok("Xóa kệ hàng thành công");
-    }
-
-    @PutMapping("/update")
-    public ResponseEntity<ShelfResponse> updateShelf(@Valid @RequestBody UpdateShelfRequest request) {
-        ShelfResponse response = shelfService.updateShelf(request);
-        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/pdf")

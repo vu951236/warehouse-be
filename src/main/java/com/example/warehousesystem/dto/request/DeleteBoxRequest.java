@@ -8,5 +8,5 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class DeleteBoxRequest {
-    private Integer Id;
+    private String boxCode;
 }

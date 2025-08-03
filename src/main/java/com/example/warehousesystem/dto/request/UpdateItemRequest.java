@@ -9,9 +9,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class UpdateItemRequest {
-    private Integer id;
-    private Integer boxId;
-    private Integer skuId;
     private String barcode;
     private Status status;
 }

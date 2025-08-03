@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface ShelfRepository extends JpaRepository<Shelf, Integer> {
-    //Tìm kiếm kệ hàng
+    // Tìm kiếm kệ hàng theo mã code
     @Query("""
     SELECT DISTINCT s FROM Shelf s
     JOIN FETCH s.warehouse w
@@ -19,18 +19,18 @@ public interface ShelfRepository extends JpaRepository<Shelf, Integer> {
     LEFT JOIN Box bx ON bx.bin = b AND bx.isDeleted = false
     LEFT JOIN SKU sku ON bx.sku = sku
     WHERE s.isDeleted = false 
-      AND (:shelfId IS NULL OR s.id = :shelfId)
+      AND (:shelfCode IS NULL OR s.shelfCode LIKE %:shelfCode%)
       AND (:warehouseId IS NULL OR w.id = :warehouseId)
-      AND (:binId IS NULL OR b.id = :binId)
-      AND (:boxId IS NULL OR bx.id = :boxId)
-      AND (:skuId IS NULL OR sku.id = :skuId)
+      AND (:binCode IS NULL OR b.binCode LIKE %:binCode%)
+      AND (:boxCode IS NULL OR bx.boxCode LIKE %:boxCode%)
+      AND (:skuCode IS NULL OR sku.skuCode LIKE %:skuCode%)
 """)
     List<Shelf> searchShelves(
-            @Param("shelfId") Integer shelfId,
+            @Param("shelfCode") String shelfCode,
             @Param("warehouseId") Integer warehouseId,
-            @Param("binId") Integer binId,
-            @Param("boxId") Integer boxId,
-            @Param("skuId") Integer skuId
+            @Param("binCode") String binCode,
+            @Param("boxCode") String boxCode,
+            @Param("skuCode") String skuCode
     );
 
     //Thêm kệ hàng
@@ -44,4 +44,7 @@ public interface ShelfRepository extends JpaRepository<Shelf, Integer> {
     List<Shelf> findAvailableShelvesOrderedById();
 
     List<Shelf> findAllByIsDeletedFalse();
+
+    Optional<Shelf> findByShelfCode(String shelfCode);
+
 }

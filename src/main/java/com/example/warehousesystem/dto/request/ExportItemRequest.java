@@ -10,7 +10,7 @@ import java.util.List;
 @Builder
 //Xuất hàng vật phẩm
 public class ExportItemRequest {
-    private Integer exportOrderId;
+    private String exportCode;
     private List<String> barcodes;         // Danh sách mã barcode cần xuất
     private Integer userId;
 }

@@ -7,7 +7,7 @@ public class UrgentOrderMapper {
     public static UrgentOrderResponse toResponse(ExportOrder eo) {
         return UrgentOrderResponse.builder()
                 .exportOrderId(eo.getId())
-                .orderCode(eo.getOrderCode())
+                .exportCode(eo.getExportCode())
                 .destination(eo.getDestination())
                 .status(eo.getStatus().name()) // Enum -> String
                 .createdBy(eo.getCreatedBy().getFullName()) // hoặc .getUsername()

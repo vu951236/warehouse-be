@@ -8,5 +8,5 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class DeleteItemRequest {
-    private Integer Id;
+    private String barcode;
 }

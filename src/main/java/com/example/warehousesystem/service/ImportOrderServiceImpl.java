@@ -73,9 +73,14 @@ public class ImportOrderServiceImpl implements ImportOrderService {
         );
 
         List<ImportItemsResponse.ImportedItemInfo> results = new ArrayList<>();
+
         for (ScanBarcodeDTO dto : request.getScannedItems()) {
-            results.addAll(handleImportItem(order, dto.getBarcode(), dto.getSkuId(), dto.getQuantity()));
+            SKU sku = skuRepository.findBySkuCode(dto.getSkuCode())
+                    .orElseThrow(() -> new AppException(ErrorCode.SKU_NOT_FOUND, "SKU not found"));
+
+            results.addAll(handleImportItem(order, sku.getId(), dto.getQuantity()));
         }
+
 
         return ImportItemsResponse.builder()
                 .importOrderId(order.getId())
@@ -95,9 +100,11 @@ public class ImportOrderServiceImpl implements ImportOrderService {
 
         List<ImportItemsResponse.ImportedItemInfo> results = new ArrayList<>();
         for (ExcelItemDTO dto : request.getItems()) {
+            SKU sku = skuRepository.findBySkuCode(dto.getSkuCode())
+                    .orElseThrow(() -> new AppException(ErrorCode.SKU_NOT_FOUND, "SKU not found"));
+
             for (int i = 0; i < dto.getQuantity(); i++) {
-                String barcode = dto.getBarcode() + "-" + i;
-                results.addAll(handleImportItem(order, barcode, dto.getSkuId(), 1));
+                results.addAll(handleImportItem(order, sku.getId(), 1));
             }
         }
 
@@ -107,31 +114,35 @@ public class ImportOrderServiceImpl implements ImportOrderService {
                 .build();
     }
 
-    private List<ImportItemsResponse.ImportedItemInfo> handleImportItem(ImportOrder order, String barcode, Integer skuId, Integer quantity) {
+    private List<ImportItemsResponse.ImportedItemInfo> handleImportItem(ImportOrder order, Integer skuId, Integer quantity) {
         SKU sku = skuRepository.findById(skuId)
                 .orElseThrow(() -> new RuntimeException("SKU not found"));
 
         int requiredVolume = (int) (sku.getUnitVolume() * quantity);
 
-        // Tìm box tối ưu bằng thuật toán
         Box box = putAwayOptimizer.findOptimalBox(sku, quantity);
         if (box.getId() == null) {
             box = boxRepository.save(box);
         }
 
-        // Lấy Bin từ Box
         Bin bin = box.getBin();
-
 
         ImportOrderDetail detail = ItemImportMapper.toDetail(order, sku, quantity);
         importOrderDetailRepository.save(detail);
 
-        List<ImportItemsResponse.ImportedItemInfo> itemInfos = new ArrayList<>();
-        for (int i = 0; i < quantity; i++) {
-            if (itemRepository.existsByBarcode(barcode))
-                throw new RuntimeException("Duplicate barcode: " + barcode);
+        int existingItemCount = itemRepository.countBySkuId(sku.getId());
 
-            Item item = itemRepository.save(ItemImportMapper.toItem(box, sku, barcode));
+        List<ImportItemsResponse.ImportedItemInfo> itemInfos = new ArrayList<>();
+        for (int i = 1; i <= quantity; i++) {
+            // Tăng index tiếp theo
+            int index = existingItemCount + i;
+            String barcode = sku.getSkuCode() + "-" + String.format("%05d", index);
+
+            Item item = ItemImportMapper.toItem(box, sku);
+            item.setBarcode(barcode);
+
+            item = itemRepository.save(item);
+
             itemInfos.add(new ImportItemsResponse.ImportedItemInfo(barcode, item.getId(), box.getId(), bin.getId()));
         }
 
@@ -140,6 +151,7 @@ public class ImportOrderServiceImpl implements ImportOrderService {
 
         return itemInfos;
     }
+
 
     @Override
     public ByteArrayOutputStream generateImportTemplate() throws IOException {
@@ -176,11 +188,8 @@ public class ImportOrderServiceImpl implements ImportOrderService {
         List<ImportItemsResponse.ImportedItemInfo> result = new ArrayList<>();
 
         for (ScanBarcodeDTO dto : request.getScannedItems()) {
-            if (itemRepository.existsByBarcode(dto.getBarcode())) {
-                throw new AppException(ErrorCode.BARCODE_EXISTS, "No Bin with available capacity");
-            }
 
-            SKU sku = skuRepository.findById(dto.getSkuId())
+            SKU sku = skuRepository.findBySkuCode(dto.getSkuCode())
                     .orElseThrow(() -> new AppException(ErrorCode.SKU_NOT_FOUND, "No Bin with available capacity"));
 
             int requiredVolume = (int) (sku.getUnitVolume() * dto.getQuantity());
@@ -197,24 +206,40 @@ public class ImportOrderServiceImpl implements ImportOrderService {
                     .filter(b -> b.getBin().getId().equals(bin.getId()))
                     .findFirst()
                     .orElseGet(() -> {
+                        int count = boxRepository.countBoxesInBin(bin.getId()) + 1;
+                        String binCode = bin.getBinCode(); // VD: SH01-B01
+                        String boxCode = binCode + "-BX" + String.format("%02d", count); // SH01-B01-BX01
+
                         Box newBox = Box.builder()
                                 .sku(sku)
                                 .bin(bin)
                                 .capacity(1000)
                                 .usedCapacity(0)
+                                .boxCode(boxCode)
                                 .isDeleted(false)
                                 .build();
+
                         return boxRepository.save(newBox);
                     });
 
-            Item item = itemRepository.save(ItemImportMapper.toItem(box, sku, dto.getBarcode()));
+            int existingItemCount = itemRepository.countBySkuId(sku.getId());
+
+            for (int i = 1; i <= dto.getQuantity(); i++) {
+                int index = existingItemCount + i;
+                String barcode = sku.getSkuCode() + "-" + String.format("%05d", index);
+
+                Item item = ItemImportMapper.toItem(box, sku);
+                item.setBarcode(barcode);
+                item = itemRepository.save(item);
+
+                result.add(new ImportItemsResponse.ImportedItemInfo(
+                        item.getBarcode(), item.getId(), box.getId(), bin.getId()
+                ));
+            }
+
             importOrderDetailRepository.save(ItemImportMapper.toDetail(order, sku, dto.getQuantity()));
             box.setUsedCapacity(box.getUsedCapacity() + requiredVolume);
             boxRepository.save(box);
-
-            result.add(new ImportItemsResponse.ImportedItemInfo(
-                    item.getBarcode(), item.getId(), box.getId(), bin.getId()
-            ));
         }
 
         return ImportItemsResponse.builder()

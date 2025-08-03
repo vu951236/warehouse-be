@@ -10,7 +10,7 @@ public class ExportOrderMapper {
     public ExportOrderResponse toResponse(ExportOrder order) {
         return ExportOrderResponse.builder()
                 .id(order.getId())
-                .orderCode(order.getOrderCode())
+                .exportCode(order.getExportCode())
                 .destination(order.getDestination())
                 .source(order.getSource().toString())
                 .status(order.getStatus().toString())

@@ -1,5 +1,6 @@
 package com.example.warehousesystem.repository;
 
+import com.example.warehousesystem.entity.Item;
 import com.example.warehousesystem.entity.SKU;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -7,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface SKURepository extends JpaRepository<SKU, Integer> {
@@ -46,4 +48,10 @@ public interface SKURepository extends JpaRepository<SKU, Integer> {
 
     //Thêm SKU
     boolean existsBySkuCode(String skuCode);
+
+    @Query("""
+    SELECT s FROM SKU s
+    WHERE s.skuCode IN :skuCode
+""")
+    Optional<SKU> findBySkuCode(String skuCode);
 }

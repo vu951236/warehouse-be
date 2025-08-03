@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 //Đơn xuất
 public class ExportOrderResponse {
     private Integer id;
-    private String orderCode;
+    private String exportCode;
     private String destination;
     private String source;
     private String status;

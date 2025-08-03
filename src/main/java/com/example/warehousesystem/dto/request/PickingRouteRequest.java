@@ -19,7 +19,7 @@ public class PickingRouteRequest {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class SKURequest {
-        private Integer skuId;
+        private String skuCode;
         private Integer quantity;
     }
 }

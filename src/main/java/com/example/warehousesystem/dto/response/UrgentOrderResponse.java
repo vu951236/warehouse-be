@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Builder
 public class UrgentOrderResponse {
     private Integer exportOrderId;
-    private String orderCode;
+    private String exportCode;
     private String destination;
     private String status;
     private String createdBy;

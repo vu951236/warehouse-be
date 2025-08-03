@@ -51,4 +51,9 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
 
     //Xóa shelf,bin,box
     List<Item> findByBoxIdInAndIsDeletedFalse(List<Integer> boxIds);
+
+    @Query("SELECT i FROM Item i WHERE i.barcode = :barcode")
+    Optional<Item> findByBarcode(@Param("barcode") String barcode);
+
+    int countBySkuId(Integer id);
 }

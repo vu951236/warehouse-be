@@ -8,7 +8,8 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class CreateBoxRequest {
-    private Integer binId;
-    private Integer skuId;
+    private String binCode;
+    private String skuCode;
     private Integer capacity;
+    private Integer used_capacity;
 }

@@ -7,8 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class ScanBarcodeDTO {
-    private String barcode;
-    private Integer skuId;
+    private String skuCode;
     private Integer quantity;
 }
 

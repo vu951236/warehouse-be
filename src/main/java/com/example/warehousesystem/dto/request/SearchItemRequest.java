@@ -9,11 +9,10 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class SearchItemRequest {
-    private Integer itemId;    // tìm theo ID item
-    private Integer boxId;
-    private Integer skuId;
+    private String boxCode;
+    private String skuCode;
     private String barcode;
     private Item.Status status;
-    private Integer exportOrderId;
-    private Integer importOrderId;
+    private String exportCode;
+    private String importCode;
 }

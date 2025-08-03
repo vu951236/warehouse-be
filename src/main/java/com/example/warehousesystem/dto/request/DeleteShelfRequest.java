@@ -8,5 +8,5 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class DeleteShelfRequest {
-    private Integer Id;
+    private String shelfCode;
 }

@@ -8,8 +8,8 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class SearchBinRequest {
-    private Integer shelfId;  // tìm theo kệ
-    private Integer binId;    // tìm theo bin
-    private Integer boxId;    // tìm theo box
-    private Integer skuId;    // tìm theo sku
+    private String shelfCode;  // tìm theo kệ
+    private String binCode;    // tìm theo bin
+    private String boxCode;    // tìm theo box
+    private String skuCode;    // tìm theo sku
 }

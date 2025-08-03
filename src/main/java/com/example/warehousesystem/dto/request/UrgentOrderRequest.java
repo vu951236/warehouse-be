@@ -8,6 +8,6 @@ import lombok.*;
 @AllArgsConstructor
 //Ưu tiên đơn hàng gấp
 public class UrgentOrderRequest {
-    private ExportOrder.Status status;     // draft, confirmed, cancelled
+    private Boolean urgent;
     private Integer maxResults;      // Giới hạn số đơn cần lấy
 }

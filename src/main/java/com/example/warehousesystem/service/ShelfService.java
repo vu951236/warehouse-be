@@ -2,7 +2,6 @@ package com.example.warehousesystem.service;
 
 import com.example.warehousesystem.dto.request.CreateShelfRequest;
 import com.example.warehousesystem.dto.request.SearchShelfRequest;
-import com.example.warehousesystem.dto.request.UpdateShelfRequest;
 import com.example.warehousesystem.dto.response.ShelfResponse;
 import com.example.warehousesystem.entity.*;
 import com.example.warehousesystem.exception.AppException;
@@ -41,16 +40,53 @@ public class ShelfService {
     private final BoxRepository boxRepository;
     private final ItemRepository itemRepository;
 
+    @Transactional
+    public void deleteShelf(String shelfCode) {
+        Shelf shelf = shelfRepository.findByShelfCode(shelfCode)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Shelf not found with code: " + shelfCode));
+
+        Integer shelfId = shelf.getId();
+
+        // Lấy các bin chưa bị xoá
+        List<Bin> bins = binRepository.findByShelfIdAndIsDeletedFalse(shelfId);
+
+        // Lấy tất cả binId
+        List<Integer> binIds = bins.stream().map(Bin::getId).toList();
+
+        // Lấy tất cả box theo binIds
+        List<Box> boxes = boxRepository.findByBinIdInAndIsDeletedFalse(binIds);
+        List<Integer> boxIds = boxes.stream().map(Box::getId).toList();
+
+        // Lấy tất cả item theo boxIds
+        List<Item> items = itemRepository.findByBoxIdInAndIsDeletedFalse(boxIds);
+
+        // Đánh dấu xoá item
+        items.forEach(item -> item.setIsDeleted(true));
+        itemRepository.saveAll(items);
+
+        // Đánh dấu xoá box
+        boxes.forEach(box -> box.setIsDeleted(true));
+        boxRepository.saveAll(boxes);
+
+        // Đánh dấu xoá bin
+        bins.forEach(bin -> bin.setIsDeleted(true));
+        binRepository.saveAll(bins);
+
+        // Đánh dấu xoá shelf
+        shelf.setIsDeleted(true);
+        shelfRepository.save(shelf);
+    }
+
     /**
      * Tìm kiếm kệ hàng theo các tiêu chí
      */
     public List<ShelfResponse> searchShelves(SearchShelfRequest request) {
         List<Shelf> shelves = shelfRepository.searchShelves(
-                request.getShelfId(),
+                request.getShelfCode(),
                 request.getWarehouseId(),
-                request.getBinId(),
-                request.getBoxId(),
-                request.getSkuId()
+                request.getBinCode(),
+                request.getBoxCode(),
+                request.getSkuCode()
         );
 
         return shelves.stream()
@@ -97,62 +133,6 @@ public class ShelfService {
         return CreateShelfMapper.toResponse(savedShelf);
     }
 
-    @Transactional
-    public void deleteShelf(Integer shelfId) {
-        Shelf shelf = shelfRepository.findWithWarehouseById(shelfId)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "No Bin with available capacity"));
-
-        // Lấy các bin chưa bị xoá
-        List<Bin> bins = binRepository.findByShelfIdAndIsDeletedFalse(shelfId);
-
-        // Lấy tất cả binId
-        List<Integer> binIds = bins.stream().map(Bin::getId).collect(Collectors.toList());
-
-        // Lấy tất cả box theo binIds
-        List<Box> boxes = boxRepository.findByBinIdInAndIsDeletedFalse(binIds);
-        List<Integer> boxIds = boxes.stream().map(Box::getId).collect(Collectors.toList());
-
-        // Lấy tất cả item theo boxIds
-        List<Item> items = itemRepository.findByBoxIdInAndIsDeletedFalse(boxIds);
-
-        // Đánh dấu xoá item
-        items.forEach(item -> item.setIsDeleted(true));
-        itemRepository.saveAll(items);
-
-        // Đánh dấu xoá box
-        boxes.forEach(box -> box.setIsDeleted(true));
-        boxRepository.saveAll(boxes);
-
-        // Đánh dấu xoá bin
-        bins.forEach(bin -> bin.setIsDeleted(true));
-        binRepository.saveAll(bins);
-
-        // Đánh dấu xoá shelf
-        shelf.setIsDeleted(true);
-        shelfRepository.save(shelf);
-    }
-
-    @Transactional
-    public ShelfResponse updateShelf(UpdateShelfRequest request) {
-        // Tìm kệ theo ID và chưa bị xoá
-        Shelf shelf = shelfRepository.findById(request.getId())
-                .filter(s -> !Boolean.TRUE.equals(s.getIsDeleted()))
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "No Bin with available capacity"));
-
-        // Tìm warehouse mới (nếu có)
-        Warehouse warehouse = warehouseRepository.findById(request.getWarehouseId())
-                .orElseThrow(() -> new AppException(ErrorCode.WAREHOUSE_NOT_FOUND, "No Bin with available capacity"));
-
-        // Cập nhật thông tin kệ
-        shelf.setShelfCode(request.getShelfCode());
-        shelf.setBinCount(request.getBinCount());
-        shelf.setWarehouse(warehouse);
-
-        // Lưu lại
-        Shelf updatedShelf = shelfRepository.save(shelf);
-
-        return ShelfMapper.toResponse(updatedShelf);
-    }
     public byte[] exportShelvesToPdf() {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         PdfWriter writer = new PdfWriter(outputStream);

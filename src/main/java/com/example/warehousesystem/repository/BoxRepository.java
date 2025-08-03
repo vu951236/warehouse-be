@@ -1,9 +1,7 @@
 package com.example.warehousesystem.repository;
 
 import com.example.warehousesystem.entity.Box;
-import com.example.warehousesystem.entity.SKU;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -21,6 +19,9 @@ public interface BoxRepository extends JpaRepository<Box, Integer> {
     AND (bx.capacity - bx.usedCapacity) >= :requiredVolume
     """)
     List<Box> findAvailableBoxes(@Param("skuId") Integer skuId, @Param("requiredVolume") Integer requiredVolume);
+
+    @Query("SELECT COUNT(b) FROM Box b WHERE b.bin.id = :binId")
+    int countBoxesInBin(@Param("binId") Integer binId);
 
     //[Thuật toán] Đường đi lấy hàng tối ưu
     @Query("""
@@ -65,4 +66,7 @@ public interface BoxRepository extends JpaRepository<Box, Integer> {
 
     //Xóa shelf,bin
     List<Box> findByBinIdInAndIsDeletedFalse(List<Integer> binIds);
+
+    //Thêm box
+    boolean existsByBoxCode(String boxCode);
 }

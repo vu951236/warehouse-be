@@ -19,6 +19,6 @@ public class InvalidatedToken {
     private String id;
 
     @Column(name = "expiry_time")
-    @Temporal(TemporalType.TIMESTAMP) // Giúp mapping chính xác kiểu thời gian
+    @Temporal(TemporalType.TIMESTAMP)
     private Date expiryTime;
 }

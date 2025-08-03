@@ -8,9 +8,9 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class SearchSkuRequest {
-    private Integer skuId;
-    private Integer itemId;
-    private Integer boxId;
-    private Integer importOrderId;
-    private Integer exportOrderId;
+    private String skuCode;
+    private String itemCode;
+    private String boxCode;
+    private String importCode;
+    private String exportCode;
 }

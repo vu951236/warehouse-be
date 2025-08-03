@@ -8,8 +8,6 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class UpdateBinRequest {
-    private Integer id;         // ID của Bin cần cập nhật
-    private String binCode;     // Mã Bin mới
+    private String binCode;         // ID của Bin cần cập nhật
     private Integer capacity;   // Sức chứa mới
-    private Integer shelfId;    // ID kệ chứa bin này
 }
