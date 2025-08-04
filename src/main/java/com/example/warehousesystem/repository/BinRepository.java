@@ -1,6 +1,7 @@
 package com.example.warehousesystem.repository;
 
 import com.example.warehousesystem.entity.Bin;
+import com.example.warehousesystem.entity.Shelf;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -30,22 +31,23 @@ public interface BinRepository extends JpaRepository<Bin, Integer> {
 
     //Tìm kiếm bin
     @Query("""
-        SELECT DISTINCT b FROM Bin b
-        JOIN FETCH b.shelf s
-        JOIN Box bx ON bx.bin = b
-        JOIN SKU sku ON bx.sku = sku
-        WHERE b.isDeleted = false 
-          AND (:shelfId IS NULL OR s.id = :shelfId)
-          AND (:binId IS NULL OR b.id = :binId)
-          AND (:boxId IS NULL OR bx.id = :boxId)
-          AND (:skuId IS NULL OR sku.id = :skuId)
-    """)
+    SELECT DISTINCT b FROM Bin b
+    JOIN FETCH b.shelf s
+    LEFT JOIN Box bx ON bx.bin = b AND bx.isDeleted = false
+    LEFT JOIN SKU sku ON bx.sku = sku
+    WHERE b.isDeleted = false 
+      AND (:binCode IS NULL OR b.binCode LIKE %:binCode%)
+      AND (:shelfCode IS NULL OR s.shelfCode LIKE %:shelfCode%)
+      AND (:boxCode IS NULL OR bx.boxCode LIKE %:boxCode%)
+      AND (:skuCode IS NULL OR sku.skuCode LIKE %:skuCode%)
+""")
     List<Bin> searchBins(
-            @Param("shelfId") Integer shelfId,
-            @Param("binId") Integer binId,
-            @Param("boxId") Integer boxId,
-            @Param("skuId") Integer skuId
+            @Param("binCode") String binCode,
+            @Param("shelfCode") String shelfCode,
+            @Param("boxCode") String boxCode,
+            @Param("skuCode") String skuCode
     );
+
 
     //Thêm kệ hàng
     boolean existsByBinCode(String binCode);
@@ -60,5 +62,7 @@ public interface BinRepository extends JpaRepository<Bin, Integer> {
 
     //Xóa shelf
     List<Bin> findByShelfIdAndIsDeletedFalse(Integer shelfId);
+
+    Optional<Bin> findByBinCode(String binCode);
 
 }

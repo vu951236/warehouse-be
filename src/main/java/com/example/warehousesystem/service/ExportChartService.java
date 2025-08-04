@@ -19,8 +19,8 @@ public class ExportChartService {
     public List<ExportChartResponse> getExportChartData(ExportChartRequest request) {
         List<Object[]> rawData = exportOrderRepository.getExportChartData(
                 request.getWarehouseId(),
-                request.getFromDate(),
-                request.getToDate()
+                request.getStartDate(),
+                request.getEndDate()
         );
 
         return rawData.stream()

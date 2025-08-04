@@ -163,7 +163,6 @@ public class ImportOrderServiceImpl implements ImportOrderService {
         header.createCell(1).setCellValue("skuId");
         header.createCell(2).setCellValue("quantity");
 
-        // Dòng gợi ý (mẫu)
         Row exampleRow = sheet.createRow(1);
         exampleRow.createCell(0).setCellValue("ABC123456789");
         exampleRow.createCell(1).setCellValue(1);

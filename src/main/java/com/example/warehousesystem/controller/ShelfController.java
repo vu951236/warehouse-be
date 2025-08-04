@@ -3,7 +3,12 @@ package com.example.warehousesystem.controller;
 import com.example.warehousesystem.dto.request.CreateShelfRequest;
 import com.example.warehousesystem.dto.request.DeleteShelfRequest;
 import com.example.warehousesystem.dto.request.SearchShelfRequest;
+import com.example.warehousesystem.dto.response.BinResponse;
+import com.example.warehousesystem.dto.response.BoxResponse;
 import com.example.warehousesystem.dto.response.ShelfResponse;
+import com.example.warehousesystem.entity.Bin;
+import com.example.warehousesystem.entity.Box;
+import com.example.warehousesystem.entity.Shelf;
 import com.example.warehousesystem.service.ShelfService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -45,6 +50,22 @@ public class ShelfController {
         response.setHeader("Content-Disposition", "attachment; filename=shelves.pdf");
         response.getOutputStream().write(pdfContent);
         response.getOutputStream().flush();
+    }
+
+    @GetMapping("/{shelfId}/bins")
+    public ResponseEntity<List<BinResponse>> getBinsByShelf(@PathVariable Integer shelfId) {
+        List<BinResponse> bins = shelfService.getBinsByShelfId(shelfId);
+        return ResponseEntity.ok(bins);}
+
+    @GetMapping("/bin/{binId}/boxes")
+    public ResponseEntity<List<BoxResponse>> getBoxesByBin(@PathVariable Integer binId) {
+        List<BoxResponse> boxes = shelfService.getBoxesByBinId(binId);
+        return ResponseEntity.ok(boxes);}
+
+    @GetMapping("/all")
+    public ResponseEntity<List<ShelfResponse>> getAllShelves() {
+        List<ShelfResponse> shelves = shelfService.getAllShelves();
+        return ResponseEntity.ok(shelves);
     }
 
 }

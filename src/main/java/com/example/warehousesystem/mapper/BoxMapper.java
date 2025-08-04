@@ -8,6 +8,7 @@ public class BoxMapper {
     public static BoxResponse toResponse(Box box) {
         return BoxResponse.builder()
                 .id(box.getId())
+                .boxCode(box.getBoxCode())
                 .binId(box.getBin().getId())
                 .binCode(box.getBin().getBinCode())
                 .skuId(box.getSku().getId())

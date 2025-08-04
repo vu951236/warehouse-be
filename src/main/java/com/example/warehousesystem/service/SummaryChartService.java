@@ -27,14 +27,15 @@ public class SummaryChartService {
         );
 
         for (Object[] row : importStats) {
-            String date = formatDate(row[0], request.getType());
+            String dateKey = formatDate(row[0], request.getType());
             Long totalOrders = row[1] != null ? ((Number) row[1]).longValue() : 0L;
             Long totalItems = row[2] != null ? ((Number) row[2]).longValue() : 0L;
 
-            resultMap.putIfAbsent(date, SummaryChartMapper.toResponse(date, 0L, 0L, 0L, 0L));
-            SummaryChartResponse current = resultMap.get(date);
-            current.setTotalImportOrders(totalOrders);
-            current.setTotalImportItems(totalItems);
+            // Nếu đã có tháng này, cộng dồn thêm
+            resultMap.putIfAbsent(dateKey, SummaryChartMapper.toResponse(dateKey, 0L, 0L, 0L, 0L));
+            SummaryChartResponse current = resultMap.get(dateKey);
+            current.setTotalImportOrders(current.getTotalImportOrders() + totalOrders);
+            current.setTotalImportItems(current.getTotalImportItems() + totalItems);
         }
 
         // Lấy dữ liệu xuất
@@ -43,18 +44,19 @@ public class SummaryChartService {
         );
 
         for (Object[] row : exportStats) {
-            String date = formatDate(row[0], request.getType());
+            String dateKey = formatDate(row[0], request.getType());
             Long totalOrders = row[1] != null ? ((Number) row[1]).longValue() : 0L;
             Long totalItems = row[2] != null ? ((Number) row[2]).longValue() : 0L;
 
-            resultMap.putIfAbsent(date, SummaryChartMapper.toResponse(date, 0L, 0L, 0L, 0L));
-            SummaryChartResponse current = resultMap.get(date);
-            current.setTotalExportOrders(totalOrders);
-            current.setTotalExportItems(totalItems);
+            resultMap.putIfAbsent(dateKey, SummaryChartMapper.toResponse(dateKey, 0L, 0L, 0L, 0L));
+            SummaryChartResponse current = resultMap.get(dateKey);
+            current.setTotalExportOrders(current.getTotalExportOrders() + totalOrders);
+            current.setTotalExportItems(current.getTotalExportItems() + totalItems);
         }
 
         return new ArrayList<>(resultMap.values());
     }
+
 
     private String formatDate(Object rawDate, String type) {
         String fullDate = rawDate.toString(); // yyyy-MM-dd

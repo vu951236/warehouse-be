@@ -2,10 +2,14 @@ package com.example.warehousesystem.service;
 
 import com.example.warehousesystem.dto.request.CreateShelfRequest;
 import com.example.warehousesystem.dto.request.SearchShelfRequest;
+import com.example.warehousesystem.dto.response.BinResponse;
+import com.example.warehousesystem.dto.response.BoxResponse;
 import com.example.warehousesystem.dto.response.ShelfResponse;
 import com.example.warehousesystem.entity.*;
 import com.example.warehousesystem.exception.AppException;
 import com.example.warehousesystem.exception.ErrorCode;
+import com.example.warehousesystem.mapper.BinMapper;
+import com.example.warehousesystem.mapper.BoxMapper;
 import com.example.warehousesystem.mapper.CreateShelfMapper;
 import com.example.warehousesystem.mapper.ShelfMapper;
 import com.example.warehousesystem.repository.BinRepository;
@@ -27,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -174,5 +179,24 @@ public class ShelfService {
         return outputStream.toByteArray();
     }
 
+    public List<ShelfResponse> getAllShelves() {
+        List<Shelf> shelves = shelfRepository.findAllByIsDeletedFalse();
+        return shelves.stream()
+                .map(ShelfMapper::toResponse)
+                .toList();
+    }
+
+    public List<BinResponse> getBinsByShelfId(Integer shelfId) {
+        List<Bin> bins = binRepository.findByShelfIdAndIsDeletedFalse(shelfId);
+        return bins.stream()
+                .map(BinMapper::toResponse)
+                .toList();
+    }
+
+    public List<BoxResponse> getBoxesByBinId(Integer binId) {
+        return boxRepository.findByBinIdInAndIsDeletedFalse(Collections.singletonList(binId)).stream()
+                .map(BoxMapper::toResponse)
+                .toList();
+    }
 
 }

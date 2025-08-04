@@ -19,8 +19,8 @@ public class ImportChartService {
     public List<ImportChartResponse> getImportChartData(ImportChartRequest request) {
         List<Object[]> rawData = importOrderRepository.getImportChartData(
                 request.getWarehouseId(),
-                request.getFromDate(),
-                request.getToDate()
+                request.getStartDate(),
+                request.getEndDate()
         );
 
         return rawData.stream()

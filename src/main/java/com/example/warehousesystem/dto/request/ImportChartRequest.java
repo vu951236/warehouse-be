@@ -9,6 +9,6 @@ import lombok.*;
 //Biểu đồ nhập hàng
 public class ImportChartRequest {
     private Integer warehouseId;
-    private String fromDate;       // yyyy-MM-dd
-    private String toDate;         // yyyy-MM-dd
+    private String startDate;       // yyyy-MM-dd
+    private String endDate;         // yyyy-MM-dd
 }

@@ -1,5 +1,6 @@
 package com.example.warehousesystem.repository;
 
+import com.example.warehousesystem.entity.Bin;
 import com.example.warehousesystem.entity.Box;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

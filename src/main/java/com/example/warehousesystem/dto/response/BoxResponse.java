@@ -9,6 +9,7 @@ import lombok.*;
 @Builder
 public class BoxResponse {
     private Integer id;
+    private String boxCode;
     private Integer binId;
     private String binCode;
     private Integer skuId;
