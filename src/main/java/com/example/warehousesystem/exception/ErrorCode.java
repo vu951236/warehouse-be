@@ -24,7 +24,6 @@ public enum ErrorCode {
     NO_BOX_CAPACITY(5003, "No suitable Box found or created", HttpStatus.BAD_REQUEST),
 
 
-
     ;
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;

@@ -1,6 +1,7 @@
 package com.example.warehousesystem.service;
 
 import com.example.warehousesystem.dto.request.AuthenticationRequest;
+import com.example.warehousesystem.dto.request.ForgotPasswordRequest;
 import com.example.warehousesystem.dto.request.IntrospectRequest;
 import com.example.warehousesystem.dto.response.AuthenticationResponse;
 import com.example.warehousesystem.entity.InvalidatedToken;
@@ -32,6 +33,8 @@ public class AuthenticationService {
 
     private final UserRepository userRepository;
     private final InvalidatedTokenRepository invalidatedTokenRepository;
+    private final MailService mailService;
+
     public final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @NonFinal
@@ -86,9 +89,9 @@ public class AuthenticationService {
 
     public AuthenticationResponse login(AuthenticationRequest request) {
         var user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, "No Bin with available capacity"));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-            throw new AppException(ErrorCode.INVALID_PASSWORD, "No Bin with available capacity");
+            throw new AppException(ErrorCode.INVALID_PASSWORD);
         }
 
         var token = generateToken(user);
@@ -136,15 +139,15 @@ public class AuthenticationService {
         JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
         SignedJWT signedJWT = SignedJWT.parse(token);
 
-        if (!signedJWT.verify(verifier)) throw new AppException(ErrorCode.UNAUTHENTICATED, "No Bin with available capacity");
+        if (!signedJWT.verify(verifier)) throw new AppException(ErrorCode.UNAUTHENTICATED);
         if (signedJWT.getJWTClaimsSet().getExpirationTime().before(new Date()))
-            throw new AppException(ErrorCode.UNAUTHENTICATED, "No Bin with available capacity");
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
         if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
-            throw new AppException(ErrorCode.UNAUTHENTICATED, "No Bin with available capacity");
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
 
         if (isRefresh) {
             String type = (String) signedJWT.getJWTClaimsSet().getClaim("type");
-            if (!"refresh_token".equals(type)) throw new AppException(ErrorCode.UNAUTHENTICATED, "No Bin with available capacity");
+            if (!"refresh_token".equals(type)) throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
         return signedJWT;
@@ -154,12 +157,27 @@ public class AuthenticationService {
         SignedJWT signedJWT = verifyToken(refreshToken, true);
         String username = signedJWT.getJWTClaimsSet().getSubject();
         var user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, "No Bin with available capacity"));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         return AuthenticationResponse.builder()
                 .authenticated(true)
                 .token(generateToken(user))
                 .refreshToken(refreshToken)
                 .build();
+    }
+
+    public void forgotPassword(ForgotPasswordRequest request) {
+        var user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        String newPassword = generateRandomPassword();
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        mailService.sendForgotPasswordEmail(user.getEmail(), newPassword); // Gửi email thực
+    }
+
+    private String generateRandomPassword() {
+        return UUID.randomUUID().toString().substring(0, 8); // ví dụ: "3f5g9k8a"
     }
 }

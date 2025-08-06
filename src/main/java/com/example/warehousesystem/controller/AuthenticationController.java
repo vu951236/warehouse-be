@@ -1,5 +1,6 @@
 package com.example.warehousesystem.controller;
 
+import com.example.warehousesystem.dto.request.ForgotPasswordRequest;
 import com.example.warehousesystem.dto.response.ApiResponse;
 import com.example.warehousesystem.dto.request.AuthenticationRequest;
 import com.example.warehousesystem.dto.request.IntrospectRequest;
@@ -63,13 +64,21 @@ public class AuthenticationController {
     public ApiResponse<AuthenticationResponse> refreshToken(
             @CookieValue(name = "refresh_token", required = false) String refreshToken) throws ParseException, JOSEException {
         if (refreshToken == null) {
-            throw new AppException(ErrorCode.INVALID_REFRESH_TOKEN, "No Bin with available capacity");
+            throw new AppException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
         var newAccessToken = authenticationService.refreshAccessToken(refreshToken);
         return ApiResponse.<AuthenticationResponse>builder()
                 .data(newAccessToken)
                 .build();
 
+    }
+
+    @PostMapping("/forgot-password")
+    public ApiResponse<Void> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        authenticationService.forgotPassword(request);
+        return ApiResponse.<Void>builder()
+                .message("Nếu email tồn tại, mật khẩu mới đã được gửi.")
+                .build();
     }
 
 

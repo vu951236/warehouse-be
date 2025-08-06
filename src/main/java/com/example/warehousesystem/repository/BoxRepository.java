@@ -1,6 +1,5 @@
 package com.example.warehousesystem.repository;
 
-import com.example.warehousesystem.entity.Bin;
 import com.example.warehousesystem.entity.Box;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,7 +18,7 @@ public interface BoxRepository extends JpaRepository<Box, Integer> {
     AND bx.sku.id = :skuId 
     AND (bx.capacity - bx.usedCapacity) >= :requiredVolume
     """)
-    List<Box> findAvailableBoxes(@Param("skuId") Integer skuId, @Param("requiredVolume") Integer requiredVolume);
+    List<Box> findAvailableBoxes(@Param("skuId") Integer skuId, @Param("requiredVolume") Float requiredVolume);
 
     @Query("SELECT COUNT(b) FROM Box b WHERE b.bin.id = :binId")
     int countBoxesInBin(@Param("binId") Integer binId);

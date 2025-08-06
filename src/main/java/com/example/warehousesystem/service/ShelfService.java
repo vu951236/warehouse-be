@@ -48,7 +48,7 @@ public class ShelfService {
     @Transactional
     public void deleteShelf(String shelfCode) {
         Shelf shelf = shelfRepository.findByShelfCode(shelfCode)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Shelf not found with code: " + shelfCode));
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
         Integer shelfId = shelf.getId();
 
@@ -111,7 +111,7 @@ public class ShelfService {
 
         // Lấy warehouse theo ID
         Warehouse warehouse = warehouseRepository.findById(request.getWarehouseId())
-                .orElseThrow(() -> new AppException(ErrorCode.WAREHOUSE_NOT_FOUND, "No Bin with available capacity"));
+                .orElseThrow(() -> new AppException(ErrorCode.WAREHOUSE_NOT_FOUND));
 
         // Tạo đối tượng Shelf
         Shelf shelf = CreateShelfMapper.toEntity(request, warehouse);
