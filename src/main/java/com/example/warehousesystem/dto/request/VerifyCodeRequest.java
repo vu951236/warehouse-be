@@ -5,15 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
 @Builder
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-//Cập nhập thông tin tài khoản
-public class UserUpdateRequest {
+public class VerifyCodeRequest {
     private String email;
-    private String password;
-    private String fullName;
-    private String role;
-    private Boolean isActive;
+    private String code;
 }
