@@ -50,7 +50,7 @@ public class UserService {
         try {
             user = userRepository.save(user);
         } catch (Exception e) {
-            throw new AppException(ErrorCode.USER_EXISTS, "User exits");
+            throw new AppException(ErrorCode.USER_EXISTS);
         }
 
         return userMapper.toUserResponse(user);
@@ -58,7 +58,7 @@ public class UserService {
 
     @PreAuthorize("hasRole('admin')")
     public UserResponse updateUser(Integer userId,UserUpdateRequest request) {
-        User user = userRepository.findById(userId).orElseThrow(()-> new AppException(ErrorCode.USER_NOT_FOUND, "User not found"));
+        User user = userRepository.findById(userId).orElseThrow(()-> new AppException(ErrorCode.USER_NOT_FOUND));
         userMapper.updateUser(user, request);
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         return userMapper.toUserResponse(userRepository.save(user));
@@ -68,9 +68,9 @@ public class UserService {
     public UserResponse updatePassword(UserUpdatePasswordRequest request) {
         var context = SecurityContextHolder.getContext();
         var username = context.getAuthentication().getName();
-        User user = userRepository.findByUsername(username).orElseThrow(()-> new AppException(ErrorCode.USER_NOT_FOUND, "User not found"));
+        User user = userRepository.findByUsername(username).orElseThrow(()-> new AppException(ErrorCode.USER_NOT_FOUND));
         if (!passwordEncoder.matches(request.getOldPassword(), user.getPasswordHash())) {
-            throw new AppException(ErrorCode.OLD_PASSWORD_INCORRECT, "Old password incorrect");
+            throw new AppException(ErrorCode.OLD_PASSWORD_INCORRECT);
         }
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
         return userMapper.toUserResponse(userRepository.save(user));
@@ -81,7 +81,7 @@ public class UserService {
     public UserResponse getMyInfo() {
         var context = SecurityContextHolder.getContext();
         var username = context.getAuthentication().getName();
-        User user = userRepository.findByUsername(username).orElseThrow(()-> new AppException(ErrorCode.USER_NOT_FOUND, "User not found"));
+        User user = userRepository.findByUsername(username).orElseThrow(()-> new AppException(ErrorCode.USER_NOT_FOUND));
         return userMapper.toUserResponse(user);
     }
 
@@ -105,7 +105,7 @@ public class UserService {
 
     public void generateVerificationCode(ForgotPasswordRequest request) throws IOException, MessagingException {
         userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         String code = generateVerificationCode();
         LocalDateTime expiry = LocalDateTime.now().plusMinutes(10);
@@ -125,13 +125,13 @@ public class UserService {
 
     public boolean verifyCode(String email, String code) {
         AbstractMap.SimpleEntry<String, LocalDateTime> entry = verificationCodes.get(email);
-        if (entry == null) throw new AppException(ErrorCode.INVALID_CONFIRMATION_CODE, "Confirm code invalid");
+        if (entry == null) throw new AppException(ErrorCode.INVALID_CONFIRMATION_CODE);
         if (LocalDateTime.now().isAfter(entry.getValue())) {
             verificationCodes.remove(email);
-            throw new AppException(ErrorCode.INVALID_CONFIRMATION_CODE, "Confirm code invalid");
+            throw new AppException(ErrorCode.INVALID_CONFIRMATION_CODE);
         }
         if (!entry.getKey().equals(code)) {
-            throw new AppException(ErrorCode.INVALID_CONFIRMATION_CODE, "Confirm code invalid");
+            throw new AppException(ErrorCode.INVALID_CONFIRMATION_CODE);
         }
         return true;
     }

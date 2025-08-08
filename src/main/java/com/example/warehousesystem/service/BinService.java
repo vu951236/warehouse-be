@@ -1,6 +1,7 @@
 package com.example.warehousesystem.service;
 
 import com.example.warehousesystem.dto.request.SearchBinRequest;
+import com.example.warehousesystem.dto.request.UpdateBinRequest;
 import com.example.warehousesystem.dto.response.BinResponse;
 import com.example.warehousesystem.entity.*;
 import com.example.warehousesystem.exception.AppException;
@@ -23,16 +24,17 @@ import java.io.ByteArrayOutputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class BinService {
 
     private final ShelfRepository shelfRepository;
-    private final WarehouseRepository warehouseRepository;
     private final BinRepository binRepository;
     private final BoxRepository boxRepository;
     private final ItemRepository itemRepository;
+    private final SKURepository skuRepository;
 
     @Transactional
     public void deleteBin(String binCode) {
@@ -59,10 +61,29 @@ public class BinService {
         boxs.forEach(box -> box.setIsDeleted(true));
         boxRepository.saveAll(boxs);
 
+        // Trừ binCount trong Shelf
+        Shelf shelf = bin.getShelf();
+        if (shelf != null && shelf.getBinCount() != null && shelf.getBinCount() > 0) {
+            shelf.setBinCount(shelf.getBinCount() - 1);
+            shelfRepository.save(shelf);
+        }
+
         // Đánh dấu xoá bin
         bin.setIsDeleted(true);
         binRepository.save(bin);
     }
+
+    @Transactional
+    public BinResponse updateBin(UpdateBinRequest request) {
+        Bin bin = binRepository.findByBinCode(request.getBinCode())
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+
+        bin.setCapacity(request.getCapacity());
+        Bin updatedBin = binRepository.save(bin);
+
+        return BinMapper.toResponse(updatedBin);
+    }
+
 
     /**
      * Tìm kiếm ngăn hàng theo các tiêu chí
@@ -105,14 +126,32 @@ public class BinService {
         table.addHeaderCell(new Cell().add(new Paragraph("Mã Shelf").setBold()));
         table.addHeaderCell(new Cell().add(new Paragraph("Mã Sku").setBold()));
 
-        // Dữ liệu
-        List<Shelf> shelves = shelfRepository.findAllByIsDeletedFalse();
-        for (Shelf shelf : shelves) {
-            table.addCell(String.valueOf(shelf.getId()));
-            table.addCell(shelf.getShelfCode());
-            table.addCell(String.valueOf(shelf.getBinCount()));
-            table.addCell(String.valueOf(shelf.getWarehouse().getId()));
-            table.addCell(shelf.getWarehouse().getName());
+        Map<Integer, Long> boxCountMap = boxRepository.countBoxesAvailableInAllBins()
+                .stream()
+                .collect(Collectors.toMap(
+                        row -> (Integer) row[0],
+                        row -> (Long) row[1]
+                ));
+
+        Map<Integer, String> skuCodeMap = skuRepository.findSkuCodesByBinId()
+                .stream()
+                .collect(Collectors.toMap(
+                        row -> (Integer) row[0],
+                        row -> (String) row[1]
+                ));
+
+        List<Bin> bins = binRepository.findAllByIsDeletedFalse();
+        for (Bin bin : bins) {
+            table.addCell(String.valueOf(bin.getId()));
+            table.addCell(bin.getBinCode());
+
+            long boxCount = boxCountMap.getOrDefault(bin.getId(), 0L);
+            table.addCell(String.valueOf(boxCount));
+
+            table.addCell(bin.getShelf() != null ? bin.getShelf().getShelfCode() : "");
+
+            String skuCode = skuCodeMap.getOrDefault(bin.getId(), "");
+            table.addCell(skuCode);
         }
 
         document.add(table);

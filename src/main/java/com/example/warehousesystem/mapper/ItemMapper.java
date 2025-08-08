@@ -11,7 +11,7 @@ public class ItemMapper {
                 .barcode(item.getBarcode())
                 .skuCode(item.getSku().getSkuCode())
                 .skuName(item.getSku().getName())
-                .boxCode(item.getBox().getBin().getBinCode())
+                .boxCode(item.getBox().getBoxCode())
                 .status(item.getStatus())
                 .createdAt(item.getCreatedAt())
                 .build();

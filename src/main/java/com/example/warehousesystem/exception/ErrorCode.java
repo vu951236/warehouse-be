@@ -22,6 +22,7 @@ public enum ErrorCode {
     SKU_NOT_FOUND(5001, "SKU not found", HttpStatus.NOT_FOUND),
     NO_BIN_CAPACITY(5002, "No available Bin with enough capacity", HttpStatus.BAD_REQUEST),
     NO_BOX_CAPACITY(5003, "No suitable Box found or created", HttpStatus.BAD_REQUEST),
+    INVALID_INPUT(5004, "Invalid Input", HttpStatus.BAD_REQUEST),
 
 
     ;

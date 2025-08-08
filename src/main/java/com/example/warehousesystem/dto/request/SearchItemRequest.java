@@ -9,9 +9,9 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class SearchItemRequest {
+    private String barcode;
     private String boxCode;
     private String skuCode;
-    private String barcode;
     private Item.Status status;
     private String exportCode;
     private String importCode;

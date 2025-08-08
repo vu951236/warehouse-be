@@ -10,5 +10,6 @@ import lombok.*;
 @Builder
 public class UpdateItemRequest {
     private String barcode;
+    private String boxCode;
     private Status status;
 }

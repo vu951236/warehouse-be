@@ -1,6 +1,7 @@
 package com.example.warehousesystem.repository;
 
 import com.example.warehousesystem.entity.Item;
+import com.example.warehousesystem.entity.Box;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -28,25 +29,25 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
     SELECT i FROM Item i
     JOIN i.box b
     JOIN i.sku s
-    LEFT JOIN ExportOrderDetail eod ON eod.sku.id = s.id
-    LEFT JOIN ImportOrderDetail iod ON iod.sku.id = s.id
+    LEFT JOIN ExportOrderDetail eod ON eod.sku.id = i.sku.id
+    LEFT JOIN ImportOrderDetail iod ON iod.sku.id = i.sku.id
+    LEFT JOIN ExportOrder eo ON eo.id = eod.exportOrder.id
+    LEFT JOIN ImportOrder io ON io.id = iod.importOrder.id
     WHERE i.isDeleted = false
-    AND (:itemId IS NULL OR i.id = :itemId)
-    AND (:boxId IS NULL OR b.id = :boxId)
-    AND (:skuId IS NULL OR s.id = :skuId)
     AND (:barcode IS NULL OR i.barcode LIKE %:barcode%)
+    AND (:boxCode IS NULL OR b.boxCode LIKE %:boxCode%)
+    AND (:skuCode IS NULL OR s.skuCode LIKE %:skuCode%)
     AND (:status IS NULL OR i.status = :status)
-    AND (:exportOrderId IS NULL OR eod.exportOrder.id = :exportOrderId)
-    AND (:importOrderId IS NULL OR iod.importOrder.id = :importOrderId)
+    AND (:exportCode IS NULL OR eo.exportCode LIKE %:exportCode%)
+    AND (:importCode IS NULL OR io.importCode LIKE %:importCode%)
 """)
     List<Item> searchItems(
-            Integer itemId,
-            Integer boxId,
-            Integer skuId,
-            String barcode,
-            Item.Status status,
-            Integer exportOrderId,
-            Integer importOrderId
+            @Param("barcode") String barcode,
+            @Param("boxCode") String boxCode,
+            @Param("skuCode") String skuCode,
+            @Param("status") Item.Status status,
+            @Param("exportCode") String exportCode,
+            @Param("importCode") String importCode
     );
 
     //Xóa shelf,bin,box
@@ -56,4 +57,10 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
     Optional<Item> findByBarcode(@Param("barcode") String barcode);
 
     int countBySkuId(Integer id);
+
+    @Query("SELECT i.box.id, COUNT(i) FROM Item i WHERE i.isDeleted = false GROUP BY i.box.id")
+    List<Object[]> countItemAvailableInAllBoxes();
+
+    List<Item> findAllByIsDeletedFalse();
+
 }

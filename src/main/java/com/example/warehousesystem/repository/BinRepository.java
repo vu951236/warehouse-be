@@ -65,4 +65,6 @@ public interface BinRepository extends JpaRepository<Bin, Integer> {
 
     Optional<Bin> findByBinCode(String binCode);
 
+    List<Bin> findAllByIsDeletedFalse();
+
 }

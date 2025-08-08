@@ -11,5 +11,4 @@ public class CreateBoxRequest {
     private String binCode;
     private String skuCode;
     private Integer capacity;
-    private Integer used_capacity;
 }

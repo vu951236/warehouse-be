@@ -8,6 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class UpdateBoxRequest {
-    private String boxCode;         // ID của Box cần cập nhật
+    private String boxCode;     // mã box cũ
+    private String binCode;     // mã bin mới
     private Integer capacity;
 }

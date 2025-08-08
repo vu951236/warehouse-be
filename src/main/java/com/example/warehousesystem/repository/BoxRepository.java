@@ -23,6 +23,9 @@ public interface BoxRepository extends JpaRepository<Box, Integer> {
     @Query("SELECT COUNT(b) FROM Box b WHERE b.bin.id = :binId")
     int countBoxesInBin(@Param("binId") Integer binId);
 
+    @Query("SELECT b.bin.id, COUNT(b) FROM Box b WHERE b.isDeleted = false GROUP BY b.bin.id")
+    List<Object[]> countBoxesAvailableInAllBins();
+
     //[Thuật toán] Đường đi lấy hàng tối ưu
     @Query("""
     SELECT b FROM Box b
@@ -42,17 +45,17 @@ public interface BoxRepository extends JpaRepository<Box, Integer> {
         JOIN FETCH bx.bin b
         JOIN FETCH bx.sku s
         LEFT JOIN Item i ON i.box = bx
-        WHERE b.isDeleted = false 
-          AND(:binId IS NULL OR b.id = :binId)
-          AND (:boxId IS NULL OR bx.id = :boxId)
-          AND (:skuId IS NULL OR s.id = :skuId)
-          AND (:itemId IS NULL OR i.id = :itemId)
+        WHERE bx.isDeleted = false\s
+        AND (:binCode IS NULL OR b.binCode LIKE %:binCode%)
+        AND (:boxCode IS NULL OR bx.boxCode LIKE %:boxCode%)
+        AND (:skuCode IS NULL OR s.skuCode LIKE %:skuCode%)
+        AND (:barcode IS NULL OR i.barcode LIKE %:barcode%)
     """)
     List<Box> searchBoxes(
-            @Param("binId") Integer binId,
-            @Param("boxId") Integer boxId,
-            @Param("skuId") Integer skuId,
-            @Param("itemId") Integer itemId
+          @Param("binCode") String binCode,
+          @Param("boxCode") String boxCode,
+          @Param("skuCode") String skuCode,
+          @Param("barcode") String barcode
     );
 
     @Query("""
@@ -69,4 +72,10 @@ public interface BoxRepository extends JpaRepository<Box, Integer> {
 
     //Thêm box
     boolean existsByBoxCode(String boxCode);
+
+    Optional<Box> findByBoxCode(String boxCode);
+
+    List<Box> findAllByIsDeletedFalse();
+
+    int countByBinId(Integer binId);
 }

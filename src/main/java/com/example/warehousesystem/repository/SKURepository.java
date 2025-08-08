@@ -54,4 +54,13 @@ public interface SKURepository extends JpaRepository<SKU, Integer> {
     WHERE s.skuCode IN :skuCode
 """)
     Optional<SKU> findBySkuCode(String skuCode);
+
+    @Query(value = """
+    SELECT b.bin_id, GROUP_CONCAT(DISTINCT s.sku_code SEPARATOR ', ')
+    FROM box b
+    JOIN sku s ON b.sku_id = s.id
+    WHERE b.is_deleted = false
+    GROUP BY b.bin_id
+""", nativeQuery = true)
+    List<Object[]> findSkuCodesByBinId();
 }
