@@ -1,6 +1,8 @@
 package com.example.warehousesystem.service;
 
 import com.example.warehousesystem.dto.request.*;
+import com.example.warehousesystem.dto.response.ProfileResponse;
+import com.example.warehousesystem.dto.response.UserLockResponse;
 import com.example.warehousesystem.dto.response.UserResponse;
 import com.example.warehousesystem.entity.User;
 import com.example.warehousesystem.exception.AppException;
@@ -76,6 +78,45 @@ public class UserService {
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
+    public ProfileResponse updateProfile(Integer userId, ProfileUpdateRequest request) {
+        var context = SecurityContextHolder.getContext();
+        var username = context.getAuthentication().getName();
+
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        if (!currentUser.getId().equals(userId) &&
+                (currentUser.getRole() == null || !"admin".equalsIgnoreCase(String.valueOf(currentUser.getRole())))) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
+            if (userRepository.existsByEmail(request.getEmail())) {
+                throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS);
+            }
+            user.setEmail(request.getEmail());
+        }
+        user.setFullName(request.getFullName());
+
+        User updatedUser = userRepository.save(user);
+
+        return userMapper.toProfileResponse(updatedUser);
+    }
+
+    @PreAuthorize("hasRole('admin')")
+    public UserLockResponse lockOrUnlockUser(Integer userId, UserLockRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        user.setIsActive(request.getIsActive());
+
+        userRepository.save(user);
+
+        return userMapper.toUserLockResponse(user);
+    }
 
     @PostAuthorize("returnObject.username==authentication.name")
     public UserResponse getMyInfo() {

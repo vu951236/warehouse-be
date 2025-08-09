@@ -1,8 +1,10 @@
 package com.example.warehousesystem.controller;
 
+import com.example.warehousesystem.dto.request.UserLockRequest;
 import com.example.warehousesystem.dto.response.ApiResponse;
 import com.example.warehousesystem.dto.request.UserCreateRequest;
 import com.example.warehousesystem.dto.request.UserUpdateRequest;
+import com.example.warehousesystem.dto.response.UserLockResponse;
 import com.example.warehousesystem.dto.response.UserResponse;
 import com.example.warehousesystem.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +38,16 @@ public class AdminController {
     ApiResponse<List<UserResponse>> getAllUsers() {
         return ApiResponse.<List<UserResponse>>builder()
                 .data(userService.getAllUsers())
+                .build();
+    }
+
+    @PutMapping("/{userId}/lock")
+    public ApiResponse<UserLockResponse> lockOrUnlockUser(
+            @PathVariable Integer userId,
+            @RequestBody UserLockRequest request
+    ) {
+        return ApiResponse.<UserLockResponse>builder()
+                .data(userService.lockOrUnlockUser(userId, request))
                 .build();
     }
 

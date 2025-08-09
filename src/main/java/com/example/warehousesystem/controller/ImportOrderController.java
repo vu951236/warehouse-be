@@ -24,6 +24,7 @@ public class ImportOrderController {
     private final ImportExcelService importExcelService;
     private final ImportOrderDetailService importOrderDetailService;
     private final ImportExcelExportService importExcelExportService;
+    private final ImportOrderService importOrderService;
 
     /**
      * WMS-16: Tìm kiếm đơn nhập kho
@@ -119,5 +120,19 @@ public class ImportOrderController {
                 .headers(headers)
                 .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                 .body(new InputStreamResource(in));
+    }
+
+    @GetMapping("/getallImportOrder")
+    public ApiResponse<List<ImportOrderResponse>> getAllImportOrders() {
+        return ApiResponse.<List<ImportOrderResponse>>builder()
+                .data(importOrderService.getAllImportOrders())
+                .build();
+    }
+
+    @GetMapping("/{orderId}/details")
+    public ApiResponse<List<ImportOrderDetailResponse>> getImportOrderDetails(@PathVariable Integer orderId) {
+        return ApiResponse.<List<ImportOrderDetailResponse>>builder()
+                .data(importOrderService.getImportOrderDetailsByOrderId(orderId))
+                .build();
     }
 }

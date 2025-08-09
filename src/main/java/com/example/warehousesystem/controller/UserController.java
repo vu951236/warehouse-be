@@ -2,6 +2,7 @@ package com.example.warehousesystem.controller;
 
 import com.example.warehousesystem.dto.request.*;
 import com.example.warehousesystem.dto.response.ApiResponse;
+import com.example.warehousesystem.dto.response.ProfileResponse;
 import com.example.warehousesystem.dto.response.UserResponse;
 import com.example.warehousesystem.service.UserService;
 import jakarta.mail.MessagingException;
@@ -54,6 +55,16 @@ public class UserController {
         }
         return ApiResponse.<Boolean>builder()
                 .data(verified)
+                .build();
+    }
+
+    @PutMapping("/{userId}/update-profile")
+    public ApiResponse<ProfileResponse> updateProfile(
+            @PathVariable Integer userId,
+            @RequestBody ProfileUpdateRequest request
+    ) {
+        return ApiResponse.<ProfileResponse>builder()
+                .data(userService.updateProfile(userId, request))
                 .build();
     }
 }
