@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,14 +30,18 @@ public class ImportExcelService {
 
     @Transactional
     public ImportItemsResponse importFromExcel(ImportExcelItemRequest request) {
+        // Lấy user
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
+        // Tạo đơn nhập kho
         ImportOrder importOrder = ItemImportMapper.toImportOrder(request.getSource(), request.getNote(), user);
+        importOrder.setCreatedAt(LocalDateTime.now());
         importOrderRepository.save(importOrder);
 
         List<ImportItemsResponse.ImportedItemInfo> importedItems = new ArrayList<>();
 
+        // Xử lý từng item trong Excel
         for (ExcelItemDTO dto : request.getItems()) {
             SKU sku = skuRepository.findBySkuCode(dto.getSkuCode())
                     .orElseThrow(() -> new AppException(ErrorCode.SKU_NOT_FOUND));
@@ -58,7 +63,7 @@ public class ImportExcelService {
                 throw new AppException(ErrorCode.NO_BIN_CAPACITY);
             }
 
-            // Tìm các box phù hợp
+            // Tìm box trong bin phù hợp
             List<Box> availableBoxes = boxRepository.findAvailableBoxes(sku.getId(), sku.getUnitVolume());
             Bin finalTargetBin = targetBin;
             availableBoxes = availableBoxes.stream()
@@ -77,7 +82,7 @@ public class ImportExcelService {
                     }
                 }
 
-                // Nếu không còn box chứa được → tạo mới
+                // Nếu không có box phù hợp → tạo mới
                 if (targetBox == null) {
                     int boxCount = boxRepository.countBoxesInBin(targetBin.getId());
                     String newBoxCode = targetBin.getBinCode() + "-BOX-" + (boxCount + 1);
@@ -86,7 +91,7 @@ public class ImportExcelService {
                             .boxCode(newBoxCode)
                             .bin(targetBin)
                             .sku(sku)
-                            .capacity(1000) // default
+                            .capacity(1000) // mặc định
                             .usedCapacity(0)
                             .isDeleted(false)
                             .build();
@@ -100,10 +105,10 @@ public class ImportExcelService {
 
                 for (int i = 0; i < canAddQuantity; i++) {
                     Item item = ItemImportMapper.toItem(targetBox, sku);
-                    String barcode = sku.getSkuCode() + "-" + UUID.randomUUID().toString().substring(0, 8);
-                    while (itemRepository.existsByBarcode(barcode)) {
+                    String barcode;
+                    do {
                         barcode = sku.getSkuCode() + "-" + UUID.randomUUID().toString().substring(0, 8);
-                    }
+                    } while (itemRepository.existsByBarcode(barcode));
                     item.setBarcode(barcode);
                     itemRepository.save(item);
 

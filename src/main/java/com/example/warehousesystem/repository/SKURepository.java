@@ -12,6 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface SKURepository extends JpaRepository<SKU, Integer> {
+    List<SKU> findBySkuCodeIn(List<String> skuCodes);
     //Chart Tỉ lệ loại hàng
     @Query(value = """
     SELECT 

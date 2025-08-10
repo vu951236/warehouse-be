@@ -40,7 +40,7 @@ public class Item {
         available,
         damaged,
         returned,
-        exported
+        exported,
     }
 
     @Column(name = "is_deleted", nullable = false)

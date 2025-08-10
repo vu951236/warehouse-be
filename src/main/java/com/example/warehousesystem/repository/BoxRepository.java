@@ -35,7 +35,7 @@ public interface BoxRepository extends JpaRepository<Box, Integer> {
     WHERE b.isDeleted = false 
     AND b.sku.id IN :skuIds 
     AND b.usedCapacity > 0
-    ORDER BY shelf.id ASC
+    ORDER BY shelf.id ASC, bin.id ASC, b.id ASC
 """)
     List<Box> findAvailableBoxesBySkuIds(@Param("skuIds") List<Integer> skuIds);
 

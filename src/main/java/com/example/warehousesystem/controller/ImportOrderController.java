@@ -1,17 +1,22 @@
 package com.example.warehousesystem.controller;
 
+import com.example.warehousesystem.dto.ExcelItemDTO;
 import com.example.warehousesystem.dto.request.*;
 import com.example.warehousesystem.dto.response.*;
+import com.example.warehousesystem.entity.ImportOrder;
 import com.example.warehousesystem.service.*;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.*;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -61,17 +66,62 @@ public class ImportOrderController {
     /**
      * WMS-18: Nhập kho nhiều item bằng Excel
      */
-    @PostMapping("/import-by-excel")
-    public ResponseEntity<ApiResponse<ImportItemsResponse>> importExcel(
-            @RequestBody ImportExcelItemRequest request
-    ) {
+    @PostMapping("/import-by-excel-file")
+    public ResponseEntity<ApiResponse<ImportItemsResponse>> importExcelFile(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("userId") Long userId,
+            @RequestParam(value = "source", required = false) String source,
+            @RequestParam(value = "note", required = false) String note
+    ) throws IOException {
+
+        // Parse file Excel → danh sách item
+        List<ExcelItemDTO> items = parseExcel(file);
+
+        // Tạo request và gọi service xử lý
+        ImportExcelItemRequest request = new ImportExcelItemRequest();
+        request.setUserId(Math.toIntExact(userId));
+        request.setSource(ImportOrder.Source.valueOf(source));
+        request.setNote(note);
+        request.setItems(items);
+
         ImportItemsResponse result = importExcelService.importFromExcel(request);
+
         return ResponseEntity.ok(
                 ApiResponse.<ImportItemsResponse>builder()
-                        .message("Nhập kho thành công từ Excel")
+                        .message("Nhập kho thành công từ Excel file")
                         .data(result)
                         .build()
         );
+    }
+
+    /**
+     * Đọc dữ liệu từ file Excel, bỏ qua header row
+     */
+    private List<ExcelItemDTO> parseExcel(MultipartFile file) throws IOException {
+        List<ExcelItemDTO> items = new ArrayList<>();
+        try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
+            Sheet sheet = workbook.getSheetAt(0); // lấy sheet đầu tiên
+            for (int i = 1; i <= sheet.getLastRowNum(); i++) { // bỏ header row
+                Row row = sheet.getRow(i);
+                if (row == null) continue;
+
+                Cell skuCell = row.getCell(0);
+                Cell qtyCell = row.getCell(1);
+
+                if (skuCell == null || qtyCell == null) continue;
+
+                String skuCode = skuCell.getStringCellValue().trim();
+                int quantity = (int) qtyCell.getNumericCellValue();
+
+                if (!skuCode.isEmpty() && quantity > 0) {
+                    ExcelItemDTO dto = new ExcelItemDTO();
+                    dto.setSkuCode(skuCode);
+                    dto.setQuantity(quantity);
+                    items.add(dto);
+                }
+            }
+        }
+        return items;
     }
 
     /**
