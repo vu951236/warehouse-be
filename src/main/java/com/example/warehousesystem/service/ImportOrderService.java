@@ -1,9 +1,11 @@
 package com.example.warehousesystem.service;
 
+import com.example.warehousesystem.dto.response.ImportOrderBoardResponse;
 import com.example.warehousesystem.dto.response.ImportOrderResponse;
 import com.example.warehousesystem.dto.response.ImportOrderDetailResponse;
 import com.example.warehousesystem.entity.ImportOrder;
 import com.example.warehousesystem.entity.ImportOrderDetail;
+import com.example.warehousesystem.mapper.ImportOrderBoardMapper;
 import com.example.warehousesystem.mapper.ImportOrderMapper;
 import com.example.warehousesystem.mapper.ImportOrderDetailMapper;
 import com.example.warehousesystem.repository.ImportOrderRepository;
@@ -37,4 +39,14 @@ public class ImportOrderService {
                 .map(ImportOrderDetailMapper::toResponse)
                 .collect(Collectors.toList());
     }
+
+    // Lấy tất cả đơn nhập cho bảng
+    public List<ImportOrderBoardResponse> getAllImportOrderDetails() {
+        List<ImportOrderDetail> details = importOrderDetailRepository.findAll();
+        return details.stream()
+                .map(ImportOrderBoardMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+
 }
