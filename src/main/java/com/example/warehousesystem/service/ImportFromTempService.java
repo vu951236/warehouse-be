@@ -1,7 +1,6 @@
 package com.example.warehousesystem.service;
 
 import com.example.warehousesystem.dto.ExcelItemDTO;
-import com.example.warehousesystem.dto.request.ImportExcelItemRequest;
 import com.example.warehousesystem.dto.response.ImportItemsResponse;
 import com.example.warehousesystem.entity.*;
 import com.example.warehousesystem.exception.AppException;
@@ -18,8 +17,9 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class ImportExcelService {
+public class ImportFromTempService {
 
+    private final TempImportExcelRepository tempImportExcelRepository;
     private final SKURepository skuRepository;
     private final BinRepository binRepository;
     private final BoxRepository boxRepository;
@@ -29,26 +29,30 @@ public class ImportExcelService {
     private final UserRepository userRepository;
 
     @Transactional
-    public ImportItemsResponse importFromExcel(ImportExcelItemRequest request) {
-        // Lấy user
-        User user = userRepository.findById(request.getUserId())
+    public ImportItemsResponse importSelected(List<Long> tempIds) {
+        List<TempImportExcel> tempItems = tempImportExcelRepository.findAllById(tempIds);
+        if (tempItems.isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+
+        Long userId = tempItems.get(0).getUserId();
+        String source = tempItems.get(0).getSource();
+        String note = tempItems.get(0).getNote();
+
+        User user = userRepository.findById(Math.toIntExact(userId))
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        // Tạo đơn nhập kho
-        ImportOrder importOrder = ItemImportMapper.toImportOrder(request.getSource(), request.getNote(), user);
+        ImportOrder importOrder = ItemImportMapper.toImportOrder(ImportOrder.Source.valueOf(source), note, user);
         importOrder.setCreatedAt(LocalDateTime.now());
         importOrderRepository.save(importOrder);
 
         List<ImportItemsResponse.ImportedItemInfo> importedItems = new ArrayList<>();
 
-        // Xử lý từng item trong Excel
-        for (ExcelItemDTO dto : request.getItems()) {
-            SKU sku = skuRepository.findBySkuCode(dto.getSkuCode())
+        for (TempImportExcel temp : tempItems) {
+            SKU sku = skuRepository.findBySkuCode(temp.getSkuCode())
                     .orElseThrow(() -> new AppException(ErrorCode.SKU_NOT_FOUND));
 
-            int requiredVolume = (int) (dto.getQuantity() * sku.getUnitVolume());
-
-            // Tìm bin còn sức chứa
+            int requiredVolume = (int) (temp.getQuantity() * sku.getUnitVolume());
             List<Bin> availableBins = binRepository.findBinsWithAvailableCapacity();
             Bin targetBin = null;
             for (Bin bin : availableBins) {
@@ -58,19 +62,17 @@ public class ImportExcelService {
                     break;
                 }
             }
-
             if (targetBin == null) {
                 throw new AppException(ErrorCode.NO_BIN_CAPACITY);
             }
 
-            // Tìm box trong bin phù hợp
-            List<Box> availableBoxes = boxRepository.findAvailableBoxes(sku.getId(), sku.getUnitVolume());
             Bin finalTargetBin = targetBin;
-            availableBoxes = availableBoxes.stream()
+            List<Box> availableBoxes = boxRepository.findAvailableBoxes(sku.getId(), sku.getUnitVolume())
+                    .stream()
                     .filter(box -> box.getBin().getId().equals(finalTargetBin.getId()))
                     .collect(Collectors.toList());
 
-            int quantityRemaining = dto.getQuantity();
+            int quantityRemaining = temp.getQuantity();
 
             while (quantityRemaining > 0) {
                 Box targetBox = null;
@@ -82,20 +84,17 @@ public class ImportExcelService {
                     }
                 }
 
-                // Nếu không có box phù hợp → tạo mới
                 if (targetBox == null) {
                     int boxCount = boxRepository.countBoxesInBin(targetBin.getId());
                     String newBoxCode = targetBin.getBinCode() + "-BOX-" + (boxCount + 1);
-
                     targetBox = Box.builder()
                             .boxCode(newBoxCode)
                             .bin(targetBin)
                             .sku(sku)
-                            .capacity(1000) // mặc định
+                            .capacity(1000)
                             .usedCapacity(0)
                             .isDeleted(false)
                             .build();
-
                     boxRepository.save(targetBox);
                     availableBoxes.add(targetBox);
                 }
@@ -117,17 +116,18 @@ public class ImportExcelService {
                     ));
                 }
 
-                // Cập nhật usedCapacity
                 targetBox.setUsedCapacity((int) (targetBox.getUsedCapacity() + canAddQuantity * sku.getUnitVolume()));
                 boxRepository.save(targetBox);
 
                 quantityRemaining -= canAddQuantity;
             }
 
-            // Lưu chi tiết đơn hàng
-            ImportOrderDetail detail = ItemImportMapper.toDetail(importOrder, sku, dto.getQuantity());
+            ImportOrderDetail detail = ItemImportMapper.toDetail(importOrder, sku, temp.getQuantity());
             importOrderDetailRepository.save(detail);
         }
+
+        // Xóa dữ liệu tạm sau khi nhập
+        tempImportExcelRepository.deleteAllById(tempIds);
 
         return ImportItemsResponse.builder()
                 .importOrderId(importOrder.getId())

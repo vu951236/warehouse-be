@@ -37,7 +37,8 @@ public enum ErrorCode {
     EXPORT_ORDER_ALREADY_COMPLETED(6002, "Export order already completed", HttpStatus.BAD_REQUEST),
 
     INVALID_INPUT(5004, "Invalid Input", HttpStatus.BAD_REQUEST),
-    EMAIL_ALREADY_EXISTS(1015, "Email already exists", HttpStatus.CONFLICT);
+    EMAIL_ALREADY_EXISTS(1015, "Email already exists", HttpStatus.CONFLICT),
+    INVALID_REQUEST(1016,"Invalid Request" , HttpStatus.BAD_REQUEST);
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;

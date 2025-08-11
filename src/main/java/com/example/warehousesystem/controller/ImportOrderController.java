@@ -4,6 +4,7 @@ import com.example.warehousesystem.dto.ExcelItemDTO;
 import com.example.warehousesystem.dto.request.*;
 import com.example.warehousesystem.dto.response.*;
 import com.example.warehousesystem.entity.ImportOrder;
+import com.example.warehousesystem.entity.TempImportExcel;
 import com.example.warehousesystem.service.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
@@ -25,8 +26,10 @@ import java.util.List;
 public class ImportOrderController {
 
     private final ImportOrderSearchService importOrderSearchService;
+    private final TempImportExcelService tempImportExcelService;
+    private final ImportFromTempService importFromTempService;
     private final ImportScanBarcodeService importScanBarcodeService;
-    private final ImportExcelService importExcelService;
+    private final ImportSingleItemByForm importSingleItemByForm;
     private final ImportOrderDetailService importOrderDetailService;
     private final ImportExcelExportService importExcelExportService;
     private final ImportOrderService importOrderService;
@@ -66,33 +69,40 @@ public class ImportOrderController {
     /**
      * WMS-18: Nhập kho nhiều item bằng Excel
      */
-    @PostMapping("/import-by-excel-file")
-    public ResponseEntity<ApiResponse<ImportItemsResponse>> importExcelFile(
+    @PostMapping(
+            value = "/upload-excel-to-temp",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<ApiResponse<String>> uploadExcelToTemp(
             @RequestParam("file") MultipartFile file,
             @RequestParam("userId") Long userId,
             @RequestParam(value = "source", required = false) String source,
             @RequestParam(value = "note", required = false) String note
     ) throws IOException {
-
-        // Parse file Excel → danh sách item
         List<ExcelItemDTO> items = parseExcel(file);
-
-        // Tạo request và gọi service xử lý
-        ImportExcelItemRequest request = new ImportExcelItemRequest();
-        request.setUserId(Math.toIntExact(userId));
-        request.setSource(ImportOrder.Source.valueOf(source));
-        request.setNote(note);
-        request.setItems(items);
-
-        ImportItemsResponse result = importExcelService.importFromExcel(request);
-
-        return ResponseEntity.ok(
-                ApiResponse.<ImportItemsResponse>builder()
-                        .message("Nhập kho thành công từ Excel file")
-                        .data(result)
-                        .build()
-        );
+        tempImportExcelService.saveTempItems(items, userId, source, note);
+        return ResponseEntity.ok(ApiResponse.<String>builder()
+                .message("Đã lưu dữ liệu vào bảng tạm")
+                .data("success")
+                .build());
     }
+
+    @GetMapping("/temp-items/{userId}")
+    public ApiResponse<List<TempImportExcelResponse>> getTempItems(@PathVariable Long userId) {
+        return ApiResponse.<List<TempImportExcelResponse>>builder()
+                .message("Lấy dữ liệu tạm thành công")
+                .data(tempImportExcelService.getTempItemsByUser(userId))
+                .build();
+    }
+
+    @PostMapping("/import-from-temp")
+    public ApiResponse<ImportItemsResponse> importFromTemp(@RequestBody ImportFromTempRequest request) {
+        return ApiResponse.<ImportItemsResponse>builder()
+                .message("Nhập kho thành công")
+                .data(importFromTempService.importSelected(request.getTempIds()))
+                .build();
+    }
+
     /**
      * Đọc dữ liệu từ file Excel, bỏ qua header row
      */
@@ -188,5 +198,10 @@ public class ImportOrderController {
     @GetMapping("/allDetails")
     public List<ImportOrderBoardResponse> getAllImportOrderDetails() {
         return importOrderService.getAllImportOrderDetails();
+    }
+
+    @PostMapping("/import-single-item")
+    public ImportItemsResponse importSingleItem(@RequestBody ImportSingleItemRequest request) {
+        return importSingleItemByForm.importSingleItemByForm(request);
     }
 }
