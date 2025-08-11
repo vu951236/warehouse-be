@@ -46,13 +46,13 @@ public class ExportOrder {
 
     public enum Source {
         manual,
-        haravan
+        haravan,
     }
 
     public enum Status {
         draft,
         confirmed,
-        cancelled
+        cancelled,
     }
 }
 

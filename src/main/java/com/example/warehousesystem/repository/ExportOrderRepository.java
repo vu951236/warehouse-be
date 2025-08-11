@@ -8,8 +8,11 @@ import org.springframework.data.repository.query.Param;
 import java.awt.print.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface ExportOrderRepository extends JpaRepository<ExportOrder, Integer> {
+    Optional<ExportOrder> findByExportCode(String exportCode);
+
     // Chart thông tin xuất kho
     @Query(value = """
     SELECT 

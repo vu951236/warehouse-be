@@ -17,30 +17,30 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
 
     //Xuất kho item
     @Query("""
-    SELECT i FROM Item i
-    JOIN FETCH i.sku
-    JOIN FETCH i.box b
-    WHERE i.barcode IN :barcodes AND i.isDeleted = false
-""")
+                SELECT i FROM Item i
+                JOIN FETCH i.sku
+                JOIN FETCH i.box b
+                WHERE i.barcode IN :barcodes AND i.isDeleted = false
+            """)
     List<Item> findItemsByBarcodes(@Param("barcodes") List<String> barcodes);
 
     //Tìm kiếm item
     @Query("""
-    SELECT i FROM Item i
-    JOIN i.box b
-    JOIN i.sku s
-    LEFT JOIN ExportOrderDetail eod ON eod.sku.id = i.sku.id
-    LEFT JOIN ImportOrderDetail iod ON iod.sku.id = i.sku.id
-    LEFT JOIN ExportOrder eo ON eo.id = eod.exportOrder.id
-    LEFT JOIN ImportOrder io ON io.id = iod.importOrder.id
-    WHERE i.isDeleted = false
-    AND (:barcode IS NULL OR i.barcode LIKE %:barcode%)
-    AND (:boxCode IS NULL OR b.boxCode LIKE %:boxCode%)
-    AND (:skuCode IS NULL OR s.skuCode LIKE %:skuCode%)
-    AND (:status IS NULL OR i.status = :status)
-    AND (:exportCode IS NULL OR eo.exportCode LIKE %:exportCode%)
-    AND (:importCode IS NULL OR io.importCode LIKE %:importCode%)
-""")
+                SELECT i FROM Item i
+                JOIN i.box b
+                JOIN i.sku s
+                LEFT JOIN ExportOrderDetail eod ON eod.sku.id = i.sku.id
+                LEFT JOIN ImportOrderDetail iod ON iod.sku.id = i.sku.id
+                LEFT JOIN ExportOrder eo ON eo.id = eod.exportOrder.id
+                LEFT JOIN ImportOrder io ON io.id = iod.importOrder.id
+                WHERE i.isDeleted = false
+                AND (:barcode IS NULL OR i.barcode LIKE %:barcode%)
+                AND (:boxCode IS NULL OR b.boxCode LIKE %:boxCode%)
+                AND (:skuCode IS NULL OR s.skuCode LIKE %:skuCode%)
+                AND (:status IS NULL OR i.status = :status)
+                AND (:exportCode IS NULL OR eo.exportCode LIKE %:exportCode%)
+                AND (:importCode IS NULL OR io.importCode LIKE %:importCode%)
+            """)
     List<Item> searchItems(
             @Param("barcode") String barcode,
             @Param("boxCode") String boxCode,
@@ -62,5 +62,25 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
     List<Object[]> countItemAvailableInAllBoxes();
 
     List<Item> findAllByIsDeletedFalse();
+
+    @Query("""
+        SELECT i FROM Item i
+        WHERE i.sku.id = :skuId
+        AND i.status = :status
+        AND i.isDeleted = false
+        """)
+    List<Item> findAvailableItemsBySku(@Param("skuId") Integer skuId,
+                                       @Param("status") Item.Status status,
+                                       org.springframework.data.domain.Pageable pageable);
+
+    default List<Item> findAvailableItemsBySku(Integer skuId, int quantity) {
+        return findAvailableItemsBySku(
+                skuId,
+                Item.Status.available,
+                org.springframework.data.domain.PageRequest.of(0, quantity)
+        );
+    }
+
+
 
 }

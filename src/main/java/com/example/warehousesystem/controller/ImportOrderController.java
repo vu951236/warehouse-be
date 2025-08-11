@@ -124,6 +124,36 @@ public class ImportOrderController {
     }
 
     /**
+     * Đọc dữ liệu từ file Excel, bỏ qua header row
+     */
+    private List<ExcelItemDTO> parseExcel(MultipartFile file) throws IOException {
+        List<ExcelItemDTO> items = new ArrayList<>();
+        try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
+            Sheet sheet = workbook.getSheetAt(0); // lấy sheet đầu tiên
+            for (int i = 1; i <= sheet.getLastRowNum(); i++) { // bỏ header row
+                Row row = sheet.getRow(i);
+                if (row == null) continue;
+
+                Cell skuCell = row.getCell(0);
+                Cell qtyCell = row.getCell(1);
+
+                if (skuCell == null || qtyCell == null) continue;
+
+                String skuCode = skuCell.getStringCellValue().trim();
+                int quantity = (int) qtyCell.getNumericCellValue();
+
+                if (!skuCode.isEmpty() && quantity > 0) {
+                    ExcelItemDTO dto = new ExcelItemDTO();
+                    dto.setSkuCode(skuCode);
+                    dto.setQuantity(quantity);
+                    items.add(dto);
+                }
+            }
+        }
+        return items;
+    }
+
+    /**
      * WMS-22: Xem thông tin nhập theo SKU
      */
     @PostMapping("/search-by-sku")
