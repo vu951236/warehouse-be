@@ -11,7 +11,6 @@ public class ImportOrderDetailMapper {
                 .skuCode(detail.getSku().getSkuCode())
                 .skuName(detail.getSku().getName())
                 .quantity(detail.getQuantity())
-                .receivedQuantity(detail.getReceivedQuantity())
                 .build();
     }
 }

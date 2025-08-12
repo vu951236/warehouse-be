@@ -1,6 +1,7 @@
 package com.example.warehousesystem.service;
 
 import com.example.warehousesystem.dto.response.ImportOrderBoardResponse;
+import com.example.warehousesystem.dto.response.ImportOrderFullResponse;
 import com.example.warehousesystem.dto.response.ImportOrderResponse;
 import com.example.warehousesystem.dto.response.ImportOrderDetailResponse;
 import com.example.warehousesystem.entity.ImportOrder;
@@ -47,6 +48,33 @@ public class ImportOrderService {
                 .map(ImportOrderBoardMapper::toResponse)
                 .collect(Collectors.toList());
     }
+
+    public ImportOrderFullResponse getFullImportOrderById(Integer orderId) {
+        // Lấy ImportOrder
+        ImportOrder importOrder = importOrderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn nhập"));
+
+        // Lấy ImportOrderDetail
+        List<ImportOrderDetail> details = importOrderDetailRepository.findByImportOrderId(orderId);
+
+        // Map sang DTO
+        return ImportOrderFullResponse.builder()
+                .id(importOrder.getId())
+                .importCode(importOrder.getImportCode())
+                .source(importOrder.getSource().toString())
+                .status(importOrder.getStatus().toString())
+                .createdBy(importOrder.getCreatedBy().getUsername())
+                .createdAt(importOrder.getCreatedAt())
+                .note(importOrder.getNote())
+                .details(details.stream().map(d -> ImportOrderFullResponse.ImportOrderDetailItem.builder()
+                        .id(d.getId())
+                        .skuCode(d.getSku().getSkuCode())
+                        .quantity(d.getQuantity())
+                        .build()
+                ).collect(Collectors.toList()))
+                .build();
+    }
+
 
 
 }

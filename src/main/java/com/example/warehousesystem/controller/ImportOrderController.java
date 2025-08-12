@@ -204,4 +204,10 @@ public class ImportOrderController {
     public ImportItemsResponse importSingleItem(@RequestBody ImportSingleItemRequest request) {
         return importSingleItemByForm.importSingleItemByForm(request);
     }
+
+    @GetMapping("/import-orders/{id}/fullDetail")
+    public ResponseEntity<ImportOrderFullResponse> getFullImportOrder(@PathVariable Integer id) {
+        return ResponseEntity.ok(importOrderService.getFullImportOrderById(id));
+    }
+
 }

@@ -55,7 +55,6 @@ public class ImportOrderDetailService {
                         .skuCode(detail.getSku().getSkuCode())
                         .skuName(detail.getSku().getName())
                         .quantity(detail.getQuantity())
-                        .receivedQuantity(detail.getReceivedQuantity() != null ? detail.getReceivedQuantity() : 0)
                         .build())
                 .collect(Collectors.toList());
     }
