@@ -7,6 +7,7 @@ public class ImportOrderBoardMapper {
 
     public static ImportOrderBoardResponse toResponse(ImportOrderDetail detail) {
         return ImportOrderBoardResponse.builder()
+                .id(Long.valueOf(detail.getId()))
                 .importCode(detail.getImportOrder().getImportCode())
                 .skuCode(detail.getSku().getSkuCode())
                 .skuName(detail.getSku().getName())

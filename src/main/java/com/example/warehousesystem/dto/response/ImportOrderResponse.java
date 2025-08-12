@@ -16,6 +16,6 @@ public class ImportOrderResponse {
 
     @JsonFormat(pattern = "yyyy/MM/dd")
     private LocalDateTime createdAt;
-    
+
     private String note;
 }
