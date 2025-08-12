@@ -1,5 +1,6 @@
 package com.example.warehousesystem.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
 
@@ -12,6 +13,9 @@ public class ImportOrderResponse {
     private String source;
     private String status;
     private String createdBy;
+
+    @JsonFormat(pattern = "yyyy/MM/dd")
     private LocalDateTime createdAt;
+    
     private String note;
 }
