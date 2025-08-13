@@ -2,6 +2,7 @@ package com.example.warehousesystem.controller;
 
 import com.example.warehousesystem.dto.request.SearchItemRequest;
 import com.example.warehousesystem.dto.request.UpdateItemRequest;
+import com.example.warehousesystem.dto.response.ApiResponse;
 import com.example.warehousesystem.dto.response.ItemResponse;
 import com.example.warehousesystem.service.ItemService;
 import lombok.RequiredArgsConstructor;
@@ -23,27 +24,41 @@ public class ItemController {
      * Xóa item theo mã barcode
      */
     @DeleteMapping("/{barcode}")
-    public ResponseEntity<Void> deleteItem(@PathVariable String barcode) {
+    public ResponseEntity<ApiResponse<Void>> deleteItem(@PathVariable String barcode) {
         itemService.deleteItem(barcode);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(
+                ApiResponse.<Void>builder()
+                        .message("Xóa item thành công")
+                        .build()
+        );
     }
 
     /**
      * Cập nhật item (vị trí box + trạng thái)
      */
     @PutMapping("/update")
-    public ResponseEntity<ItemResponse> updateItem(@RequestBody UpdateItemRequest request) {
+    public ResponseEntity<ApiResponse<ItemResponse>> updateItem(@RequestBody UpdateItemRequest request) {
         ItemResponse updatedItem = itemService.updateItem(request);
-        return ResponseEntity.ok(updatedItem);
+        return ResponseEntity.ok(
+                ApiResponse.<ItemResponse>builder()
+                        .message("Cập nhật item thành công")
+                        .data(updatedItem)
+                        .build()
+        );
     }
 
     /**
      * Tìm kiếm item theo điều kiện
      */
     @PostMapping("/search")
-    public ResponseEntity<List<ItemResponse>> searchItems(@RequestBody SearchItemRequest request) {
+    public ResponseEntity<ApiResponse<List<ItemResponse>>> searchItems(@RequestBody SearchItemRequest request) {
         List<ItemResponse> items = itemService.searchItems(request);
-        return ResponseEntity.ok(items);
+        return ResponseEntity.ok(
+                ApiResponse.<List<ItemResponse>>builder()
+                        .message("Tìm kiếm item thành công")
+                        .data(items)
+                        .build()
+        );
     }
 
     /**

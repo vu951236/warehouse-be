@@ -2,6 +2,7 @@ package com.example.warehousesystem.controller;
 
 import com.example.warehousesystem.dto.request.SearchBinRequest;
 import com.example.warehousesystem.dto.request.UpdateBinRequest;
+import com.example.warehousesystem.dto.response.ApiResponse;
 import com.example.warehousesystem.dto.response.BinResponse;
 import com.example.warehousesystem.service.BinService;
 import lombok.RequiredArgsConstructor;
@@ -23,18 +24,27 @@ public class BinController {
      * API tìm kiếm danh sách bin theo điều kiện
      */
     @PostMapping("/search")
-    public ResponseEntity<List<BinResponse>> searchBins(@RequestBody SearchBinRequest request) {
+    public ResponseEntity<ApiResponse<List<BinResponse>>> searchBins(@RequestBody SearchBinRequest request) {
         List<BinResponse> responses = binService.searchBins(request);
-        return ResponseEntity.ok(responses);
+        return ResponseEntity.ok(
+                ApiResponse.<List<BinResponse>>builder()
+                        .message("Tìm kiếm bin thành công")
+                        .data(responses)
+                        .build()
+        );
     }
 
     /**
      * API xóa ngăn hàng theo binCode
      */
     @DeleteMapping("/{binCode}")
-    public ResponseEntity<Void> deleteBin(@PathVariable String binCode) {
+    public ResponseEntity<ApiResponse<Void>> deleteBin(@PathVariable String binCode) {
         binService.deleteBin(binCode);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(
+                ApiResponse.<Void>builder()
+                        .message("Xoá bin thành công")
+                        .build()
+        );
     }
 
     /**
@@ -43,7 +53,6 @@ public class BinController {
     @GetMapping("/export/pdf")
     public ResponseEntity<byte[]> exportBinToPdf() {
         byte[] pdfBytes = binService.exportBinToPdf();
-
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_PDF)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=bin_list.pdf")
@@ -54,8 +63,13 @@ public class BinController {
      * API cập nhật capacity của một bin
      */
     @PutMapping("/update")
-    public ResponseEntity<BinResponse> updateBin(@RequestBody UpdateBinRequest request) {
+    public ResponseEntity<ApiResponse<BinResponse>> updateBin(@RequestBody UpdateBinRequest request) {
         BinResponse response = binService.updateBin(request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(
+                ApiResponse.<BinResponse>builder()
+                        .message("Cập nhật bin thành công")
+                        .data(response)
+                        .build()
+        );
     }
 }

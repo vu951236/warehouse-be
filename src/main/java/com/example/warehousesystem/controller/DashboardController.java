@@ -25,44 +25,72 @@ public class DashboardController {
     private final StorageStatusService storageStatusService;
     private final ReportPdfService reportPdfService;
 
-
-    // WMS-04: Biểu đồ Nhập kho
     @PostMapping("/import-chart")
-    public List<ImportChartResponse> getImportChart(@RequestBody ImportChartRequest request) {
-        return importChartService.getImportChartData(request);
+    public ResponseEntity<ApiResponse<List<ImportChartResponse>>> getImportChart(@RequestBody ImportChartRequest request) {
+        List<ImportChartResponse> data = importChartService.getImportChartData(request);
+        return ResponseEntity.ok(
+                ApiResponse.<List<ImportChartResponse>>builder()
+                        .message("Lấy dữ liệu biểu đồ nhập kho thành công")
+                        .data(data)
+                        .build()
+        );
     }
 
-    // WMS-05: Biểu đồ Xuất kho
     @PostMapping("/export-chart")
-    public List<ExportChartResponse> getExportChart(@RequestBody ExportChartRequest request) {
-        return exportChartService.getExportChartData(request);
+    public ResponseEntity<ApiResponse<List<ExportChartResponse>>> getExportChart(@RequestBody ExportChartRequest request) {
+        List<ExportChartResponse> data = exportChartService.getExportChartData(request);
+        return ResponseEntity.ok(
+                ApiResponse.<List<ExportChartResponse>>builder()
+                        .message("Lấy dữ liệu biểu đồ xuất kho thành công")
+                        .data(data)
+                        .build()
+        );
     }
 
-    // WMS-06: Biểu đồ Tổng kết
     @PostMapping("/summary-chart")
-    public List<SummaryChartResponse> getSummaryChart(@RequestBody SummaryChartRequest request) {
-        return summaryChartService.getSummaryChart(request);
+    public ResponseEntity<ApiResponse<List<SummaryChartResponse>>> getSummaryChart(@RequestBody SummaryChartRequest request) {
+        List<SummaryChartResponse> data = summaryChartService.getSummaryChart(request);
+        return ResponseEntity.ok(
+                ApiResponse.<List<SummaryChartResponse>>builder()
+                        .message("Lấy dữ liệu biểu đồ tổng kết thành công")
+                        .data(data)
+                        .build()
+        );
     }
 
-    // WMS-07: Biểu đồ Tỉ lệ loại hàng
     @GetMapping("/sku-type-ratio")
-    public List<SkuTypeRatioChartResponse> getSkuRatioChart() {
-        return skuTypeRatioChartService.getSkuTypeRatioChart();
+    public ResponseEntity<ApiResponse<List<SkuTypeRatioChartResponse>>> getSkuRatioChart() {
+        List<SkuTypeRatioChartResponse> data = skuTypeRatioChartService.getSkuTypeRatioChart();
+        return ResponseEntity.ok(
+                ApiResponse.<List<SkuTypeRatioChartResponse>>builder()
+                        .message("Lấy dữ liệu tỉ lệ loại hàng thành công")
+                        .data(data)
+                        .build()
+        );
     }
 
-    // WMS-09: Biểu đồ Chỉ số tối ưu hóa
     @PostMapping("/optimization-index")
-    public List<OptimizationIndexResponse> getOptimizationIndex(@RequestBody OptimizationIndexRequest request) {
-        return optimizationIndexService.getOptimizationData(request);
+    public ResponseEntity<ApiResponse<List<OptimizationIndexResponse>>> getOptimizationIndex(@RequestBody OptimizationIndexRequest request) {
+        List<OptimizationIndexResponse> data = optimizationIndexService.getOptimizationData(request);
+        return ResponseEntity.ok(
+                ApiResponse.<List<OptimizationIndexResponse>>builder()
+                        .message("Lấy dữ liệu chỉ số tối ưu hóa thành công")
+                        .data(data)
+                        .build()
+        );
     }
 
-    // WMS-10: Tình trạng sức chứa
     @PostMapping("/storage-status")
-    public StorageStatusResponse getStorageStatus(@RequestBody StorageStatusRequest request) {
-        return storageStatusService.getStorageStatus(request);
+    public ResponseEntity<ApiResponse<StorageStatusResponse>> getStorageStatus(@RequestBody StorageStatusRequest request) {
+        StorageStatusResponse data = storageStatusService.getStorageStatus(request);
+        return ResponseEntity.ok(
+                ApiResponse.<StorageStatusResponse>builder()
+                        .message("Lấy dữ liệu tình trạng sức chứa thành công")
+                        .data(data)
+                        .build()
+        );
     }
 
-    // WMS-12: Xuất báo cáo tổng hợp kho (PDF)
     @PostMapping(value = "/warehouse-summary-pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<byte[]> exportWarehouseReport(@RequestBody StorageStatusRequest request) {
         byte[] pdfBytes = reportPdfService.generateWarehouseReportPdf(request);

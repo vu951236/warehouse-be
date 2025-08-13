@@ -3,12 +3,10 @@ package com.example.warehousesystem.controller;
 import com.example.warehousesystem.dto.request.CreateShelfRequest;
 import com.example.warehousesystem.dto.request.DeleteShelfRequest;
 import com.example.warehousesystem.dto.request.SearchShelfRequest;
+import com.example.warehousesystem.dto.response.ApiResponse;
 import com.example.warehousesystem.dto.response.BinResponse;
 import com.example.warehousesystem.dto.response.BoxResponse;
 import com.example.warehousesystem.dto.response.ShelfResponse;
-import com.example.warehousesystem.entity.Bin;
-import com.example.warehousesystem.entity.Box;
-import com.example.warehousesystem.entity.Shelf;
 import com.example.warehousesystem.service.ShelfService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -27,20 +25,36 @@ public class ShelfController {
     private final ShelfService shelfService;
 
     @PostMapping("/search")
-    public List<ShelfResponse> searchShelves(@RequestBody SearchShelfRequest request) {
-        return shelfService.searchShelves(request);
+    public ResponseEntity<ApiResponse<List<ShelfResponse>>> searchShelves(@RequestBody SearchShelfRequest request) {
+        List<ShelfResponse> shelves = shelfService.searchShelves(request);
+        return ResponseEntity.ok(
+                ApiResponse.<List<ShelfResponse>>builder()
+                        .message("Tìm kiếm kệ hàng thành công")
+                        .data(shelves)
+                        .build()
+        );
     }
 
     @PostMapping("/create")
-    public ResponseEntity<ShelfResponse> createShelf(@Valid @RequestBody CreateShelfRequest request) {
+    public ResponseEntity<ApiResponse<ShelfResponse>> createShelf(@Valid @RequestBody CreateShelfRequest request) {
         ShelfResponse response = shelfService.createShelf(request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(
+                ApiResponse.<ShelfResponse>builder()
+                        .message("Tạo kệ hàng thành công")
+                        .data(response)
+                        .build()
+        );
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteShelf(@RequestBody DeleteShelfRequest request) {
+    public ResponseEntity<ApiResponse<String>> deleteShelf(@RequestBody DeleteShelfRequest request) {
         shelfService.deleteShelf(request.getShelfCode());
-        return ResponseEntity.ok("Xóa kệ hàng thành công");
+        return ResponseEntity.ok(
+                ApiResponse.<String>builder()
+                        .message("Xóa kệ hàng thành công")
+                        .data("success")
+                        .build()
+        );
     }
 
     @GetMapping("/pdf")
@@ -53,19 +67,35 @@ public class ShelfController {
     }
 
     @GetMapping("/{shelfId}/bins")
-    public ResponseEntity<List<BinResponse>> getBinsByShelf(@PathVariable Integer shelfId) {
+    public ResponseEntity<ApiResponse<List<BinResponse>>> getBinsByShelf(@PathVariable Integer shelfId) {
         List<BinResponse> bins = shelfService.getBinsByShelfId(shelfId);
-        return ResponseEntity.ok(bins);}
-
-    @GetMapping("/bin/{binId}/boxes")
-    public ResponseEntity<List<BoxResponse>> getBoxesByBin(@PathVariable Integer binId) {
-        List<BoxResponse> boxes = shelfService.getBoxesByBinId(binId);
-        return ResponseEntity.ok(boxes);}
-
-    @GetMapping("/all")
-    public ResponseEntity<List<ShelfResponse>> getAllShelves() {
-        List<ShelfResponse> shelves = shelfService.getAllShelves();
-        return ResponseEntity.ok(shelves);
+        return ResponseEntity.ok(
+                ApiResponse.<List<BinResponse>>builder()
+                        .message("Lấy danh sách bin theo kệ thành công")
+                        .data(bins)
+                        .build()
+        );
     }
 
+    @GetMapping("/bin/{binId}/boxes")
+    public ResponseEntity<ApiResponse<List<BoxResponse>>> getBoxesByBin(@PathVariable Integer binId) {
+        List<BoxResponse> boxes = shelfService.getBoxesByBinId(binId);
+        return ResponseEntity.ok(
+                ApiResponse.<List<BoxResponse>>builder()
+                        .message("Lấy danh sách box theo bin thành công")
+                        .data(boxes)
+                        .build()
+        );
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse<List<ShelfResponse>>> getAllShelves() {
+        List<ShelfResponse> shelves = shelfService.getAllShelves();
+        return ResponseEntity.ok(
+                ApiResponse.<List<ShelfResponse>>builder()
+                        .message("Lấy toàn bộ kệ hàng thành công")
+                        .data(shelves)
+                        .build()
+        );
+    }
 }
