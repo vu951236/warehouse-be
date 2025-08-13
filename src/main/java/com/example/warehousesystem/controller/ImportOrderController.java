@@ -3,8 +3,6 @@ package com.example.warehousesystem.controller;
 import com.example.warehousesystem.dto.ExcelItemDTO;
 import com.example.warehousesystem.dto.request.*;
 import com.example.warehousesystem.dto.response.*;
-import com.example.warehousesystem.entity.ImportOrder;
-import com.example.warehousesystem.entity.TempImportExcel;
 import com.example.warehousesystem.service.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
@@ -34,45 +32,29 @@ public class ImportOrderController {
     private final ImportExcelExportService importExcelExportService;
     private final ImportOrderService importOrderService;
 
-    /**
-     * WMS-16: Tìm kiếm đơn nhập kho
-     */
     @PostMapping("/search")
     public ResponseEntity<ApiResponse<List<ImportOrderResponse>>> searchImportOrders(
             @RequestBody ImportOrderSearchRequest request
     ) {
         List<ImportOrderResponse> result = importOrderSearchService.searchImportOrders(request);
-        return ResponseEntity.ok(
-                ApiResponse.<List<ImportOrderResponse>>builder()
-                        .message("Tìm kiếm thành công")
-                        .data(result)
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.<List<ImportOrderResponse>>builder()
+                .message("Tìm kiếm thành công")
+                .data(result)
+                .build());
     }
 
-    /**
-     * WMS-17: Nhập kho 1 hoặc nhiều item bằng form quét mã vạch
-     */
     @PostMapping("/import-by-scan")
     public ResponseEntity<ApiResponse<ImportItemsResponse>> importItemsByScan(
             @RequestBody ImportScanBarcodeRequest request
     ) {
         ImportItemsResponse result = importScanBarcodeService.importItemsByScan(request);
-        return ResponseEntity.ok(
-                ApiResponse.<ImportItemsResponse>builder()
-                        .message("Nhập kho bằng form quét mã thành công")
-                        .data(result)
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.<ImportItemsResponse>builder()
+                .message("Nhập kho bằng form quét mã thành công")
+                .data(result)
+                .build());
     }
 
-    /**
-     * WMS-18: Nhập kho nhiều item bằng Excel
-     */
-    @PostMapping(
-            value = "/upload-excel-to-temp",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
+    @PostMapping(value = "/upload-excel-to-temp", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<String>> uploadExcelToTemp(
             @RequestParam("file") MultipartFile file,
             @RequestParam("userId") Long userId,
@@ -88,29 +70,26 @@ public class ImportOrderController {
     }
 
     @GetMapping("/temp-items/{userId}")
-    public ApiResponse<List<TempImportExcelResponse>> getTempItems(@PathVariable Long userId) {
-        return ApiResponse.<List<TempImportExcelResponse>>builder()
+    public ResponseEntity<ApiResponse<List<TempImportExcelResponse>>> getTempItems(@PathVariable Long userId) {
+        return ResponseEntity.ok(ApiResponse.<List<TempImportExcelResponse>>builder()
                 .message("Lấy dữ liệu tạm thành công")
                 .data(tempImportExcelService.getTempItemsByUser(userId))
-                .build();
+                .build());
     }
 
     @PostMapping("/import-from-temp")
-    public ApiResponse<ImportItemsResponse> importFromTemp(@RequestBody ImportFromTempRequest request) {
-        return ApiResponse.<ImportItemsResponse>builder()
+    public ResponseEntity<ApiResponse<ImportItemsResponse>> importFromTemp(@RequestBody ImportFromTempRequest request) {
+        return ResponseEntity.ok(ApiResponse.<ImportItemsResponse>builder()
                 .message("Nhập kho thành công")
                 .data(importFromTempService.importSelected(request.getTempIds()))
-                .build();
+                .build());
     }
 
-    /**
-     * Đọc dữ liệu từ file Excel, bỏ qua header row
-     */
     private List<ExcelItemDTO> parseExcel(MultipartFile file) throws IOException {
         List<ExcelItemDTO> items = new ArrayList<>();
         try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
-            Sheet sheet = workbook.getSheetAt(0); // lấy sheet đầu tiên
-            for (int i = 1; i <= sheet.getLastRowNum(); i++) { // bỏ header row
+            Sheet sheet = workbook.getSheetAt(0);
+            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
 
@@ -133,48 +112,33 @@ public class ImportOrderController {
         return items;
     }
 
-    /**
-     * WMS-22: Xem thông tin nhập theo SKU
-     */
     @PostMapping("/search-by-sku")
     public ResponseEntity<ApiResponse<List<SearchImportBySKUResponse>>> getImportHistoryBySku(
             @RequestBody SearchImportBySKURequest request
     ) {
         List<SearchImportBySKUResponse> results = importOrderDetailService.getImportHistoryBySku(request);
-        return ResponseEntity.ok(
-                ApiResponse.<List<SearchImportBySKUResponse>>builder()
-                        .message("Lấy thông tin nhập theo SKU thành công")
-                        .data(results)
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.<List<SearchImportBySKUResponse>>builder()
+                .message("Lấy thông tin nhập theo SKU thành công")
+                .data(results)
+                .build());
     }
 
-    /**
-     * WMS-26: Xem thông tin các lần nhập kho
-     */
     @GetMapping("/{importOrderId}")
     public ResponseEntity<ApiResponse<List<ImportOrderDetailResponse>>> getImportDetails(
             @PathVariable Integer importOrderId
     ) {
         List<ImportOrderDetailResponse> details = importOrderDetailService.getImportOrderDetails(importOrderId);
-        return ResponseEntity.ok(
-                ApiResponse.<List<ImportOrderDetailResponse>>builder()
-                        .message("Lấy chi tiết đơn nhập thành công")
-                        .data(details)
-                        .build()
-        );
+        return ResponseEntity.ok(ApiResponse.<List<ImportOrderDetailResponse>>builder()
+                .message("Lấy chi tiết đơn nhập thành công")
+                .data(details)
+                .build());
     }
 
-    /**
-     * WMS-27: Xuất danh sách excel
-     */
     @PostMapping("/export-excel")
     public ResponseEntity<InputStreamResource> exportImportExcel(@RequestBody SearchImportBySKURequest request) throws IOException {
         ByteArrayInputStream in = importExcelExportService.exportImportHistoryBySku(request);
-
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Disposition", "attachment; filename=import_history.xlsx");
-
         return ResponseEntity.ok()
                 .headers(headers)
                 .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
@@ -182,32 +146,46 @@ public class ImportOrderController {
     }
 
     @GetMapping("/getallImportOrder")
-    public ApiResponse<List<ImportOrderResponse>> getAllImportOrders() {
-        return ApiResponse.<List<ImportOrderResponse>>builder()
+    public ResponseEntity<ApiResponse<List<ImportOrderResponse>>> getAllImportOrders() {
+        return ResponseEntity.ok(ApiResponse.<List<ImportOrderResponse>>builder()
+                .message("Lấy tất cả đơn nhập thành công")
                 .data(importOrderService.getAllImportOrders())
-                .build();
+                .build());
     }
 
     @GetMapping("/{orderId}/details")
-    public ApiResponse<List<ImportOrderDetailResponse>> getImportOrderDetails(@PathVariable Integer orderId) {
-        return ApiResponse.<List<ImportOrderDetailResponse>>builder()
+    public ResponseEntity<ApiResponse<List<ImportOrderDetailResponse>>> getImportOrderDetails(@PathVariable Integer orderId) {
+        return ResponseEntity.ok(ApiResponse.<List<ImportOrderDetailResponse>>builder()
+                .message("Lấy chi tiết đơn nhập thành công")
                 .data(importOrderService.getImportOrderDetailsByOrderId(orderId))
-                .build();
+                .build());
     }
 
     @GetMapping("/allDetails")
-    public List<ImportOrderBoardResponse> getAllImportOrderDetails() {
-        return importOrderService.getAllImportOrderDetails();
+    public ResponseEntity<ApiResponse<List<ImportOrderBoardResponse>>> getAllImportOrderDetails() {
+        return ResponseEntity.ok(ApiResponse.<List<ImportOrderBoardResponse>>builder()
+                .message("Lấy toàn bộ chi tiết nhập hàng thành công")
+                .data(importOrderService.getAllImportOrderDetails())
+                .build());
     }
 
     @PostMapping("/import-single-item")
-    public ImportItemsResponse importSingleItem(@RequestBody ImportSingleItemRequest request) {
-        return importSingleItemByForm.importSingleItemByForm(request);
+    public ResponseEntity<ApiResponse<Object>> importSingleItem(@RequestBody ImportSingleItemRequest request) {
+        return ResponseEntity.ok(
+                ApiResponse.builder()
+                        .message("Nhập kho một sản phẩm thành công")
+                        .data(importSingleItemByForm.importSingleItemByForm(request))
+                        .build()
+        );
     }
 
     @GetMapping("/import-orders/{id}/fullDetail")
-    public ResponseEntity<ImportOrderFullResponse> getFullImportOrder(@PathVariable Integer id) {
-        return ResponseEntity.ok(importOrderService.getFullImportOrderById(id));
+    public ResponseEntity<ApiResponse<Object>> getFullImportOrder(@PathVariable Integer id) {
+        return ResponseEntity.ok(
+                ApiResponse.builder()
+                        .message("Lấy đầy đủ thông tin đơn nhập thành công")
+                        .data(importOrderService.getFullImportOrderById(id))
+                        .build()
+        );
     }
-
 }
