@@ -71,17 +71,16 @@ public class ImportOrderController {
 
     @PostMapping(value = "/upload-excel-to-temp", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<String>> uploadExcelToTemp(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "source", required = false) String source,
-            @RequestParam(value = "note", required = false) String note
+            @RequestParam("file") MultipartFile file
     ) throws IOException {
         List<ExcelItemDTO> items = parseExcel(file);
-        tempImportExcelService.saveTempItems(items, source, note);
+        tempImportExcelService.saveTempItems(items);
         return ResponseEntity.ok(ApiResponse.<String>builder()
                 .message("Đã lưu dữ liệu vào bảng tạm")
                 .data("success")
                 .build());
     }
+
 
 
     @PostMapping("/import-from-temp")

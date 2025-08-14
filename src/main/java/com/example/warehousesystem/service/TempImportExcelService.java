@@ -35,7 +35,7 @@ public class TempImportExcelService {
     }
 
     @Transactional
-    public void saveTempItems(List<ExcelItemDTO> items, String source, String note) {
+    public void saveTempItems(List<ExcelItemDTO> items) {
         Long userId = getCurrentUserId();
 
         List<TempImportExcel> entities = items.stream()
@@ -43,13 +43,14 @@ public class TempImportExcelService {
                         .userId(userId)
                         .skuCode(dto.getSkuCode())
                         .quantity(dto.getQuantity())
-                        .source(source)
-                        .note(note)
+                        .source(dto.getSource())
+                        .note(dto.getNote())
                         .build())
                 .toList();
 
         tempImportExcelRepository.saveAll(entities);
     }
+
 
 
 
