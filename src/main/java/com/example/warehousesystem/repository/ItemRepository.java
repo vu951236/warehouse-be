@@ -1,13 +1,11 @@
 package com.example.warehousesystem.repository;
 
 import com.example.warehousesystem.entity.Item;
-import com.example.warehousesystem.entity.Box;
+import com.example.warehousesystem.entity.SKU;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -86,4 +84,6 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
             "WHERE d.importOrder.id = :importOrderId")
     List<Item> findByImportOrderId(Integer importOrderId);
 
+    // Tìm tất cả item theo SKU
+    List<Item> findItemsBySku(SKU sku);
 }

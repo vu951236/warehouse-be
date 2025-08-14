@@ -12,6 +12,6 @@ import java.util.List;
 //Xuất hàng bằng excel
 public class ExportExcelItemRequest {
     private String exportCode;
-    private List<ExcelItemDTO> items;//file ExcelItemDTO
+    private List<ExcelItemDTO> items;
     private Integer userId;
 }

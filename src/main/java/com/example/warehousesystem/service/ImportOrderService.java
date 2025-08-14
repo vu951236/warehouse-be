@@ -46,9 +46,10 @@ public class ImportOrderService {
     public List<ImportOrderBoardResponse> getAllImportOrderDetails() {
         List<ImportOrderDetail> details = importOrderDetailRepository.findAll();
         return details.stream()
-                .map(ImportOrderBoardMapper::toResponse)
+                .map(ImportOrderBoardMapper::toResponse) 
                 .collect(Collectors.toList());
     }
+
 
     public ImportOrderFullResponse getFullImportOrderById(Integer orderId) {
         ImportOrder importOrder = importOrderRepository.findById(orderId)

@@ -64,4 +64,5 @@ public interface SKURepository extends JpaRepository<SKU, Integer> {
     GROUP BY b.bin_id
 """, nativeQuery = true)
     List<Object[]> findSkuCodesByBinId();
+
 }

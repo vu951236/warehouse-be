@@ -1,6 +1,7 @@
 package com.example.warehousesystem.service;
 
 import com.example.warehousesystem.dto.request.ExportOrderSearchRequest;
+import com.example.warehousesystem.dto.response.AllExportOrderResponse;
 import com.example.warehousesystem.dto.response.ExportOrderResponse;
 import com.example.warehousesystem.dto.response.ExportOrderDetailResponse;
 import com.example.warehousesystem.entity.ExportOrder;
@@ -66,4 +67,18 @@ public class ExportOrderService {
                 .map(exportOrderMapper::toResponse)
                 .toList();
     }
+
+    public List<AllExportOrderResponse> getAllExportOrderDetails() {
+        List<ExportOrderDetail> details = exportOrderDetailRepository.findAll();
+
+        return details.stream().map(detail -> AllExportOrderResponse.builder()
+                .exportCode(detail.getExportOrder().getExportCode())
+                .skuCode(detail.getSku().getSkuCode())
+                .productName(detail.getSku().getName())
+                .exportDate(detail.getExportOrder().getCreatedAt())
+                .quantity(detail.getQuantity())
+                .build()
+        ).toList();
+    }
+
 }

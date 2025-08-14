@@ -41,6 +41,7 @@ public class Item {
         damaged,
         returned,
         exported,
+        queued // trạng thái chờ xuất
     }
 
     @Column(name = "is_deleted", nullable = false)

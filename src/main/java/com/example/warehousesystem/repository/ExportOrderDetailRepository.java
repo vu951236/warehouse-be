@@ -1,5 +1,6 @@
 package com.example.warehousesystem.repository;
 
+import com.example.warehousesystem.entity.ExportOrder;
 import com.example.warehousesystem.entity.ExportOrderDetail;
 import com.example.warehousesystem.entity.SKU;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -35,5 +36,7 @@ public interface ExportOrderDetailRepository extends JpaRepository<ExportOrderDe
     //Xuất kho item + Xem thông tin các lần xuất
     @Query("SELECT d FROM ExportOrderDetail d WHERE d.exportOrder.id = :orderId")
     List<ExportOrderDetail> findByExportOrderId(@Param("orderId") Integer orderId);
+
+    List<ExportOrderDetail> findByExportOrder(ExportOrder exportOrder);
 
 }
