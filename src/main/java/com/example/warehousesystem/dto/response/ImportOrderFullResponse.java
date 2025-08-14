@@ -36,5 +36,4 @@ public class ImportOrderFullResponse {
         private Float unitVolume;
         private Integer quantity;
     }
-
 }

@@ -62,7 +62,11 @@ public class SummaryChartService {
         String fullDate = rawDate.toString(); // yyyy-MM-dd
         if ("monthly".equalsIgnoreCase(type)) {
             return fullDate.substring(0, 7); // yyyy-MM
+        } else if ("yearly".equalsIgnoreCase(type)) {
+            return fullDate.substring(0, 4); // yyyy
+        } else if ("daily".equalsIgnoreCase(type)) {
+            return fullDate; // yyyy-MM-dd
         }
-        return fullDate;
+        throw new IllegalArgumentException("Invalid type: " + type);
     }
 }

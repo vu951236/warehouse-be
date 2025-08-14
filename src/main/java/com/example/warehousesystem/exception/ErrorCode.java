@@ -38,7 +38,9 @@ public enum ErrorCode {
 
     INVALID_INPUT(5004, "Invalid Input", HttpStatus.BAD_REQUEST),
     EMAIL_ALREADY_EXISTS(1015, "Email already exists", HttpStatus.CONFLICT),
-    INVALID_REQUEST(1016,"Invalid Request" , HttpStatus.BAD_REQUEST);
+    INVALID_REQUEST(1016,"Invalid Request" , HttpStatus.BAD_REQUEST),
+    NOT_FOUND(1017,"Temp not found", HttpStatus.BAD_REQUEST),
+    IMPORT_ORDER_NOT_FOUND(1018, "Import order not found", HttpStatus.NOT_FOUND);
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;

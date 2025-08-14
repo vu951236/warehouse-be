@@ -8,6 +8,9 @@ import com.example.warehousesystem.repository.SKURepository;
 import com.example.warehousesystem.repository.WarehouseRepository;
 import com.example.warehousesystem.mapper.*;
 
+import com.itextpdf.io.font.PdfEncodings;
+import com.itextpdf.kernel.font.PdfFont;
+import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
@@ -15,9 +18,12 @@ import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.properties.TextAlignment;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,11 +36,16 @@ public class ReportPdfService {
     private final SKURepository skuRepository;
     private final WarehouseRepository warehouseRepository;
 
-    public byte[] generateWarehouseReportPdf(StorageStatusRequest request) {
+    public byte[] generateWarehouseReportPdf(StorageStatusRequest request) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         PdfWriter writer = new PdfWriter(outputStream);
         PdfDocument pdf = new PdfDocument(writer);
         Document document = new Document(pdf);
+
+        try (InputStream fontStream = new ClassPathResource("fonts/arial.ttf").getInputStream()) {
+            PdfFont font = PdfFontFactory.createFont(fontStream.readAllBytes(), PdfEncodings.IDENTITY_H);
+            document.setFont(font);
+        }
 
         // Tiêu đề
         document.add(new Paragraph("📦 Báo Cáo Kho Tổng Hợp")
