@@ -10,11 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-// Nhập hàng bằng Excel (gồm nhiều item)
 public class ImportExcelItemRequest {
-    private List<ExcelItemDTO> items; // Danh sách các item từ Excel
-    private ImportOrder.Source source;
-    private Integer userId;           // Người nhập
-    private String note;              // Ghi chú
+    private List<ExcelItemDTO> items;
 }
 

@@ -56,24 +56,25 @@ public class ImportOrderController {
 
     @PostMapping(value = "/upload-excel-to-temp", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<String>> uploadExcelToTemp(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("userId") Long userId,
-            @RequestParam(value = "source", required = false) String source,
-            @RequestParam(value = "note", required = false) String note
+            @RequestParam("file") MultipartFile file
     ) throws IOException {
         List<ExcelItemDTO> items = parseExcel(file);
-        tempImportExcelService.saveTempItems(items, userId, source, note);
+
+        // Gọi service, userId sẽ lấy từ SecurityContext bên trong service
+        tempImportExcelService.saveTempItems(items);
+
         return ResponseEntity.ok(ApiResponse.<String>builder()
                 .message("Đã lưu dữ liệu vào bảng tạm")
                 .data("success")
                 .build());
     }
 
-    @GetMapping("/temp-items/{userId}")
-    public ResponseEntity<ApiResponse<List<TempImportExcelResponse>>> getTempItems(@PathVariable Long userId) {
+
+    @GetMapping("/temp-items")
+    public ResponseEntity<ApiResponse<List<TempImportExcelResponse>>> getTempItems() {
         return ResponseEntity.ok(ApiResponse.<List<TempImportExcelResponse>>builder()
                 .message("Lấy dữ liệu tạm thành công")
-                .data(tempImportExcelService.getTempItemsByUser(userId))
+                .data(tempImportExcelService.getTempItemsByUser())
                 .build());
     }
 
@@ -95,16 +96,22 @@ public class ImportOrderController {
 
                 Cell skuCell = row.getCell(0);
                 Cell qtyCell = row.getCell(1);
+                Cell sourceCell = row.getCell(2);
+                Cell noteCell = row.getCell(3);
 
                 if (skuCell == null || qtyCell == null) continue;
 
                 String skuCode = skuCell.getStringCellValue().trim();
                 int quantity = (int) qtyCell.getNumericCellValue();
+                String source = sourceCell != null ? sourceCell.getStringCellValue().trim() : null;
+                String note = noteCell != null ? noteCell.getStringCellValue().trim() : null;
 
                 if (!skuCode.isEmpty() && quantity > 0) {
                     ExcelItemDTO dto = new ExcelItemDTO();
                     dto.setSkuCode(skuCode);
                     dto.setQuantity(quantity);
+                    dto.setSource(source);
+                    dto.setNote(note);
                     items.add(dto);
                 }
             }

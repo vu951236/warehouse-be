@@ -11,7 +11,6 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class ImportOrderFullResponse {
-    // Thông tin ImportOrder
     private Integer id;
     private String importCode;
     private String source;
@@ -20,7 +19,6 @@ public class ImportOrderFullResponse {
     private LocalDateTime createdAt;
     private String note;
 
-    // Danh sách chi tiết
     private List<ImportOrderDetailItem> details;
 
     @Getter
@@ -31,6 +29,12 @@ public class ImportOrderFullResponse {
     public static class ImportOrderDetailItem {
         private Integer id;
         private String skuCode;
+        private String skuName;
+        private String size;
+        private String color;
+        private String type;
+        private Float unitVolume;
         private Integer quantity;
     }
+
 }
