@@ -81,6 +81,9 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
         );
     }
 
-
+    @Query("SELECT i FROM Item i " +
+            "JOIN ImportOrderDetail d ON d.sku.id = i.sku.id " +
+            "WHERE d.importOrder.id = :importOrderId")
+    List<Item> findByImportOrderId(Integer importOrderId);
 
 }

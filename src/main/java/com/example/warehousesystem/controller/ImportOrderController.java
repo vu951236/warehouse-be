@@ -6,7 +6,10 @@ import com.example.warehousesystem.dto.response.*;
 import com.example.warehousesystem.service.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +35,9 @@ public class ImportOrderController {
     private final ImportOrderDetailService importOrderDetailService;
     private final ImportExcelExportService importExcelExportService;
     private final ImportOrderService importOrderService;
+    private final ImportTemplateService importTemplateService;
+    private final BarcodeSimulationService barcodeSimulationService;
+
 
     @PostMapping("/search")
     public ResponseEntity<ApiResponse<List<ImportOrderResponse>>> searchImportOrders(
@@ -187,5 +194,39 @@ public class ImportOrderController {
                         .data(importOrderService.getFullImportOrderById(id))
                         .build()
         );
+    }
+
+    // WMS-19: Tải xuống mẫu nhập
+    @GetMapping("/template")
+    public ResponseEntity<Resource> downloadImportTemplate() throws IOException {
+        ByteArrayResource resource = importTemplateService.generateTemplate();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=import_template.xlsx")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .contentLength(resource.contentLength())
+                .body(resource);
+    }
+
+    // WMS-21: Chỉnh sửa phiếu nhập tạm
+    @PutMapping("/temp/update")
+    public ResponseEntity<ApiResponse<String>> updateTempItem(@RequestBody UpdateTempImportRequest request) {
+        tempImportExcelService.updateTempImport(request);
+        return ResponseEntity.ok(ApiResponse.<String>builder()
+                .message("Cập nhật bản ghi tạm thành công")
+                .data("success")
+                .build());
+    }
+
+    // WMS-24: Giả lập bắn mã
+    @GetMapping("/{id}/simulate-barcode")
+    public ResponseEntity<ApiResponse<List<String>>> simulateBarcode(
+            @PathVariable("id") Integer importOrderId,
+            @RequestParam(defaultValue = "5") int count
+    ) {
+        List<String> data = barcodeSimulationService.simulateForImportOrder(importOrderId, count);
+        return ResponseEntity.ok(ApiResponse.<List<String>>builder()
+                .message("Giả lập bắn mã thành công")
+                .data(data)
+                .build());
     }
 }

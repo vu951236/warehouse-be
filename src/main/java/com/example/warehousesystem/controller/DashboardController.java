@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -92,7 +93,7 @@ public class DashboardController {
     }
 
     @PostMapping(value = "/warehouse-summary-pdf", produces = MediaType.APPLICATION_PDF_VALUE)
-    public ResponseEntity<byte[]> exportWarehouseReport(@RequestBody StorageStatusRequest request) {
+    public ResponseEntity<byte[]> exportWarehouseReport(@RequestBody StorageStatusRequest request) throws IOException {
         byte[] pdfBytes = reportPdfService.generateWarehouseReportPdf(request);
 
         HttpHeaders headers = new HttpHeaders();
