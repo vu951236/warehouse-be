@@ -100,6 +100,7 @@ public class ExportOrderController {
         header2.createCell(2).setCellValue("Box");
         header2.createCell(3).setCellValue("Shelf");
         header2.createCell(4).setCellValue("Số lượng cần lấy");
+        header2.createCell(5).setCellValue("Barcodes cần lấy");
 
         int rowNum2 = 1;
         for (PickingRouteResponse p : result.getPickingRoutes()) {
@@ -109,6 +110,7 @@ public class ExportOrderController {
             row.createCell(2).setCellValue(p.getBoxCode());
             row.createCell(3).setCellValue(p.getShelfCode());
             row.createCell(4).setCellValue(p.getQuantityPicked());
+            row.createCell(5).setCellValue(String.join(", ", p.getBarcodes()));
         }
 
         // --- Xuất file ---

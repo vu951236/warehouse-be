@@ -181,6 +181,14 @@ public class ImportOrderController {
                 .build());
     }
 
+    @GetMapping("/allDetails/merged-sku")
+    public ResponseEntity<ApiResponse<List<ImportOrderBoardResponse>>> getAllImportOrderDetailsMergedWithSkuList() {
+        return ResponseEntity.ok(ApiResponse.<List<ImportOrderBoardResponse>>builder()
+                .message("Lấy toàn bộ chi tiết nhập hàng (gộp SKU) thành công")
+                .data(importOrderService.getAllImportOrderDetailsMergedWithSkuList())
+                .build());
+    }
+
     @PostMapping("/import-single-item")
     public ResponseEntity<ApiResponse<Object>> importSingleItem(@RequestBody ImportSingleItemRequest request) {
         return ResponseEntity.ok(
@@ -197,6 +205,19 @@ public class ImportOrderController {
                 ApiResponse.builder()
                         .message("Lấy đầy đủ thông tin đơn nhập thành công")
                         .data(importOrderService.getFullImportOrderById(id))
+                        .build()
+        );
+    }
+
+    @GetMapping("/detail/{detailId}/full")
+    public ResponseEntity<ApiResponse<ImportOrderFullResponse>> getFullImportOrderByDetailId(
+            @PathVariable Integer detailId
+    ) {
+        ImportOrderFullResponse response = importOrderService.getFullImportOrderByDetailId(detailId);
+        return ResponseEntity.ok(
+                ApiResponse.<ImportOrderFullResponse>builder()
+                        .message("Lấy đầy đủ thông tin đơn nhập từ chi tiết thành công")
+                        .data(response)
                         .build()
         );
     }

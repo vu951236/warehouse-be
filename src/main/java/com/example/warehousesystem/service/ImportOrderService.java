@@ -15,7 +15,10 @@ import com.example.warehousesystem.repository.ImportOrderDetailRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,10 +49,55 @@ public class ImportOrderService {
     public List<ImportOrderBoardResponse> getAllImportOrderDetails() {
         List<ImportOrderDetail> details = importOrderDetailRepository.findAll();
         return details.stream()
-                .map(ImportOrderBoardMapper::toResponse) 
+                .map(ImportOrderBoardMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
+    public List<ImportOrderBoardResponse> getAllImportOrderDetailsMergedWithSkuList() {
+        List<ImportOrderDetail> details = importOrderDetailRepository.findAll();
+
+        if (details.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // Gom nhóm theo importOrderId
+        Map<Long, List<ImportOrderDetail>> groupedByOrder = details.stream()
+                .collect(Collectors.groupingBy(d -> Long.valueOf(d.getImportOrder().getId())));
+
+        List<ImportOrderBoardResponse> result = new ArrayList<>();
+
+        for (Map.Entry<Long, List<ImportOrderDetail>> entry : groupedByOrder.entrySet()) {
+            List<ImportOrderDetail> orderDetails = entry.getValue();
+            ImportOrderDetail first = orderDetails.get(0);
+
+            String allSkuCodes = orderDetails.stream()
+                    .map(d -> d.getSku().getSkuCode())
+                    .distinct()
+                    .collect(Collectors.joining(", "));
+
+            String allSkuNames = orderDetails.stream()
+                    .map(d -> d.getSku().getName())
+                    .distinct()
+                    .collect(Collectors.joining(", "));
+
+            int totalQuantity = orderDetails.stream()
+                    .mapToInt(ImportOrderDetail::getQuantity)
+                    .sum();
+
+            ImportOrderBoardResponse merged = ImportOrderBoardResponse.builder()
+                    .id(Long.valueOf(first.getImportOrder().getId()))
+                    .importCode(first.getImportOrder().getImportCode())
+                    .skuCode(allSkuCodes)
+                    .skuName(allSkuNames)
+                    .createdAt(first.getImportOrder().getCreatedAt())
+                    .quantity(totalQuantity)
+                    .build();
+
+            result.add(merged);
+        }
+
+        return result;
+    }
 
     public ImportOrderFullResponse getFullImportOrderById(Integer orderId) {
         ImportOrder importOrder = importOrderRepository.findById(orderId)
@@ -78,6 +126,36 @@ public class ImportOrderService {
                             .quantity(d.getQuantity())
                             .build();
                 }).collect(Collectors.toList()))
+                .build();
+    }
+
+    public ImportOrderFullResponse getFullImportOrderByDetailId(Integer detailId) {
+        ImportOrderDetail detail = importOrderDetailRepository.findById(detailId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy chi tiết đơn nhập"));
+
+        ImportOrder importOrder = detail.getImportOrder();
+        SKU sku = detail.getSku();
+
+        return ImportOrderFullResponse.builder()
+                .id(importOrder.getId())
+                .importCode(importOrder.getImportCode())
+                .source(importOrder.getSource().toString())
+                .status(importOrder.getStatus().toString())
+                .createdBy(importOrder.getCreatedBy().getUsername())
+                .createdAt(importOrder.getCreatedAt())
+                .note(importOrder.getNote())
+                .details(Collections.singletonList(
+                        ImportOrderFullResponse.ImportOrderDetailItem.builder()
+                                .id(detail.getId())
+                                .skuCode(sku.getSkuCode())
+                                .skuName(sku.getName())
+                                .size(sku.getSize())
+                                .color(sku.getColor())
+                                .type(sku.getType())
+                                .unitVolume(sku.getUnitVolume())
+                                .quantity(detail.getQuantity())
+                                .build()
+                ))
                 .build();
     }
 

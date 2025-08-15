@@ -86,4 +86,7 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
 
     // Tìm tất cả item theo SKU
     List<Item> findItemsBySku(SKU sku);
+
+    List<Item> findByBoxIdAndStatus(Integer boxId, Item.Status status);
+
 }

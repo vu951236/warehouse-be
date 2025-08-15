@@ -2,6 +2,8 @@ package com.example.warehousesystem.dto.response;
 
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,4 +17,5 @@ public class PickingRouteResponse {
     private String shelfCode;
     private String warehouseName;
     private Integer quantityPicked;
+    private List<String> barcodes;
 }
