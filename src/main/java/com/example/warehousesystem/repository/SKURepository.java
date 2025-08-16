@@ -65,4 +65,7 @@ public interface SKURepository extends JpaRepository<SKU, Integer> {
 """, nativeQuery = true)
     List<Object[]> findSkuCodesByBinId();
 
+    @Query("SELECT COUNT(i) FROM Item i WHERE i.sku.id = :skuId AND i.isDeleted = false")
+    Long countItemsBySkuId(@Param("skuId") Integer skuId);
+
 }

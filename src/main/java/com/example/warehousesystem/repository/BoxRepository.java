@@ -78,4 +78,7 @@ public interface BoxRepository extends JpaRepository<Box, Integer> {
     List<Box> findAllByIsDeletedFalse();
 
     int countByBinId(Integer binId);
+
+    Optional<Box> findByIdAndIsDeletedFalse(Integer id);
+
 }

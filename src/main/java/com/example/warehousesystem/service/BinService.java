@@ -2,10 +2,13 @@ package com.example.warehousesystem.service;
 
 import com.example.warehousesystem.dto.request.SearchBinRequest;
 import com.example.warehousesystem.dto.request.UpdateBinRequest;
+import com.example.warehousesystem.dto.response.AllBinResponse;
+import com.example.warehousesystem.dto.response.BinDetailResponse;
 import com.example.warehousesystem.dto.response.BinResponse;
 import com.example.warehousesystem.entity.*;
 import com.example.warehousesystem.exception.AppException;
 import com.example.warehousesystem.exception.ErrorCode;
+import com.example.warehousesystem.mapper.AllBinMapper;
 import com.example.warehousesystem.mapper.BinMapper;
 import com.example.warehousesystem.repository.*;
 import com.itextpdf.kernel.pdf.PdfDocument;
@@ -159,6 +162,44 @@ public class BinService {
 
         return outputStream.toByteArray();
     }
+
+    public List<AllBinResponse> getBinsByShelfId(Integer shelfId) {
+        List<Bin> bins = binRepository.findByShelfIdAndIsDeletedFalse(shelfId);
+
+        return bins.stream()
+                .map(bin -> {
+                    Long itemCount = itemRepository.countItemsByBinId(bin.getId());
+                    return AllBinMapper.toResponse(bin, itemCount);
+                })
+                .toList();
+    }
+
+    public BinDetailResponse getBinDetail(Integer binId) {
+        Bin bin = binRepository.findById(binId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+
+        // Tổng số item trong bin
+        Long itemCount = itemRepository.countItemsByBinId(bin.getId());
+
+        // Lấy tất cả box thuộc bin
+        List<Box> boxes = boxRepository.findByBinIdInAndIsDeletedFalse(Collections.singletonList(binId));
+
+        int totalUsedCapacity = boxes.stream()
+                .mapToInt(Box::getUsedCapacity)
+                .sum();
+
+        // Tính tỉ lệ chứa
+        double utilizationRate = bin.getCapacity() == 0 ? 0.0 :
+                (double) totalUsedCapacity / bin.getCapacity() * 100.0;
+
+        return BinDetailResponse.builder()
+                .id(bin.getId())
+                .binCode(bin.getBinCode())
+                .itemCount(itemCount)
+                .utilizationRate(utilizationRate)
+                .build();
+    }
+
 
 
 }

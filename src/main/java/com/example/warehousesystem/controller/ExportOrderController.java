@@ -223,4 +223,38 @@ public class ExportOrderController {
                         .build()
         );
     }
+
+    @GetMapping("/{orderId}/full")
+    public ResponseEntity<ApiResponse<ExportOrderFullResponse>> getFullExportOrderById(@PathVariable Integer orderId) {
+        ExportOrderFullResponse data = exportOrderService.getFullExportOrderById(orderId);
+        return ResponseEntity.ok(
+                ApiResponse.<ExportOrderFullResponse>builder()
+                        .message("Lấy đầy đủ thông tin đơn xuất thành công")
+                        .data(data)
+                        .build()
+        );
+    }
+
+    @GetMapping("/detail/{detailId}/full")
+    public ResponseEntity<ApiResponse<ExportOrderFullResponse>> getFullExportOrderByDetailId(@PathVariable Integer detailId) {
+        ExportOrderFullResponse data = exportOrderService.getFullExportOrderByDetailId(detailId);
+        return ResponseEntity.ok(
+                ApiResponse.<ExportOrderFullResponse>builder()
+                        .message("Lấy đầy đủ thông tin đơn xuất từ detailId thành công")
+                        .data(data)
+                        .build()
+        );
+    }
+
+    @GetMapping("/getAllExportOrder/board")
+    public ResponseEntity<ApiResponse<List<ExportOrderBoardResponse>>> getAllExportOrderDetailsMergedWithSkuList() {
+        List<ExportOrderBoardResponse> data = exportOrderService.getAllExportOrderDetailsMergedWithSkuList();
+        return ResponseEntity.ok(
+                ApiResponse.<List<ExportOrderBoardResponse>>builder()
+                        .message("Lấy tất cả chi tiết đơn xuất (gộp SKU) thành công")
+                        .data(data)
+                        .build()
+        );
+    }
+
 }

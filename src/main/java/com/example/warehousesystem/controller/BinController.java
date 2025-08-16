@@ -2,7 +2,9 @@ package com.example.warehousesystem.controller;
 
 import com.example.warehousesystem.dto.request.SearchBinRequest;
 import com.example.warehousesystem.dto.request.UpdateBinRequest;
+import com.example.warehousesystem.dto.response.AllBinResponse;
 import com.example.warehousesystem.dto.response.ApiResponse;
+import com.example.warehousesystem.dto.response.BinDetailResponse;
 import com.example.warehousesystem.dto.response.BinResponse;
 import com.example.warehousesystem.service.BinService;
 import lombok.RequiredArgsConstructor;
@@ -72,4 +74,27 @@ public class BinController {
                         .build()
         );
     }
+
+    @GetMapping("/{shelfId}/bins")
+    public ResponseEntity<ApiResponse<List<AllBinResponse>>> getBinsByShelf(@PathVariable Integer shelfId) {
+        List<AllBinResponse> bins = binService.getBinsByShelfId(shelfId);
+        return ResponseEntity.ok(
+                ApiResponse.<List<AllBinResponse>>builder()
+                        .message("Lấy danh sách bin theo kệ thành công")
+                        .data(bins)
+                        .build()
+        );
+    }
+
+    @GetMapping("/{binId}/detail")
+    public ResponseEntity<ApiResponse<BinDetailResponse>> getBinDetail(@PathVariable Integer binId) {
+        BinDetailResponse detail = binService.getBinDetail(binId);
+        return ResponseEntity.ok(
+                ApiResponse.<BinDetailResponse>builder()
+                        .message("Lấy chi tiết bin thành công")
+                        .data(detail)
+                        .build()
+        );
+    }
+
 }

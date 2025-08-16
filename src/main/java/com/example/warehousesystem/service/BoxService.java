@@ -1,12 +1,16 @@
 package com.example.warehousesystem.service;
 
 import com.example.warehousesystem.dto.request.*;
+import com.example.warehousesystem.dto.response.AllBoxResponse;
+import com.example.warehousesystem.dto.response.BoxDetailResponse;
 import com.example.warehousesystem.dto.response.BoxResponse;
 import com.example.warehousesystem.entity.Bin;
 import com.example.warehousesystem.entity.Box;
 import com.example.warehousesystem.entity.Item;
 import com.example.warehousesystem.exception.AppException;
 import com.example.warehousesystem.exception.ErrorCode;
+import com.example.warehousesystem.mapper.AllBoxMapper;
+import com.example.warehousesystem.mapper.BoxDetailMapper;
 import com.example.warehousesystem.mapper.BoxMapper;
 import com.example.warehousesystem.repository.*;
 import com.itextpdf.kernel.pdf.PdfDocument;
@@ -206,4 +210,25 @@ public class BoxService {
 
         return outputStream.toByteArray();
     }
+
+    public List<AllBoxResponse> getBoxesByBinId(Integer binId) {
+        return boxRepository.findByBinIdInAndIsDeletedFalse(Collections.singletonList(binId))
+                .stream()
+                .map(box -> {
+                    Long itemCount = itemRepository.countItemsByBoxId(box.getId());
+                    return AllBoxMapper.toResponse(box, itemCount);
+                })
+                .toList();
+    }
+
+    public BoxDetailResponse getBoxDetail(Integer boxId) {
+        Box box = boxRepository.findByIdAndIsDeletedFalse(boxId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+
+        Long itemCount = itemRepository.countItemsByBoxId(box.getId());
+        Long skuItemCount = itemRepository.countItemsByBoxIdAndSkuId(box.getId(), box.getSku().getId());
+
+        return BoxDetailMapper.toResponse(box, itemCount, skuItemCount);
+    }
+
 }

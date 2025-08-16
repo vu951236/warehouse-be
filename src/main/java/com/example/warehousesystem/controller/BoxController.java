@@ -3,7 +3,9 @@ package com.example.warehousesystem.controller;
 import com.example.warehousesystem.dto.request.CreateBoxRequest;
 import com.example.warehousesystem.dto.request.SearchBoxRequest;
 import com.example.warehousesystem.dto.request.UpdateBoxRequest;
+import com.example.warehousesystem.dto.response.AllBoxResponse;
 import com.example.warehousesystem.dto.response.ApiResponse;
+import com.example.warehousesystem.dto.response.BoxDetailResponse;
 import com.example.warehousesystem.dto.response.BoxResponse;
 import com.example.warehousesystem.service.BoxService;
 import lombok.RequiredArgsConstructor;
@@ -87,4 +89,27 @@ public class BoxController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=box_list.pdf")
                 .body(pdfBytes);
     }
+
+    @GetMapping("/bin/{binId}/boxes")
+    public ResponseEntity<ApiResponse<List<AllBoxResponse>>> getBoxesByBin(@PathVariable Integer binId) {
+        List<AllBoxResponse> boxes = boxService.getBoxesByBinId(binId);
+        return ResponseEntity.ok(
+                ApiResponse.<List<AllBoxResponse>>builder()
+                        .message("Lấy danh sách box theo bin thành công")
+                        .data(boxes)
+                        .build()
+        );
+    }
+
+    @GetMapping("/{boxId}/detail")
+    public ResponseEntity<ApiResponse<BoxDetailResponse>> getBoxDetail(@PathVariable Integer boxId) {
+        BoxDetailResponse response = boxService.getBoxDetail(boxId);
+        return ResponseEntity.ok(
+                ApiResponse.<BoxDetailResponse>builder()
+                        .message("Xem chi tiết box thành công")
+                        .data(response)
+                        .build()
+        );
+    }
+
 }

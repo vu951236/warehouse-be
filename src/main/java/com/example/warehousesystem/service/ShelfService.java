@@ -2,16 +2,11 @@ package com.example.warehousesystem.service;
 
 import com.example.warehousesystem.dto.request.CreateShelfRequest;
 import com.example.warehousesystem.dto.request.SearchShelfRequest;
-import com.example.warehousesystem.dto.response.BinResponse;
-import com.example.warehousesystem.dto.response.BoxResponse;
-import com.example.warehousesystem.dto.response.ShelfResponse;
+import com.example.warehousesystem.dto.response.*;
 import com.example.warehousesystem.entity.*;
 import com.example.warehousesystem.exception.AppException;
 import com.example.warehousesystem.exception.ErrorCode;
-import com.example.warehousesystem.mapper.BinMapper;
-import com.example.warehousesystem.mapper.BoxMapper;
-import com.example.warehousesystem.mapper.CreateShelfMapper;
-import com.example.warehousesystem.mapper.ShelfMapper;
+import com.example.warehousesystem.mapper.*;
 import com.example.warehousesystem.repository.BinRepository;
 import com.example.warehousesystem.repository.ShelfRepository;
 import com.example.warehousesystem.repository.WarehouseRepository;
@@ -179,24 +174,51 @@ public class ShelfService {
         return outputStream.toByteArray();
     }
 
-    public List<ShelfResponse> getAllShelves() {
+    public List<AllShelfResponse> getAllShelves() {
         List<Shelf> shelves = shelfRepository.findAllByIsDeletedFalse();
+
         return shelves.stream()
-                .map(ShelfMapper::toResponse)
+                .map(shelf -> {
+                    Long itemCount = itemRepository.countItemsByShelfId(shelf.getId());
+                    return AllShelfMapper.toResponse(shelf, itemCount);
+                })
                 .toList();
     }
 
-    public List<BinResponse> getBinsByShelfId(Integer shelfId) {
+
+
+    public ShelfDetailResponse getShelfDetail(Integer shelfId) {
+        Shelf shelf = shelfRepository.findById(shelfId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+
+        // Tổng số item trong shelf
+        Long itemCount = itemRepository.countItemsByShelfId(shelf.getId());
+
+        // Lấy tất cả bin thuộc shelf
         List<Bin> bins = binRepository.findByShelfIdAndIsDeletedFalse(shelfId);
-        return bins.stream()
-                .map(BinMapper::toResponse)
-                .toList();
+        int totalBinCapacity = bins.stream()
+                .mapToInt(Bin::getCapacity)
+                .sum();
+
+        // Lấy tất cả box thuộc shelf thông qua bin
+        List<Integer> binIds = bins.stream().map(Bin::getId).toList();
+        List<Box> boxes = boxRepository.findByBinIdInAndIsDeletedFalse(binIds);
+
+        int totalUsedCapacity = boxes.stream()
+                .mapToInt(Box::getUsedCapacity)
+                .sum();
+
+        // Tính tỉ lệ chứa
+        double utilizationRate = totalBinCapacity == 0 ? 0.0 :
+                (double) totalUsedCapacity / totalBinCapacity * 100.0;
+
+        return ShelfDetailResponse.builder()
+                .id(shelf.getId())
+                .shelfCode(shelf.getShelfCode())
+                .itemCount(itemCount)
+                .utilizationRate(utilizationRate)
+                .build();
     }
 
-    public List<BoxResponse> getBoxesByBinId(Integer binId) {
-        return boxRepository.findByBinIdInAndIsDeletedFalse(Collections.singletonList(binId)).stream()
-                .map(BoxMapper::toResponse)
-                .toList();
-    }
 
 }

@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class AllExportOrderResponse {
+    private Integer id;  // Mã đơn xuất
     private String exportCode;  // Mã đơn xuất
     private String skuCode;     // Mã SKU
     private String productName; // Tên sản phẩm
