@@ -104,10 +104,13 @@ public class TempImportExcelService {
         tempImportExcelRepository.save(temp);
     }
 
-
     @Transactional
-    public void deleteTempItems(List<Long> ids) {
-        tempImportExcelRepository.deleteAllById(ids);
+    public void deleteTempItem(Long id) {
+        if (!tempImportExcelRepository.existsById(id)) {
+            throw new AppException(ErrorCode.NOT_FOUND);
+        }
+        tempImportExcelRepository.deleteById(id);
     }
+
 
 }

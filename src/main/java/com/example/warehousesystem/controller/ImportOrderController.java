@@ -69,6 +69,15 @@ public class ImportOrderController {
                 .build());
     }
 
+    @DeleteMapping("/delete/temp/{id}")
+    public ResponseEntity<ApiResponse<String>> deleteTempItem(@PathVariable Long id) {
+        tempImportExcelService.deleteTempItem(id);
+        return ResponseEntity.ok(ApiResponse.<String>builder()
+                .message("Xóa bản ghi tạm thành công")
+                .data("success")
+                .build());
+    }
+
     @PostMapping(value = "/upload-excel-to-temp", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<String>> uploadExcelToTemp(
             @RequestParam("file") MultipartFile file
