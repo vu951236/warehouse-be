@@ -37,4 +37,8 @@ public class TempImportExcel {
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
     }
+
+    @Column(name = "import_code", nullable = false)
+    private String importCode;
+
 }

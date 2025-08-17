@@ -6,6 +6,7 @@ import com.example.warehousesystem.dto.response.TempImportExcelResponse;
 import com.example.warehousesystem.exception.AppException;
 import com.example.warehousesystem.exception.ErrorCode;
 import com.example.warehousesystem.entity.TempImportExcel;
+import com.example.warehousesystem.mapper.ItemImportMapper;
 import com.example.warehousesystem.repository.SKURepository;
 import com.example.warehousesystem.repository.TempImportExcelRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,8 @@ public class TempImportExcelService {
     public void saveTempItems(List<ExcelItemDTO> items) {
         Long userId = getCurrentUserId();
 
+        String importCode = ItemImportMapper.generateImportCode();
+
         List<TempImportExcel> entities = items.stream()
                 .map(dto -> TempImportExcel.builder()
                         .userId(userId)
@@ -45,14 +48,12 @@ public class TempImportExcelService {
                         .quantity(dto.getQuantity())
                         .source(dto.getSource())
                         .note(dto.getNote())
+                        .importCode(importCode)
                         .build())
                 .toList();
 
         tempImportExcelRepository.saveAll(entities);
     }
-
-
-
 
     public List<TempImportExcelResponse> getTempItemsByUser() {
         Long userId = getCurrentUserId();
@@ -60,18 +61,21 @@ public class TempImportExcelService {
         return tempImportExcelRepository.findByUserId(userId)
                 .stream()
                 .map(entity -> {
-                    String skuName = skuRepository.findBySkuCode(entity.getSkuCode())
-                            .map(SKU::getName)
-                            .orElse(null);
+                    SKU sku = skuRepository.findBySkuCode(entity.getSkuCode()).orElse(null);
 
                     return TempImportExcelResponse.builder()
                             .id(entity.getId())
                             .userId(entity.getUserId())
                             .skuCode(entity.getSkuCode())
-                            .skuName(skuName)
+                            .skuName(sku != null ? sku.getName() : null)
                             .quantity(entity.getQuantity())
                             .source(entity.getSource())
                             .note(entity.getNote())
+                            .importCode(entity.getImportCode())
+                            .size(sku != null ? sku.getSize() : null)
+                            .color(sku != null ? sku.getColor() : null)
+                            .type(sku != null ? sku.getType() : null)
+                            .unitVolume(sku != null ? sku.getUnitVolume() : null)
                             .createdAt(entity.getCreatedAt())
                             .build();
                 })

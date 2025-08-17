@@ -31,19 +31,24 @@ public class ImportFromTempService {
     @Transactional
     public ImportItemsResponse importSelected(List<Long> tempIds) {
         List<TempImportExcel> tempItems = tempImportExcelRepository.findAllById(tempIds);
-        if (tempItems.isEmpty()) {
-            throw new AppException(ErrorCode.INVALID_REQUEST);
-        }
+        if (tempItems.isEmpty()) throw new AppException(ErrorCode.INVALID_REQUEST);
 
         Long userId = tempItems.get(0).getUserId();
-        String source = tempItems.get(0).getSource();
-        String note = tempItems.get(0).getNote();
-
         User user = userRepository.findById(Math.toIntExact(userId))
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        ImportOrder importOrder = ItemImportMapper.toImportOrder(ImportOrder.Source.valueOf(source), note, user);
-        importOrder.setCreatedAt(LocalDateTime.now());
+        String importCode = tempItems.get(0).getImportCode();
+        String source = tempItems.get(0).getSource();
+        String note = tempItems.get(0).getNote();
+
+        ImportOrder importOrder = ImportOrder.builder()
+                .importCode(importCode)
+                .source(ImportOrder.Source.valueOf(source))
+                .status(ImportOrder.Status.confirmed)
+                .createdBy(user)
+                .createdAt(LocalDateTime.now())
+                .note(note)
+                .build();
         importOrderRepository.save(importOrder);
 
         List<ImportItemsResponse.ImportedItemInfo> importedItems = new ArrayList<>();

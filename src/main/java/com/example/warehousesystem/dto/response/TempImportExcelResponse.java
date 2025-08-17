@@ -18,6 +18,12 @@ public class TempImportExcelResponse {
     private Integer quantity;
     private String source;
     private String note;
+    private String importCode;
+
+    private String size;
+    private String color;
+    private String type;
+    private Float unitVolume;
 
     @JsonFormat(pattern = "yyyy/MM/dd")
     private LocalDateTime createdAt;
