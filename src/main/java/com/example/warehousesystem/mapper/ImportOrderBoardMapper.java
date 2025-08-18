@@ -13,6 +13,13 @@ public class ImportOrderBoardMapper {
                 .skuName(detail.getSku().getName())
                 .createdAt(detail.getImportOrder().getCreatedAt())
                 .quantity(detail.getQuantity())
+                .size(detail.getSku().getSize())
+                .color(detail.getSku().getColor())
+                .type(detail.getSku().getType())
+                .unitVolume(detail.getSku().getUnitVolume())
+                .source(detail.getImportOrder().getSource().toString())
+                .note(detail.getImportOrder().getNote())
                 .build();
     }
 }
+
