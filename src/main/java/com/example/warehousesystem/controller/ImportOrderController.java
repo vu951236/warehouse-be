@@ -207,9 +207,9 @@ public class ImportOrderController {
     }
 
     @GetMapping("/import-orders/{id}/fullDetail")
-    public ResponseEntity<ApiResponse<Object>> getFullImportOrder(@PathVariable Integer id) {
+    public ResponseEntity<ApiResponse<ImportOrderFullResponse>> getFullImportOrder(@PathVariable Integer id) {
         return ResponseEntity.ok(
-                ApiResponse.builder()
+                ApiResponse.<ImportOrderFullResponse>builder()
                         .message("Lấy đầy đủ thông tin đơn nhập thành công")
                         .data(importOrderService.getFullImportOrderById(id))
                         .build()
