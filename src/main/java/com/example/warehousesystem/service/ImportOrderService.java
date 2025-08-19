@@ -1,24 +1,23 @@
 package com.example.warehousesystem.service;
 
+import com.example.warehousesystem.dto.request.ImportOrderRequest;
 import com.example.warehousesystem.dto.response.ImportOrderBoardResponse;
 import com.example.warehousesystem.dto.response.ImportOrderFullResponse;
 import com.example.warehousesystem.dto.response.ImportOrderResponse;
 import com.example.warehousesystem.dto.response.ImportOrderDetailResponse;
-import com.example.warehousesystem.entity.ImportOrder;
-import com.example.warehousesystem.entity.ImportOrderDetail;
-import com.example.warehousesystem.entity.SKU;
+import com.example.warehousesystem.entity.*;
 import com.example.warehousesystem.mapper.ImportOrderBoardMapper;
 import com.example.warehousesystem.mapper.ImportOrderMapper;
 import com.example.warehousesystem.mapper.ImportOrderDetailMapper;
-import com.example.warehousesystem.repository.ImportOrderRepository;
-import com.example.warehousesystem.repository.ImportOrderDetailRepository;
+import com.example.warehousesystem.mapper.ItemImportMapper;
+import com.example.warehousesystem.repository.*;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,6 +26,11 @@ public class ImportOrderService {
 
     private final ImportOrderRepository importOrderRepository;
     private final ImportOrderDetailRepository importOrderDetailRepository;
+    private final SKURepository skuRepository;
+    private final UserRepository userRepository;
+    private final BoxRepository boxRepository;
+    private final BinRepository binRepository;
+    private final ItemRepository itemRepository;
     private final ImportOrderMapper importOrderMapper;
 
     // Lấy tất cả đơn nhập
@@ -157,6 +161,105 @@ public class ImportOrderService {
                                 .build()
                 ))
                 .build();
+    }
+
+    @Transactional
+    public ImportOrderFullResponse createImportOrder(ImportOrderRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        User creator = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người tạo"));
+
+        ImportOrder importOrder = ItemImportMapper.toImportOrder(
+                ImportOrder.Source.valueOf(request.getSource()),
+                request.getNote(),
+                creator
+        );
+        ImportOrder savedOrder = importOrderRepository.save(importOrder);
+
+        List<ImportOrderDetail> details = new ArrayList<>();
+
+        for (ImportOrderRequest.ImportOrderDetailRequest  d : request.getDetails()) {
+            SKU sku = skuRepository.findBySkuCode(d.getSkuCode())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy SKU code=" + d.getSkuCode()));
+
+            int requiredVolume = (int) (d.getQuantity() * sku.getUnitVolume());
+            List<Bin> availableBins = binRepository.findBinsWithAvailableCapacity();
+
+            Bin targetBin = null;
+            for (Bin bin : availableBins) {
+                int usedCapacity = binRepository.getUsedCapacityInBin(bin.getId());
+                if (bin.getCapacity() - usedCapacity >= requiredVolume) {
+                    targetBin = bin;
+                    break;
+                }
+            }
+            if (targetBin == null) {
+                throw new RuntimeException("Không còn bin đủ dung lượng cho SKU " + sku.getSkuCode());
+            }
+
+            Bin finalTargetBin = targetBin;
+            List<Box> availableBoxes = boxRepository.findAvailableBoxes(sku.getId(), sku.getUnitVolume())
+                    .stream()
+                    .filter(box -> box.getBin().getId().equals(finalTargetBin.getId()))
+                    .collect(Collectors.toList());
+
+            int quantityRemaining = d.getQuantity();
+
+            while (quantityRemaining > 0) {
+                Box targetBox = null;
+                for (Box box : availableBoxes) {
+                    int boxFree = box.getCapacity() - box.getUsedCapacity();
+                    if (boxFree >= sku.getUnitVolume()) {
+                        targetBox = box;
+                        break;
+                    }
+                }
+
+                if (targetBox == null) {
+                    int boxCount = boxRepository.countBoxesInBin(targetBin.getId());
+                    String newBoxCode = targetBin.getBinCode() + "-BOX-" + (boxCount + 1);
+
+                    targetBox = Box.builder()
+                            .boxCode(newBoxCode)
+                            .bin(targetBin)
+                            .sku(sku)
+                            .capacity(1000)
+                            .usedCapacity(0)
+                            .isDeleted(false)
+                            .build();
+                    boxRepository.save(targetBox);
+                    availableBoxes.add(targetBox);
+                }
+
+                int boxFree = targetBox.getCapacity() - targetBox.getUsedCapacity();
+                int canAddQuantity = (int) Math.min(quantityRemaining, boxFree / sku.getUnitVolume());
+
+                for (int i = 0; i < canAddQuantity; i++) {
+                    Item item = ItemImportMapper.toItem(targetBox, sku);
+
+                    String barcode;
+                    do {
+                        barcode = sku.getSkuCode() + "-" + UUID.randomUUID().toString().substring(0, 8);
+                    } while (itemRepository.existsByBarcode(barcode));
+
+                    item.setBarcode(barcode);
+                    itemRepository.save(item);
+                }
+
+                targetBox.setUsedCapacity((int) (targetBox.getUsedCapacity() + canAddQuantity * sku.getUnitVolume()));
+                boxRepository.save(targetBox);
+
+                quantityRemaining -= canAddQuantity;
+            }
+
+            ImportOrderDetail detail = ItemImportMapper.toDetail(savedOrder, sku, d.getQuantity());
+            importOrderDetailRepository.save(detail);
+            details.add(detail);
+        }
+
+        return getFullImportOrderById(savedOrder.getId());
     }
 
 }

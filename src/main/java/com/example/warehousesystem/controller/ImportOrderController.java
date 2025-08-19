@@ -262,4 +262,18 @@ public class ImportOrderController {
                 .data(data)
                 .build());
     }
+
+    @PostMapping("/create")
+    public ResponseEntity<ApiResponse<ImportOrderFullResponse>> createImportOrder(
+            @RequestBody ImportOrderRequest request
+    ) {
+        ImportOrderFullResponse response = importOrderService.createImportOrder(request);
+        return ResponseEntity.ok(
+                ApiResponse.<ImportOrderFullResponse>builder()
+                        .message("Tạo phiếu nhập thành công")
+                        .data(response)
+                        .build()
+        );
+    }
+
 }
