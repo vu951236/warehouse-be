@@ -2,6 +2,7 @@ package com.example.warehousesystem.controller;
 
 import com.example.warehousesystem.dto.response.SkuDetailResponse;
 import com.example.warehousesystem.dto.response.ApiResponse;
+import com.example.warehousesystem.dto.response.SkuWithBoxesResponse;
 import com.example.warehousesystem.service.SkuService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,4 +28,17 @@ public class SkuController {
                         .build()
         );
     }
+
+    @GetMapping("/getById/{id}")
+    public ResponseEntity<ApiResponse<SkuWithBoxesResponse>> getSkuDetailById(@PathVariable Integer id) {
+        SkuWithBoxesResponse skuDetail = skuService.getSkuDetailById(id);
+        return ResponseEntity.ok(
+                ApiResponse.<SkuWithBoxesResponse>builder()
+                        .code(200)
+                        .message("Lấy chi tiết SKU thành công")
+                        .data(skuDetail)
+                        .build()
+        );
+    }
+
 }

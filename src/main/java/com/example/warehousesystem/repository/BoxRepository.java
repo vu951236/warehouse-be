@@ -1,11 +1,13 @@
 package com.example.warehousesystem.repository;
 
 import com.example.warehousesystem.entity.Box;
+import com.example.warehousesystem.entity.SKU;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -81,4 +83,8 @@ public interface BoxRepository extends JpaRepository<Box, Integer> {
 
     Optional<Box> findByIdAndIsDeletedFalse(Integer id);
 
+    List<Box> findBySkuAndIsDeletedFalse(SKU sku);
+
+    @Query("SELECT COUNT(i) FROM Item i WHERE i.box.id = :boxId")
+    Long countItemsInBox(@Param("boxId") Integer boxId);
 }

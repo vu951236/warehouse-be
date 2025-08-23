@@ -1,18 +1,23 @@
 package com.example.warehousesystem.mapper;
 
-import com.example.warehousesystem.dto.response.SkuResponse;
+import com.example.warehousesystem.dto.response.SkuDetailResponse;
 import com.example.warehousesystem.entity.SKU;
+import org.springframework.stereotype.Component;
 
+@Component
 public class SkuMapper {
-    public static SkuResponse toSearchResponse(SKU sku) {
-        return SkuResponse.builder()
-                .id(sku.getId())
+
+    public SkuDetailResponse toResponse(SKU sku, Long itemCount) {
+        if (sku == null) return null;
+
+        return SkuDetailResponse.builder()
                 .skuCode(sku.getSkuCode())
+                .itemCount(itemCount)
                 .name(sku.getName())
-                .type(sku.getType())
-                .color(sku.getColor())
                 .size(sku.getSize())
-                .unitVolume(sku.getUnitVolume())
+                .color(sku.getColor())
+                .type(sku.getType())
+                .unitVolume(Double.valueOf(sku.getUnitVolume()))
                 .build();
     }
 }
