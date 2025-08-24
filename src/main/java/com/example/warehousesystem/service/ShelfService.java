@@ -98,39 +98,42 @@ public class ShelfService {
      * Tạo mới một kệ hàng cùng với 16 bin con
      */
     @Transactional
-    public ShelfResponse createShelf(CreateShelfRequest request) {
-        // Kiểm tra trùng mã kệ
-        if (shelfRepository.existsByShelfCode(request.getShelfCode())) {
-            throw new IllegalArgumentException("Mã kệ đã tồn tại: " + request.getShelfCode());
-        }
-
-        // Lấy warehouse theo ID
-        Warehouse warehouse = warehouseRepository.findById(request.getWarehouseId())
+    public ShelfResponse createShelf() {
+        Warehouse warehouse = warehouseRepository.findById(1)
                 .orElseThrow(() -> new AppException(ErrorCode.WAREHOUSE_NOT_FOUND));
 
-        // Tạo đối tượng Shelf
-        Shelf shelf = CreateShelfMapper.toEntity(request, warehouse);
-        shelf.setIsDeleted(false);
+        Shelf shelf = Shelf.builder()
+                .binCount(16)
+                .warehouse(warehouse)
+                .isDeleted(false)
+                .shelfCode("TEMP")
+                .build();
 
-        // Lưu kệ để có ID
         Shelf savedShelf = shelfRepository.save(shelf);
 
-        // Tạo 16 bin theo quy tắc mã
+        String shelfCode = "SH" + String.format("%02d", savedShelf.getId());
+        savedShelf.setShelfCode(shelfCode);
+
+        savedShelf = shelfRepository.save(savedShelf);
+
         List<Bin> binList = new ArrayList<>();
+        List<String> binCodes = new ArrayList<>();
+
         for (int i = 1; i <= 16; i++) {
-            String binCode = request.getShelfCode() + "-B" + String.format("%02d", i);  // SH01-B01, SH01-B02,...
+            String binCode = shelfCode + "-B" + String.format("%02d", i);
             Bin bin = Bin.builder()
                     .binCode(binCode)
-                    .capacity(100)
+                    .capacity(600)
                     .shelf(savedShelf)
                     .isDeleted(false)
                     .build();
             binList.add(bin);
+            binCodes.add(binCode);
         }
 
         binRepository.saveAll(binList);
 
-        return CreateShelfMapper.toResponse(savedShelf);
+        return CreateShelfMapper.toResponse(savedShelf, binCodes);
     }
 
     public byte[] exportShelvesToPdf() {

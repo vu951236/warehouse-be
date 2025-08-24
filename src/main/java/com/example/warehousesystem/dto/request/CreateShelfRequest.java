@@ -9,5 +9,6 @@ import lombok.*;
 @Builder
 public class CreateShelfRequest {
     private String shelfCode;
-    private Integer warehouseId;
+    private String warehouseName;
 }
+

@@ -225,7 +225,7 @@ public class ImportOrderService {
                             .boxCode(newBoxCode)
                             .bin(targetBin)
                             .sku(sku)
-                            .capacity(1000)
+                            .capacity(100)
                             .usedCapacity(0)
                             .isDeleted(false)
                             .build();

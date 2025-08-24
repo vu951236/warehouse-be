@@ -5,6 +5,8 @@ import com.example.warehousesystem.dto.response.ShelfResponse;
 import com.example.warehousesystem.entity.Shelf;
 import com.example.warehousesystem.entity.Warehouse;
 
+import java.util.List;
+
 public class CreateShelfMapper {
 
     public static Shelf toEntity(CreateShelfRequest request, Warehouse warehouse) {
@@ -15,13 +17,12 @@ public class CreateShelfMapper {
                 .build();
     }
 
-    public static ShelfResponse toResponse(Shelf shelf) {
+    public static ShelfResponse toResponse(Shelf shelf, List<String> binCodes) {
         return ShelfResponse.builder()
                 .id(shelf.getId())
                 .shelfCode(shelf.getShelfCode())
                 .binCount(shelf.getBinCount())
-                .warehouseId(shelf.getWarehouse().getId())
-                .warehouseName(shelf.getWarehouse().getName())
+                .binCodes(binCodes)
                 .build();
     }
 

@@ -10,8 +10,6 @@ public class ShelfMapper {
                 .id(shelf.getId())
                 .shelfCode(shelf.getShelfCode())
                 .binCount(shelf.getBinCount())
-                .warehouseId(shelf.getWarehouse().getId())
-                .warehouseName(shelf.getWarehouse().getName())
                 .build();
     }
 }

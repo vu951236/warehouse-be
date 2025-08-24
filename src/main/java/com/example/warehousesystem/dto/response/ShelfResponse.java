@@ -2,6 +2,8 @@ package com.example.warehousesystem.dto.response;
 
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -11,6 +13,5 @@ public class ShelfResponse {
     private Integer id;
     private String shelfCode;
     private Integer binCount;
-    private Integer warehouseId;
-    private String warehouseName;
+    private List<String> binCodes;
 }

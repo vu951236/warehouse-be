@@ -33,8 +33,8 @@ public class ShelfController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<ApiResponse<ShelfResponse>> createShelf(@Valid @RequestBody CreateShelfRequest request) {
-        ShelfResponse response = shelfService.createShelf(request);
+    public ResponseEntity<ApiResponse<ShelfResponse>> createShelf() {
+        ShelfResponse response = shelfService.createShelf();
         return ResponseEntity.ok(
                 ApiResponse.<ShelfResponse>builder()
                         .message("Tạo kệ hàng thành công")
