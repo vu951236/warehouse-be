@@ -219,7 +219,7 @@ public class ImportOrderService {
 
                 if (targetBox == null) {
                     int boxCount = boxRepository.countBoxesInBin(targetBin.getId());
-                    String newBoxCode = targetBin.getBinCode() + "-BOX-" + (boxCount + 1);
+                    String newBoxCode = targetBin.getBinCode() + "-BX-" + (boxCount + 1);
 
                     targetBox = Box.builder()
                             .boxCode(newBoxCode)

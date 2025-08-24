@@ -67,4 +67,13 @@ public interface BinRepository extends JpaRepository<Bin, Integer> {
 
     List<Bin> findAllByIsDeletedFalse();
 
+    @Query("SELECT bin FROM Bin bin " +
+            "JOIN bin.shelf s " +
+            "WHERE s.shelfCode IN :shelfCodes " +
+            "AND bin.isDeleted = false")
+    Optional<Bin> findFirstByShelfCodes(@Param("shelfCodes") List<String> shelfCodes);
+
+    @Query("SELECT b FROM Bin b WHERE b.shelf.shelfCode IN :shelfCodes")
+    List<Bin> findBinsWithAvailableCapacityInShelves(@Param("shelfCodes") List<String> shelfCodes);
+
 }

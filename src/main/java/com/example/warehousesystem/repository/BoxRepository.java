@@ -86,5 +86,16 @@ public interface BoxRepository extends JpaRepository<Box, Integer> {
     List<Box> findBySkuAndIsDeletedFalse(SKU sku);
 
     @Query("SELECT COUNT(i) FROM Item i WHERE i.box.id = :boxId")
+
     Long countItemsInBox(@Param("boxId") Integer boxId);
+    @Query("SELECT b FROM Box b " +
+            "JOIN b.bin bin " +
+            "JOIN bin.shelf s " +
+            "WHERE b.sku.id = :skuId " +
+            "AND s.shelfCode IN :shelfCodes " +
+            "AND b.isDeleted = false")
+    List<Box> findAvailableBoxesForSkuInShelves(
+            @Param("skuId") Integer skuId,
+            @Param("shelfCodes") List<String> shelfCodes
+    );
 }

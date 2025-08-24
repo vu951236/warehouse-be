@@ -44,6 +44,12 @@ public class Item {
         queued // trạng thái chờ xuất
     }
 
+    @Column(name = "note", length = 255)
+    private String note;
+
+    @Column(name = "transferred_at")
+    private LocalDateTime transferredAt;
+
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
 }

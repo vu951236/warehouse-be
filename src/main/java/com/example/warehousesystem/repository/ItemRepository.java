@@ -112,5 +112,8 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
     @Query("SELECT COUNT(i) FROM Item i WHERE i.box.id = :boxId AND i.sku.id = :skuId AND i.isDeleted = false")
     Long countItemsByBoxIdAndSkuId(@Param("boxId") Integer boxId, @Param("skuId") Integer skuId);
 
+    @Query("SELECT COUNT(i) FROM Item i WHERE i.sku = :sku AND i.status = 'damaged' AND i.isDeleted = false")
+    Long countDamagedItemsBySKU(@Param("sku") SKU sku);
 
+    List<Item> findBySkuAndStatus(SKU sku, Item.Status status);
 }

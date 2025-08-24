@@ -1,8 +1,6 @@
 package com.example.warehousesystem.controller;
 
-import com.example.warehousesystem.dto.response.SkuDetailResponse;
-import com.example.warehousesystem.dto.response.ApiResponse;
-import com.example.warehousesystem.dto.response.SkuWithBoxesResponse;
+import com.example.warehousesystem.dto.response.*;
 import com.example.warehousesystem.service.SkuService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -40,5 +38,31 @@ public class SkuController {
                         .build()
         );
     }
+
+    @GetMapping("/damaged")
+    public ResponseEntity<ApiResponse<List<SKUDamagedResponse>>> getAllSKUDamaged() {
+        List<SKUDamagedResponse> responses = skuService.getAllSKUDamaged();
+        return ResponseEntity.ok(
+                ApiResponse.<List<SKUDamagedResponse>>builder()
+                        .code(200)
+                        .message("Lấy danh sách SKU cùng số item damaged thành công")
+                        .data(responses)
+                        .build()
+        );
+    }
+
+    @GetMapping("/damaged/{skuId}")
+    public ResponseEntity<ApiResponse<SkuDamagedDetailResponse>> getSkuDamagedDetail(
+            @PathVariable Integer skuId
+    ) {
+        return ResponseEntity.ok(
+                ApiResponse.<SkuDamagedDetailResponse>builder()
+                        .code(200)
+                        .message("Chi tiết SKU lỗi")
+                        .data(skuService.getDamagedSkuDetail(skuId))
+                        .build()
+        );
+    }
+
 
 }
