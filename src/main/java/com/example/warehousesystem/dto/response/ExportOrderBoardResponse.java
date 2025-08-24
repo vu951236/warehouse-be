@@ -19,4 +19,5 @@ public class ExportOrderBoardResponse {
     private LocalDateTime createdAt;
 
     private Integer quantity;
+    private String note;
 }

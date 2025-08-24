@@ -1,71 +1,57 @@
 package com.example.warehousesystem.service;
 
-import com.example.warehousesystem.dto.request.SearchImportBySKURequest;
-import com.example.warehousesystem.dto.response.SearchImportBySKUResponse;
-import com.example.warehousesystem.mapper.SearchImportBySKUMapper;
-import com.example.warehousesystem.repository.ImportOrderDetailRepository;
+import com.example.warehousesystem.dto.response.ImportOrderBoardResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ImportExcelExportService {
 
-    private final ImportOrderDetailRepository importOrderDetailRepository;
+    private final ImportOrderService importOrderService;
 
-    public ByteArrayInputStream exportImportHistoryBySku(SearchImportBySKURequest request) throws IOException {
-        LocalDateTime fromDate = request.getFromDate() != null ?
-                LocalDateTime.parse(request.getFromDate() + "T00:00:00") : null;
-        LocalDateTime toDate = request.getToDate() != null ?
-                LocalDateTime.parse(request.getToDate() + "T23:59:59") : null;
+    public ByteArrayResource exportImportOrders() throws IOException {
+        List<ImportOrderBoardResponse> orders = importOrderService.getAllImportOrderDetailsMergedWithSkuList();
 
-        List<Object[]> resultSet = importOrderDetailRepository.findImportDetailsBySku(
-                request.getSkuCode(), fromDate, toDate
-        );
-
-        List<SearchImportBySKUResponse> responses = resultSet.stream()
-                .map(row -> SearchImportBySKUMapper.toImportBySkuResponse(
-                        (com.example.warehousesystem.entity.ImportOrder) row[1],
-                        (com.example.warehousesystem.entity.ImportOrderDetail) row[0],
-                        (String) row[2]
-                ))
-                .toList();
-
-        // Tạo Excel
-        try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            Sheet sheet = workbook.createSheet("Import History");
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Import Orders");
 
             // Header
-            Row header = sheet.createRow(0);
-            String[] columns = {"Mã đơn nhập", "Ngày nhập", "Số lượng", "Trạng thái", "Người tạo", "Kho"};
+            String[] columns = {"ID", "Import Code", "SKU Codes", "SKU Names", "Created At", "Quantity"};
+            Row headerRow = sheet.createRow(0);
+
             for (int i = 0; i < columns.length; i++) {
-                Cell cell = header.createCell(i);
+                Cell cell = headerRow.createCell(i);
                 cell.setCellValue(columns[i]);
             }
 
             // Data
             int rowIdx = 1;
-            for (SearchImportBySKUResponse item : responses) {
+            for (ImportOrderBoardResponse order : orders) {
                 Row row = sheet.createRow(rowIdx++);
-                row.createCell(0).setCellValue(item.getImportOrderId());
-                row.createCell(1).setCellValue(item.getImportDate());
-                row.createCell(2).setCellValue(item.getQuantity());
-                row.createCell(3).setCellValue(item.getStatus());
-                row.createCell(4).setCellValue(item.getCreatedBy());
-                row.createCell(5).setCellValue(item.getWarehouseName());
+                row.createCell(0).setCellValue(order.getId());
+                row.createCell(1).setCellValue(order.getImportCode());
+                row.createCell(2).setCellValue(order.getSkuCode());
+                row.createCell(3).setCellValue(order.getSkuName());
+                row.createCell(4).setCellValue(order.getCreatedAt().toString());
+                row.createCell(5).setCellValue(order.getQuantity());
             }
 
+            // Auto size
+            for (int i = 0; i < columns.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
             workbook.write(out);
-            return new ByteArrayInputStream(out.toByteArray());
+            return new ByteArrayResource(out.toByteArray());
         }
     }
 }

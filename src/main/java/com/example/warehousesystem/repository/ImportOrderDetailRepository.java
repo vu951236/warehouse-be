@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -36,5 +37,19 @@ public interface ImportOrderDetailRepository extends JpaRepository<ImportOrderDe
     //Xem thông tin các lần nhập
     @Query("SELECT d FROM ImportOrderDetail d WHERE d.importOrder.id = :orderId")
     List<ImportOrderDetail> findByImportOrderId(@Param("orderId") Integer orderId);
+
+    @Query("""
+        SELECT d FROM ImportOrderDetail d
+        JOIN d.importOrder o
+        JOIN d.sku s
+        WHERE (:importCode IS NULL OR o.importCode = :importCode)
+          AND (:skuCode IS NULL OR s.skuCode = :skuCode)
+          AND (:createdAt IS NULL OR DATE(o.createdAt) = :createdAt)
+    """)
+    List<ImportOrderDetail> searchImportOrdersV2(
+            @Param("importCode") String importCode,
+            @Param("skuCode") String skuCode,
+            @Param("createdAt") LocalDate createdAt
+    );
 }
 

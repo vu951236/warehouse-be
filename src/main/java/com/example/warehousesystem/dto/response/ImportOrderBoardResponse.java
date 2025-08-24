@@ -1,5 +1,6 @@
 package com.example.warehousesystem.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ImportOrderBoardResponse {
     private Long id;
 

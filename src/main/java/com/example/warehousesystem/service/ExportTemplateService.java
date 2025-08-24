@@ -2,59 +2,48 @@ package com.example.warehousesystem.service;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 @Service
 public class ExportTemplateService {
 
-    /**
-     * Tạo file Excel mẫu cho WMS-32 (Export by Excel)
-     * Trả về byte[] để controller trả về client.
-     */
-    public byte[] createExportExcelTemplate() {
-        try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+    public ByteArrayResource generateExportExcelTemplate() {
+        try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Export Template");
 
-            // Header style (bold)
+            // Tạo header row
+            Row headerRow = sheet.createRow(0);
+
+            Cell skuCell = headerRow.createCell(0);
+            skuCell.setCellValue("skuCode");
+
+            Cell quantityCell = headerRow.createCell(1);
+            quantityCell.setCellValue("quantity");
+
+            // Style cho header
             CellStyle headerStyle = workbook.createCellStyle();
-            Font headerFont = workbook.createFont();
-            headerFont.setBold(true);
-            headerStyle.setFont(headerFont);
+            Font font = workbook.createFont();
+            font.setBold(true);
+            headerStyle.setFont(font);
 
-            // Header row
-            Row header = sheet.createRow(0);
-            String[] headers = new String[] { "skuCode", "quantity", "note" };
-            for (int c = 0; c < headers.length; c++) {
-                Cell cell = header.createCell(c);
-                cell.setCellValue(headers[c]);
-                cell.setCellStyle(headerStyle);
-            }
+            skuCell.setCellStyle(headerStyle);
+            quantityCell.setCellStyle(headerStyle);
 
-            // Example row 1
-            Row example1 = sheet.createRow(1);
-            example1.createCell(0).setCellValue("SKU001");
-            example1.createCell(1).setCellValue(10);
-            example1.createCell(2).setCellValue("Xuất cho đơn bán hàng A");
+            // Auto size columns
+            sheet.autoSizeColumn(0);
+            sheet.autoSizeColumn(1);
 
-            // Example row 2
-            Row example2 = sheet.createRow(2);
-            example2.createCell(0).setCellValue("SKU002");
-            example2.createCell(1).setCellValue(5);
-            example2.createCell(2).setCellValue("");
-
-            // Gợi ý: set autofilter and autosize
-            sheet.setAutoFilter(new org.apache.poi.ss.util.CellRangeAddress(0, 0, 0, headers.length - 1));
-            for (int c = 0; c < headers.length; c++) {
-                sheet.autoSizeColumn(c);
-            }
-
+            // Ghi ra file
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
             workbook.write(out);
-            return out.toByteArray();
-        } catch (IOException e) {
-            throw new RuntimeException("Lỗi tạo file mẫu Excel", e);
+
+            return new ByteArrayResource(out.toByteArray());
+
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi tạo template Excel", e);
         }
     }
 }

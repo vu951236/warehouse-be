@@ -8,6 +8,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -32,6 +33,7 @@ public class ExportOrderController {
     private final PickingRouteService pickingRouteService;
     private final UrgentOrderService urgentOrderService;
     private final ExportExcelExportService exportExcelExportService;
+
 
     @GetMapping("/getallExportOrder")
     public ResponseEntity<ApiResponse<List<ExportOrderResponse>>> getAllExportOrders() {
@@ -157,14 +159,15 @@ public class ExportOrderController {
         );
     }
 
-    @GetMapping("/template/excel")
-    public ResponseEntity<byte[]> downloadExportTemplate() {
-        byte[] bytes = templateService.createExportExcelTemplate();
-        String filename = "export_template.xlsx";
+    @GetMapping("/export/template")
+    public ResponseEntity<ByteArrayResource> downloadTemplate() {
+        ByteArrayResource resource = templateService.generateExportExcelTemplate();
+
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
-                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                .body(bytes);
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=export_template.xlsx")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .contentLength(resource.contentLength())
+                .body(resource);
     }
 
     @PostMapping("/search-by-sku")
@@ -200,17 +203,19 @@ public class ExportOrderController {
         );
     }
 
-    @PostMapping("/export-excel")
-    public ResponseEntity<InputStreamResource> exportExportExcel(@RequestBody SearchExportBySKURequest request) throws IOException {
-        ByteArrayInputStream in = exportExcelExportService.exportExportHistoryBySku(request);
+    @GetMapping("/export-excel")
+    public ResponseEntity<byte[]> exportExcel() throws IOException {
+        ByteArrayInputStream stream = exportExcelExportService.exportAllExportOrdersToExcel();
+        byte[] bytes = stream.readAllBytes();
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Disposition", "attachment; filename=export_history.xlsx");
+        headers.add("Content-Disposition", "attachment; filename=export_orders.xlsx");
 
-        return ResponseEntity.ok()
+        return ResponseEntity
+                .ok()
                 .headers(headers)
-                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                .body(new InputStreamResource(in));
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(bytes);
     }
 
     @GetMapping("/getAllExportOrderDetails")

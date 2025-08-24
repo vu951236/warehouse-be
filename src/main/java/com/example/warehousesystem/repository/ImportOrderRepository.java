@@ -60,20 +60,4 @@ public interface ImportOrderRepository extends JpaRepository<ImportOrder, Intege
             @Param("endDate") String endDate
     );
 
-    //Tìm kiếm đơn nhập
-    @Query("""
-        SELECT io FROM ImportOrder io
-        WHERE (:source IS NULL OR io.source = :source)
-          AND (:status IS NULL OR io.status = :status)
-          AND (:createdBy IS NULL OR io.createdBy.username = :createdBy)
-          AND (:startDate IS NULL OR io.createdAt >= :startDate)
-          AND (:endDate IS NULL OR io.createdAt <= :endDate)
-    """)
-    List<ImportOrder> searchImportOrders(
-            @Param("source") com.example.warehousesystem.entity.ImportOrder.Source source,
-            @Param("status") com.example.warehousesystem.entity.ImportOrder.Status status,
-            @Param("createdBy") String createdBy,
-            @Param("startDate") LocalDateTime startDate,
-            @Param("endDate") LocalDateTime endDate
-    );
 }

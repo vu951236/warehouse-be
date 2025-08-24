@@ -6,9 +6,7 @@ import com.example.warehousesystem.dto.response.*;
 import com.example.warehousesystem.service.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -16,8 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,27 +23,23 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ImportOrderController {
 
-    private final ImportOrderSearchService importOrderSearchService;
     private final TempImportExcelService tempImportExcelService;
     private final ImportFromTempService importFromTempService;
     private final ImportScanBarcodeService importScanBarcodeService;
     private final ImportSingleItemByForm importSingleItemByForm;
     private final ImportOrderDetailService importOrderDetailService;
-    private final ImportExcelExportService importExcelExportService;
+    private final ImportExcelExportService importOrderExportService;
     private final ImportOrderService importOrderService;
     private final ImportTemplateService importTemplateService;
     private final BarcodeSimulationService barcodeSimulationService;
+    private final ImportOrderSearchService importOrderSearchService;
 
 
     @PostMapping("/search")
-    public ResponseEntity<ApiResponse<List<ImportOrderResponse>>> searchImportOrders(
+    public ResponseEntity<List<ImportOrderBoardResponse>> searchImportOrders(
             @RequestBody ImportOrderSearchRequest request
     ) {
-        List<ImportOrderResponse> result = importOrderSearchService.searchImportOrders(request);
-        return ResponseEntity.ok(ApiResponse.<List<ImportOrderResponse>>builder()
-                .message("Tìm kiếm thành công")
-                .data(result)
-                .build());
+        return ResponseEntity.ok(importOrderSearchService.searchImportOrders(request));
     }
 
     @PostMapping("/import-by-scan")
@@ -153,16 +145,17 @@ public class ImportOrderController {
                 .build());
     }
 
-    @PostMapping("/export-excel")
-    public ResponseEntity<InputStreamResource> exportImportExcel(@RequestBody SearchImportBySKURequest request) throws IOException {
-        ByteArrayInputStream in = importExcelExportService.exportImportHistoryBySku(request);
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Disposition", "attachment; filename=import_history.xlsx");
+    @GetMapping("/export-excel")
+    public ResponseEntity<Resource> exportImportOrders() throws IOException {
+        ByteArrayResource resource = importOrderExportService.exportImportOrders();
+
         return ResponseEntity.ok()
-                .headers(headers)
-                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                .body(new InputStreamResource(in));
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=import_orders_excel.xlsx")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .contentLength(resource.contentLength())
+                .body(resource);
     }
+
 
     @GetMapping("/getallImportOrder")
     public ResponseEntity<ApiResponse<List<ImportOrderResponse>>> getAllImportOrders() {
