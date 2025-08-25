@@ -9,12 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-//Tạo tài khoản (admin)
 public class UserCreateRequest {
     private String username;
     private String email;
-    private String password;
     private String fullName;
     private String role;
-    private Boolean isActive;  // trạng thái tài khoản
+    private Boolean isActive;
 }

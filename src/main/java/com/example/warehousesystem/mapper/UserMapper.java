@@ -12,9 +12,14 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
+
     User toUser(UserCreateRequest request);
 
+    @Mapping(source = "id", target = "userId")
+    @Mapping(source = "userCode", target = "userCode")
+    @Mapping(source = "createdAt", target = "createdAt")
     UserResponse toUserResponse(User user);
+
 
     void updateUser(@MappingTarget User user, UserUpdateRequest request);
 
@@ -26,5 +31,4 @@ public interface UserMapper {
     @Mapping(source = "username", target = "username")
     @Mapping(source = "isActive", target = "isActive")
     UserLockResponse toUserLockResponse(User user);
-
 }

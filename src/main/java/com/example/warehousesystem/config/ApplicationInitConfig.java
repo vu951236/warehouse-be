@@ -44,6 +44,7 @@ public class ApplicationInitConfig {
                         .username(ADMIN_USER_NAME)
                         .email(ADMIN_EMAIL)
                         .fullName("Admin")
+                        .userCode("ADMIN")
                         .passwordHash(passwordEncoder.encode(ADMIN_PASSWORD))
                         .role(Role.admin)
                         .isActive(true)

@@ -15,7 +15,10 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id; // đổi sang Integer để khớp với INT trong DB
+    private Integer id;
+
+    @Column(name = "user_code", nullable = false, unique = true, length = 50)
+    private String userCode;
 
     @Column(name = "username", nullable = false, unique = true, length = 100)
     private String username;

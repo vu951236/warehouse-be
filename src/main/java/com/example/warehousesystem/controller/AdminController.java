@@ -9,6 +9,7 @@ import com.example.warehousesystem.dto.response.UserResponse;
 import com.example.warehousesystem.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -69,5 +70,29 @@ public class AdminController {
                         .build()
         );
     }
+
+    @PutMapping("/{userId}/reset-password")
+    @PreAuthorize("hasRole('admin')")
+    public ResponseEntity<ApiResponse<Void>> resetPasswordToDefault(@PathVariable Integer userId) {
+        userService.resetPasswordToDefault(userId);
+        return ResponseEntity.ok(
+                ApiResponse.<Void>builder()
+                        .message("Đặt lại mật khẩu thành công (mặc định: Nhom333@)")
+                        .build()
+        );
+    }
+
+    @GetMapping("/user/{userId}")
+    @PreAuthorize("hasRole('admin')")
+    public ResponseEntity<ApiResponse<UserResponse>> getUserById(@PathVariable Integer userId) {
+        UserResponse response = userService.getUserById(userId);
+        return ResponseEntity.ok(
+                ApiResponse.<UserResponse>builder()
+                        .message("Lấy thông tin user thành công")
+                        .data(response)
+                        .build()
+        );
+    }
+
 
 }

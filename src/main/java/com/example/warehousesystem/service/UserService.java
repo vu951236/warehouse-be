@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Optional;
@@ -37,17 +38,23 @@ public class UserService {
     private final EmailService emailService;
     private final ConcurrentHashMap<String, AbstractMap.SimpleEntry<String, LocalDateTime>> verificationCodes = new ConcurrentHashMap<>();
 
+    public static class CodeGenerator {
+        public static String generateUserCode() {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+            return "US" + LocalDateTime.now().format(formatter);
+        }
+    }
+
     @PreAuthorize("hasRole('admin')")
     public UserResponse createUser(UserCreateRequest request) {
-        // Convert request thành entity
         User user = userMapper.toUser(request);
 
-        // Mặc định password
-        String defaultPassword = "12345678@aA";
+        String defaultPassword = "Nhom333@";
         user.setPasswordHash(passwordEncoder.encode(defaultPassword));
-
         user.setCreatedAt(LocalDateTime.now());
         user.setIsActive(true);
+
+        user.setUserCode(CodeGenerator.generateUserCode());
 
         try {
             user = userRepository.save(user);
@@ -131,6 +138,14 @@ public class UserService {
         return userRepository.findAll().stream().map(userMapper::toUserResponse).collect(Collectors.toList());
     }
 
+    @PreAuthorize("hasRole('admin')")
+    public UserResponse getUserById(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        return userMapper.toUserResponse(user);
+    }
+
     private String generateVerificationCode() {
         int length = 6;
         String characters = "0123456789";
@@ -180,5 +195,23 @@ public class UserService {
     public void clearCode(String email) {
         verificationCodes.remove(email);
     }
+
+    @PreAuthorize("hasRole('admin')")
+    public void resetPasswordToDefault(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        if (user.getRole() == User.Role.admin) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        String defaultPassword = "Nhom333@";
+        user.setPasswordHash(passwordEncoder.encode(defaultPassword));
+
+        userRepository.save(user);
+
+        userMapper.toUserResponse(user);
+    }
+
 
 }

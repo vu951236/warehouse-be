@@ -9,7 +9,7 @@ public class ItemImportMapper {
 
     public static String generateImportCode() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-        return "IMP-" + LocalDateTime.now().format(formatter);
+        return "IM" + LocalDateTime.now().format(formatter);
     }
 
     public static ImportOrder toImportOrder(ImportOrder.Source source, String note, User user) {
