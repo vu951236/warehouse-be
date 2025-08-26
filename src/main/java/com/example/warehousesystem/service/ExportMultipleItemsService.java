@@ -17,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.io.FileOutputStream;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -68,7 +69,7 @@ public class ExportMultipleItemsService {
         ExportOrder exportOrder = ExportOrder.builder()
                 .exportCode(exportCode)
                 .createdBy(createdBy)
-                .createdAt(LocalDateTime.now())
+                .createdAt(LocalDate.now())
                 .destination("Kho chính")
                 .status(ExportOrder.Status.draft)
                 .source(ExportOrder.Source.manual)

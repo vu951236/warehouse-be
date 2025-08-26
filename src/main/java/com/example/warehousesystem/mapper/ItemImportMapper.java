@@ -2,6 +2,7 @@ package com.example.warehousesystem.mapper;
 
 import com.example.warehousesystem.entity.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -18,7 +19,7 @@ public class ItemImportMapper {
                 .status(ImportOrder.Status.confirmed)
                 .importCode(generateImportCode())
                 .createdBy(user)
-                .createdAt(LocalDateTime.now())
+                .createdAt(LocalDate.now())
                 .note(note)
                 .build();
     }
@@ -36,7 +37,7 @@ public class ItemImportMapper {
                 .box(box)
                 .sku(sku)
                 .status(Item.Status.available)
-                .createdAt(LocalDateTime.now())
+                .createdAt(LocalDate.now())
                 .isDeleted(false)
                 .build();
     }

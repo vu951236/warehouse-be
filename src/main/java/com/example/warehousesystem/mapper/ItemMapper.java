@@ -13,7 +13,7 @@ public class ItemMapper {
                 .skuName(item.getSku().getName())
                 .boxCode(item.getBox().getBoxCode())
                 .status(item.getStatus())
-                .createdAt(item.getCreatedAt())
+                .createdAt(item.getCreatedAt().atStartOfDay())
                 .build();
     }
 }

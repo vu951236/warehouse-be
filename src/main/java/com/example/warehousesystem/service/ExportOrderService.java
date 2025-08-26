@@ -78,7 +78,7 @@ public class ExportOrderService {
                 .exportCode(detail.getExportOrder().getExportCode())
                 .skuCode(detail.getSku().getSkuCode())
                 .productName(detail.getSku().getName())
-                .exportDate(detail.getExportOrder().getCreatedAt())
+                .exportDate(detail.getExportOrder().getCreatedAt().atStartOfDay())
                 .quantity(detail.getQuantity())
                 .build()
         ).toList();
@@ -96,7 +96,7 @@ public class ExportOrderService {
                 .source(exportOrder.getSource().toString())
                 .status(exportOrder.getStatus().toString())
                 .createdBy(exportOrder.getCreatedBy().getUsername())
-                .createdAt(exportOrder.getCreatedAt())
+                .createdAt(exportOrder.getCreatedAt().atStartOfDay())
                 .note(exportOrder.getNote())
                 .details(details.stream().map(d -> {
                     SKU sku = d.getSku();
@@ -127,7 +127,7 @@ public class ExportOrderService {
                 .source(exportOrder.getSource().toString())
                 .status(exportOrder.getStatus().toString())
                 .createdBy(exportOrder.getCreatedBy().getUsername())
-                .createdAt(exportOrder.getCreatedAt())
+                .createdAt(exportOrder.getCreatedAt().atStartOfDay())
                 .note(exportOrder.getNote())
                 .details(Collections.singletonList(
                         ExportOrderFullResponse.ExportOrderDetailItem.builder()
@@ -180,7 +180,7 @@ public class ExportOrderService {
                     .exportCode(first.getExportOrder().getExportCode())
                     .skuCode(allSkuCodes)
                     .skuName(allSkuNames)
-                    .createdAt(first.getExportOrder().getCreatedAt())
+                    .createdAt(first.getExportOrder().getCreatedAt().atStartOfDay())
                     .quantity(totalQuantity)
                     .build();
 

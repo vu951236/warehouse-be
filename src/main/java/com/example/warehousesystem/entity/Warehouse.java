@@ -1,8 +1,10 @@
 package com.example.warehousesystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -27,13 +29,14 @@ public class Warehouse {
     @Column(name = "shelf_count", nullable = false)
     private Integer shelfCount;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
 
     @PrePersist
     public void prePersist() {
         if (createdAt == null) {
-            createdAt = LocalDateTime.now();
+            createdAt = LocalDate.now();
         }
     }
 }

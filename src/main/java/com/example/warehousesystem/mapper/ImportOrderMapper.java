@@ -13,7 +13,7 @@ public class ImportOrderMapper {
                 .source(order.getSource().toString())
                 .status(order.getStatus().toString())
                 .createdBy(order.getCreatedBy().getUsername())
-                .createdAt(order.getCreatedAt())
+                .createdAt(order.getCreatedAt().atStartOfDay())
                 .note(order.getNote())
                 .build();
     }

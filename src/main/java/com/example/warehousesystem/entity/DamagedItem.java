@@ -1,7 +1,10 @@
 package com.example.warehousesystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -24,8 +27,9 @@ public class DamagedItem {
     @Column(name = "barcode", nullable = false, length = 100)
     private String barcode;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "marked_at", nullable = false)
-    private LocalDateTime markedAt;
+    private LocalDate markedAt;
 
     @Column(name = "note", length = 255)
     private String note;

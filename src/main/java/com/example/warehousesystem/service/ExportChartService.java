@@ -24,12 +24,14 @@ public class ExportChartService {
         );
 
         return rawData.stream()
-                .map(row -> {
-                    String exportDate = (String) row[0];
-                    Long totalOrders = row[1] != null ? ((Number) row[1]).longValue() : 0L;
-                    Long totalItems = row[2] != null ? ((Number) row[2]).longValue() : 0L;
-                    return ExportChartMapper.toResponse(exportDate, totalOrders, totalItems);
-                })
+                .map(row -> ExportChartResponse.builder()
+                        .exportDate((String) row[0])
+                        .totalOrders(row[1] != null ? ((Number) row[1]).longValue() : 0L)
+                        .totalItems(row[2] != null ? ((Number) row[2]).longValue() : 0L)
+                        .manualItems(row[3] != null ? ((Number) row[3]).longValue() : 0L)
+                        .haravanItems(row[4] != null ? ((Number) row[4]).longValue() : 0L)
+                        .build())
                 .collect(Collectors.toList());
     }
+
 }

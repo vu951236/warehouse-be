@@ -11,7 +11,7 @@ public class ImportOrderBoardMapper {
                 .importCode(detail.getImportOrder().getImportCode())
                 .skuCode(detail.getSku().getSkuCode())
                 .skuName(detail.getSku().getName())
-                .createdAt(detail.getImportOrder().getCreatedAt())
+                .createdAt(detail.getImportOrder().getCreatedAt().atStartOfDay())
                 .quantity(detail.getQuantity())
                 .size(detail.getSku().getSize())
                 .color(detail.getSku().getColor())

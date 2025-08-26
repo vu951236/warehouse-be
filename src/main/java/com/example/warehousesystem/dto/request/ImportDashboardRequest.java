@@ -10,15 +10,15 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-//Biểu đồ xuất hàng
-public class ExportChartRequest {
+//Biểu đồ nhập hàng
+public class ImportDashboardRequest {
     private Integer warehouseId;
 
     @NotNull(message = "Start date is required")
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate startDate;    // yyyy-MM-dd
+    private LocalDate startDate;// yyyy-MM-dd
 
     @NotNull(message = "End date is required")
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate endDate;      // yyyy-MM-dd
+    private LocalDate endDate;         // yyyy-MM-dd
 }

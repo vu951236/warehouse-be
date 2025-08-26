@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.AbstractMap;
@@ -51,7 +52,7 @@ public class UserService {
 
         String defaultPassword = "Nhom333@";
         user.setPasswordHash(passwordEncoder.encode(defaultPassword));
-        user.setCreatedAt(LocalDateTime.now());
+        user.setCreatedAt(LocalDate.now());
         user.setIsActive(true);
 
         user.setUserCode(CodeGenerator.generateUserCode());

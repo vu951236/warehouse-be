@@ -1,5 +1,6 @@
 package com.example.warehousesystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
@@ -31,6 +32,7 @@ public class SKUPickingFrequency {
     @Column(name = "pick_count")
     private Integer pickCount;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private LocalDate updatedAt;
 }

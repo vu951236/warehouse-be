@@ -50,7 +50,7 @@ public class ExportExcelExportService {
                     .id(Long.valueOf(first.getExportOrder().getId()))
                     .exportCode(first.getExportOrder().getExportCode())
                     .note(first.getExportOrder().getNote()) // note của exportOrder
-                    .createdAt(first.getExportOrder().getCreatedAt())
+                    .createdAt(first.getExportOrder().getCreatedAt().atStartOfDay())
                     .skuCode(allSkuCodes)
                     .quantity(totalQuantity)
                     .build();

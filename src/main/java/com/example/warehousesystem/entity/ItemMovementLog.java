@@ -1,7 +1,10 @@
 package com.example.warehousesystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -38,8 +41,9 @@ public class ItemMovementLog {
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
 
     @Column(name = "note", columnDefinition = "TEXT")
     private String note;

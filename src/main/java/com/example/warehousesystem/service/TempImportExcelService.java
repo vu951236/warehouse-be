@@ -76,12 +76,11 @@ public class TempImportExcelService {
                             .color(sku != null ? sku.getColor() : null)
                             .type(sku != null ? sku.getType() : null)
                             .unitVolume(sku != null ? sku.getUnitVolume() : null)
-                            .createdAt(entity.getCreatedAt())
+                            .createdAt(entity.getCreatedAt().atStartOfDay())
                             .build();
                 })
                 .toList();
     }
-
 
     @Transactional
     public void updateTempImport(UpdateTempImportRequest request) {

@@ -11,7 +11,7 @@ public class UrgentOrderMapper {
                 .destination(eo.getDestination())
                 .status(eo.getStatus().name()) // Enum -> String
                 .createdBy(eo.getCreatedBy().getFullName()) // hoặc .getUsername()
-                .createdAt(eo.getCreatedAt())
+                .createdAt(eo.getCreatedAt().atStartOfDay())
                 .note(eo.getNote())
                 .build();
     }

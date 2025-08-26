@@ -5,6 +5,7 @@ import com.example.warehousesystem.dto.response.CreateImportOrderResponse;
 import com.example.warehousesystem.entity.*;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,7 +18,7 @@ public class CreateImportOrderMapper {
                 .source(ImportOrder.Source.valueOf(request.getSource()))
                 .status(ImportOrder.Status.draft)
                 .createdBy(user)
-                .createdAt(LocalDateTime.now())
+                .createdAt(LocalDate.now())
                 .note(request.getNote())
                 .build();
     }
@@ -28,7 +29,7 @@ public class CreateImportOrderMapper {
                 .source(importOrder.getSource().toString())
                 .status(importOrder.getStatus().toString())
                 .note(importOrder.getNote())
-                .createdAt(importOrder.getCreatedAt())
+                .createdAt(importOrder.getCreatedAt().atStartOfDay())
                 .createdBy(importOrder.getCreatedBy().getUsername())
                 .details(details.stream().map(detail -> CreateImportOrderResponse.Detail.builder()
                         .skuId(detail.getSku().getId())

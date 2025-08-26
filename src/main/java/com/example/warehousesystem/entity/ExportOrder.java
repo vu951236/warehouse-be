@@ -40,7 +40,7 @@ public class ExportOrder {
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
 
     @Column(name = "note", columnDefinition = "TEXT")
     private String note;

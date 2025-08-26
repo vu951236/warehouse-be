@@ -18,24 +18,25 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DashboardController {
 
-    private final ImportChartService importChartService;
+    private final ImportDashboardService importDashboardService;
     private final ExportChartService exportChartService;
-    private final SummaryChartService summaryChartService;
     private final SkuTypeRatioChartService skuTypeRatioChartService;
     private final OptimizationIndexService optimizationIndexService;
     private final StorageStatusService storageStatusService;
     private final ReportPdfService reportPdfService;
 
-    @PostMapping("/import-chart")
-    public ResponseEntity<ApiResponse<List<ImportChartResponse>>> getImportChart(@RequestBody ImportChartRequest request) {
-        List<ImportChartResponse> data = importChartService.getImportChartData(request);
+    @PostMapping("/import-dashboard")
+    public ResponseEntity<ApiResponse<ImportDashboardResponse>> getImportDashboard(
+            @RequestBody ImportDashboardRequest request) {
+        ImportDashboardResponse data = importDashboardService.getImportDashboardData(request);
         return ResponseEntity.ok(
-                ApiResponse.<List<ImportChartResponse>>builder()
-                        .message("Lấy dữ liệu biểu đồ nhập kho thành công")
+                ApiResponse.<ImportDashboardResponse>builder()
+                        .message("Lấy dữ liệu Dashboard nhập kho thành công")
                         .data(data)
                         .build()
         );
     }
+
 
     @PostMapping("/export-chart")
     public ResponseEntity<ApiResponse<List<ExportChartResponse>>> getExportChart(@RequestBody ExportChartRequest request) {
@@ -48,16 +49,16 @@ public class DashboardController {
         );
     }
 
-    @PostMapping("/summary-chart")
-    public ResponseEntity<ApiResponse<List<SummaryChartResponse>>> getSummaryChart(@RequestBody SummaryChartRequest request) {
-        List<SummaryChartResponse> data = summaryChartService.getSummaryChart(request);
-        return ResponseEntity.ok(
-                ApiResponse.<List<SummaryChartResponse>>builder()
-                        .message("Lấy dữ liệu biểu đồ tổng kết thành công")
-                        .data(data)
-                        .build()
-        );
-    }
+//    @PostMapping("/summary-chart")
+//    public ResponseEntity<ApiResponse<List<SummaryChartResponse>>> getSummaryChart(@RequestBody SummaryChartRequest request) {
+//        List<SummaryChartResponse> data = summaryChartService.getSummaryChart(request);
+//        return ResponseEntity.ok(
+//                ApiResponse.<List<SummaryChartResponse>>builder()
+//                        .message("Lấy dữ liệu biểu đồ tổng kết thành công")
+//                        .data(data)
+//                        .build()
+//        );
+//    }
 
     @GetMapping("/sku-type-ratio")
     public ResponseEntity<ApiResponse<List<SkuTypeRatioChartResponse>>> getSkuRatioChart() {

@@ -93,7 +93,7 @@ public class ImportOrderService {
                     .importCode(first.getImportOrder().getImportCode())
                     .skuCode(allSkuCodes)
                     .skuName(allSkuNames)
-                    .createdAt(first.getImportOrder().getCreatedAt())
+                    .createdAt(first.getImportOrder().getCreatedAt().atStartOfDay())
                     .quantity(totalQuantity)
                     .build();
 
@@ -115,7 +115,7 @@ public class ImportOrderService {
                 .source(importOrder.getSource().toString())
                 .status(importOrder.getStatus().toString())
                 .createdBy(importOrder.getCreatedBy().getUsername())
-                .createdAt(importOrder.getCreatedAt())
+                .createdAt(importOrder.getCreatedAt().atStartOfDay())
                 .note(importOrder.getNote())
                 .details(details.stream().map(d -> {
                     SKU sku = d.getSku();
@@ -146,7 +146,7 @@ public class ImportOrderService {
                 .source(importOrder.getSource().toString())
                 .status(importOrder.getStatus().toString())
                 .createdBy(importOrder.getCreatedBy().getUsername())
-                .createdAt(importOrder.getCreatedAt())
+                .createdAt(importOrder.getCreatedAt().atStartOfDay())
                 .note(importOrder.getNote())
                 .details(Collections.singletonList(
                         ImportOrderFullResponse.ImportOrderDetailItem.builder()

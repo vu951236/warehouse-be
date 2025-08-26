@@ -1,8 +1,10 @@
 package com.example.warehousesystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -22,8 +24,9 @@ public class ReorganizeHistory {
     @JoinColumn(name = "executed_by", nullable = false)
     private User executedBy;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "execution_time")
-    private LocalDateTime executionTime;
+    private LocalDate executionTime;
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;

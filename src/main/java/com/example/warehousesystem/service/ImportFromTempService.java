@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -46,7 +47,7 @@ public class ImportFromTempService {
                 .source(ImportOrder.Source.valueOf(source))
                 .status(ImportOrder.Status.confirmed)
                 .createdBy(user)
-                .createdAt(LocalDateTime.now())
+                .createdAt(LocalDate.now())
                 .note(note)
                 .build();
         importOrderRepository.save(importOrder);

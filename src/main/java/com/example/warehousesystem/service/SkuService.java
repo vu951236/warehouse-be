@@ -107,7 +107,7 @@ public class SkuService {
                 .color(sku.getColor())
                 .type(sku.getType())
                 .unitVolume(sku.getUnitVolume())
-                .createdAt(sku.getCreatedAt())
+                .createdAt(sku.getCreatedAt().atStartOfDay())
                 .damagedItemCount(damagedCount)
                 .storageLocation(storageLocation)
                 .damagedItems(damagedItemDetails)

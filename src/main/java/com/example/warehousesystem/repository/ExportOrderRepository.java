@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.awt.print.Pageable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -13,28 +14,54 @@ import java.util.Optional;
 public interface ExportOrderRepository extends JpaRepository<ExportOrder, Integer> {
     Optional<ExportOrder> findByExportCode(String exportCode);
 
-    // Chart thông tin xuất kho
-    @Query(value = """
-    SELECT 
-        DATE_FORMAT(eo.created_at, '%Y-%m-%d') AS export_date,
-        COUNT(DISTINCT eo.id) AS total_orders,
-        SUM(eod.quantity) AS total_items
-    FROM exportorder eo
-    JOIN exportorderdetail eod ON eo.id = eod.export_order_id
-    JOIN sku s ON eod.sku_id = s.id
-    JOIN box b ON b.sku_id = s.id
-    JOIN bin bi ON b.bin_id = bi.id
-    JOIN shelf sh ON bi.shelf_id = sh.id
-    JOIN warehouse w ON sh.warehouse_id = w.id
-    WHERE (:warehouseId IS NULL OR w.id = :warehouseId)
-      AND eo.created_at BETWEEN STR_TO_DATE(:fromDate, '%Y-%m-%d') AND STR_TO_DATE(:toDate, '%Y-%m-%d')
-    GROUP BY DATE_FORMAT(eo.created_at, '%Y-%m-%d')
-    ORDER BY DATE_FORMAT(eo.created_at, '%Y-%m-%d')
-""", nativeQuery = true)
+    // 1. KPI - Tổng số đơn xuất confirmed
+    @Query("""
+        SELECT COUNT(DISTINCT eo.id)
+        FROM ExportOrder eo
+        WHERE eo.status = com.example.warehousesystem.entity.ExportOrder.Status.confirmed
+          AND (CAST(:warehouseId AS integer) IS NULL OR eo.createdBy.warehouse.id = :warehouseId)
+          AND eo.createdAt BETWEEN :fromDate AND :toDate
+    """)
+    Long countConfirmedOrders(
+            @Param("warehouseId") Integer warehouseId,
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate
+    );
+
+    // 2. KPI - Tổng số item xuất
+    @Query("""
+        SELECT COALESCE(SUM(eod.quantity), 0)
+        FROM ExportOrder eo
+        JOIN ExportOrderDetail eod ON eo.id = eod.exportOrder.id
+        WHERE eo.status = com.example.warehousesystem.entity.ExportOrder.Status.confirmed
+          AND (CAST(:warehouseId AS integer) IS NULL OR eo.createdBy.warehouse.id = :warehouseId)
+          AND eo.createdAt BETWEEN :fromDate AND :toDate
+    """)
+    Long sumConfirmedItems(
+            @Param("warehouseId") Integer warehouseId,
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate
+    );
+
+    // 3. Biểu đồ xuất hàng (stacked column chart)
+    @Query("""
+        SELECT eo.createdAt AS exportDate,
+               COUNT(DISTINCT eo.id) AS totalOrders,
+               COALESCE(SUM(eod.quantity), 0) AS totalItems,
+               SUM(CASE WHEN eo.source = com.example.warehousesystem.entity.ExportOrder.Source.manual THEN eod.quantity ELSE 0 END) AS manualItems,
+               SUM(CASE WHEN eo.source = com.example.warehousesystem.entity.ExportOrder.Source.haravan THEN eod.quantity ELSE 0 END) AS haravanItems
+        FROM ExportOrder eo
+        JOIN ExportOrderDetail eod ON eo.id = eod.exportOrder.id
+        WHERE eo.status = com.example.warehousesystem.entity.ExportOrder.Status.confirmed
+          AND (CAST(:warehouseId AS integer) IS NULL OR eo.createdBy.warehouse.id = :warehouseId)
+          AND eo.createdAt BETWEEN :fromDate AND :toDate
+        GROUP BY eo.createdAt
+        ORDER BY eo.createdAt
+    """)
     List<Object[]> getExportChartData(
             @Param("warehouseId") Integer warehouseId,
-            @Param("fromDate") String fromDate,
-            @Param("toDate") String toDate
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate
     );
 
     // Chart thông tin tổng kết+Chỉ số tối ưu hoá nhập – xuất

@@ -30,7 +30,7 @@ public class ImportOrderSearchService {
                         .importCode(d.getImportOrder().getImportCode())
                         .skuCode(d.getSku().getSkuCode())
                         .skuName(d.getSku().getName())
-                        .createdAt(d.getImportOrder().getCreatedAt()) // giữ nguyên LocalDateTime
+                        .createdAt(d.getImportOrder().getCreatedAt().atStartOfDay()) // giữ nguyên LocalDateTime
                         .build())
                 .collect(Collectors.toList());
     }

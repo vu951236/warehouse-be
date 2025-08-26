@@ -1,8 +1,10 @@
 package com.example.warehousesystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -33,8 +35,9 @@ public class Item {
     @Column(name = "status", nullable = false, length = 20)
     private Status status;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
 
     public enum Status {
         available,

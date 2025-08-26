@@ -1,7 +1,10 @@
 package com.example.warehousesystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -30,8 +33,9 @@ public class UserLog {
     @Column(name = "target_id")
     private Integer targetId;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "timestamp")
-    private LocalDateTime timestamp;
+    private LocalDate timestamp;
 
     @Column(name = "ip_address", length = 100)
     private String ipAddress;

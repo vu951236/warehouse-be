@@ -10,6 +10,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +39,7 @@ public class ExportMultipleItemsByExcelService {
                     ExportOrder order = new ExportOrder();
                     order.setExportCode(request.getExportCode());
                     order.setCreatedBy(createdBy);
-                    order.setCreatedAt(LocalDateTime.now());
+                    order.setCreatedAt(LocalDate.now());
                     order.setStatus(ExportOrder.Status.draft);
                     order.setSource(ExportOrder.Source.manual);
                     order.setUrgent(false);

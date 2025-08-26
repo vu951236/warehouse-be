@@ -1,8 +1,10 @@
 package com.example.warehousesystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -30,12 +32,13 @@ public class TempImportExcel {
 
     private String note;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
 
     @PrePersist
     public void prePersist() {
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = LocalDate.now();
     }
 
     @Column(name = "import_code", nullable = false)

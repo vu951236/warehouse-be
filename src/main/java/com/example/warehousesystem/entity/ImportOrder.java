@@ -3,6 +3,8 @@ package com.example.warehousesystem.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -35,7 +37,7 @@ public class ImportOrder {
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
 
     @Column(name = "note", columnDefinition = "TEXT")
     private String note;
@@ -43,11 +45,6 @@ public class ImportOrder {
     public enum Source {
         factory,
         returnGoods;
-
-        @Override
-        public String toString() {
-            return this == returnGoods ? "return" : name();
-        }
     }
 
     public enum Status {
