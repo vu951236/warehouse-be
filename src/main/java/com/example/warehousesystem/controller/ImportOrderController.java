@@ -42,6 +42,13 @@ public class ImportOrderController {
         return ResponseEntity.ok(importOrderSearchService.searchImportOrders(request));
     }
 
+    @PostMapping("/search-merged")
+    public ResponseEntity<List<ImportOrderBoardResponse>> searchImportOrdersMerged(
+            @RequestBody ImportOrderSearch2Request request
+    ) {
+        return ResponseEntity.ok(importOrderSearchService.searchImportOrdersMerged(request));
+    }
+
     @PostMapping("/import-by-scan")
     public ResponseEntity<ApiResponse<ImportItemsResponse>> importItemsByScan(
             @RequestBody ImportScanBarcodeRequest request

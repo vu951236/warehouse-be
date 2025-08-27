@@ -18,6 +18,7 @@ public class ExportOrderBoardResponse {
     @JsonFormat(pattern = "yyyy/MM/dd")
     private LocalDateTime createdAt;
 
+    private String source;
     private Integer quantity;
     private String note;
 }

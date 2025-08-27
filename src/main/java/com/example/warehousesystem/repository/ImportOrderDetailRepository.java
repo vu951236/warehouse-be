@@ -1,5 +1,6 @@
 package com.example.warehousesystem.repository;
 
+import com.example.warehousesystem.entity.ImportOrder;
 import com.example.warehousesystem.entity.ImportOrderDetail;
 import com.example.warehousesystem.entity.SKU;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -39,17 +40,34 @@ public interface ImportOrderDetailRepository extends JpaRepository<ImportOrderDe
     List<ImportOrderDetail> findByImportOrderId(@Param("orderId") Integer orderId);
 
     @Query("""
-        SELECT d FROM ImportOrderDetail d
-        JOIN d.importOrder o
-        JOIN d.sku s
-        WHERE (:importCode IS NULL OR o.importCode = :importCode)
-          AND (:skuCode IS NULL OR s.skuCode = :skuCode)
-          AND (:createdAt IS NULL OR DATE(o.createdAt) = :createdAt)
-    """)
+    SELECT d FROM ImportOrderDetail d
+    JOIN d.importOrder o
+    JOIN d.sku s
+    WHERE (:importCode IS NULL OR o.importCode = :importCode)
+      AND (:skuCode IS NULL OR s.skuCode = :skuCode)
+      AND (:startDate IS NULL OR o.createdAt >= :startDate)
+      AND (:endDate IS NULL OR o.createdAt <= :endDate)
+""")
     List<ImportOrderDetail> searchImportOrdersV2(
             @Param("importCode") String importCode,
             @Param("skuCode") String skuCode,
-            @Param("createdAt") LocalDate createdAt
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
     );
+    @Query("""
+    SELECT d FROM ImportOrderDetail d
+    WHERE (:importCode IS NULL OR d.importOrder.importCode = :importCode)
+      AND (:source IS NULL OR d.importOrder.source = :source)
+      AND (:startDate IS NULL OR d.importOrder.createdAt >= :startDate)
+      AND (:endDate IS NULL OR d.importOrder.createdAt <= :endDate)
+""")
+    List<ImportOrderDetail> searchImportOrdersMerged(
+            @Param("importCode") String importCode,
+            @Param("source") ImportOrder.Source source,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
+
 }
 

@@ -12,9 +12,10 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder// Tìm kiếm đơn nhập
-public class ImportOrderSearchRequest {
+public class ImportOrderSearch2Request {
     private String importCode;
-    private String skuCode;
+    private ImportOrder.Source source;
     private LocalDate startDate;
     private LocalDate endDate;
+
 }

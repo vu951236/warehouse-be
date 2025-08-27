@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -38,5 +39,38 @@ public interface ExportOrderDetailRepository extends JpaRepository<ExportOrderDe
     List<ExportOrderDetail> findByExportOrderId(@Param("orderId") Integer orderId);
 
     List<ExportOrderDetail> findByExportOrder(ExportOrder exportOrder);
+
+    @Query("""
+    SELECT d FROM ExportOrderDetail d
+    JOIN FETCH d.exportOrder o
+    JOIN FETCH d.sku s
+    WHERE (:exportCode IS NULL OR o.exportCode = :exportCode)
+      AND (:skuCode IS NULL OR s.skuCode = :skuCode)
+      AND (:startDate IS NULL OR o.createdAt >= :startDate)
+      AND (:endDate IS NULL OR o.createdAt <= :endDate)
+""")
+    List<ExportOrderDetail> searchExportOrders(
+            @Param("exportCode") String exportCode,
+            @Param("skuCode") String skuCode,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
+    @Query("""
+    SELECT d FROM ExportOrderDetail d
+    JOIN FETCH d.exportOrder o
+    JOIN FETCH d.sku s
+    WHERE (:exportCode IS NULL OR o.exportCode = :exportCode)
+      AND (:source IS NULL OR o.source = :source)
+      AND (:startDate IS NULL OR o.createdAt >= :startDate)
+      AND (:endDate IS NULL OR o.createdAt <= :endDate)
+""")
+    List<ExportOrderDetail> searchExportOrders2(
+            @Param("exportCode") String exportCode,
+            @Param("source") ExportOrder.Source source,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
 
 }

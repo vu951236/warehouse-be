@@ -49,7 +49,7 @@ public class ImportOrderService {
                 .collect(Collectors.toList());
     }
 
-    // Lấy tất cả đơn nhập cho bảng
+    // Lấy tất cả đơn nhập cho bảng (map từng detail riêng lẻ)
     public List<ImportOrderBoardResponse> getAllImportOrderDetails() {
         List<ImportOrderDetail> details = importOrderDetailRepository.findAll();
         return details.stream()
@@ -57,51 +57,12 @@ public class ImportOrderService {
                 .collect(Collectors.toList());
     }
 
+    // Lấy tất cả đơn nhập đã merge sku list
     public List<ImportOrderBoardResponse> getAllImportOrderDetailsMergedWithSkuList() {
         List<ImportOrderDetail> details = importOrderDetailRepository.findAll();
-
-        if (details.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        // Gom nhóm theo importOrderId
-        Map<Long, List<ImportOrderDetail>> groupedByOrder = details.stream()
-                .collect(Collectors.groupingBy(d -> Long.valueOf(d.getImportOrder().getId())));
-
-        List<ImportOrderBoardResponse> result = new ArrayList<>();
-
-        for (Map.Entry<Long, List<ImportOrderDetail>> entry : groupedByOrder.entrySet()) {
-            List<ImportOrderDetail> orderDetails = entry.getValue();
-            ImportOrderDetail first = orderDetails.get(0);
-
-            String allSkuCodes = orderDetails.stream()
-                    .map(d -> d.getSku().getSkuCode())
-                    .distinct()
-                    .collect(Collectors.joining(", "));
-
-            String allSkuNames = orderDetails.stream()
-                    .map(d -> d.getSku().getName())
-                    .distinct()
-                    .collect(Collectors.joining(", "));
-
-            int totalQuantity = orderDetails.stream()
-                    .mapToInt(ImportOrderDetail::getQuantity)
-                    .sum();
-
-            ImportOrderBoardResponse merged = ImportOrderBoardResponse.builder()
-                    .id(Long.valueOf(first.getImportOrder().getId()))
-                    .importCode(first.getImportOrder().getImportCode())
-                    .skuCode(allSkuCodes)
-                    .skuName(allSkuNames)
-                    .createdAt(first.getImportOrder().getCreatedAt().atStartOfDay())
-                    .quantity(totalQuantity)
-                    .build();
-
-            result.add(merged);
-        }
-
-        return result;
+        return ImportOrderBoardMapper.toBoardResponses(details);
     }
+
 
     public ImportOrderFullResponse getFullImportOrderById(Integer orderId) {
         ImportOrder importOrder = importOrderRepository.findById(orderId)

@@ -1,6 +1,6 @@
 package com.example.warehousesystem.dto.request;
 
-import com.example.warehousesystem.entity.ImportOrder;
+import com.example.warehousesystem.entity.ExportOrder;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,10 +11,12 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder// Tìm kiếm đơn nhập
-public class ImportOrderSearchRequest {
-    private String importCode;
-    private String skuCode;
+@Builder
+public class SearchExportOrder2Request {
+    private String exportCode;   // mã đơn xuất
+    private ExportOrder.Source source;      // mã SKU
     private LocalDate startDate;
     private LocalDate endDate;
+
 }
+

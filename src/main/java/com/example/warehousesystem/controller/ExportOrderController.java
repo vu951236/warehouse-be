@@ -33,7 +33,7 @@ public class ExportOrderController {
     private final PickingRouteService pickingRouteService;
     private final UrgentOrderService urgentOrderService;
     private final ExportExcelExportService exportExcelExportService;
-
+    private final ExportOrderSearchService exportOrderSearchService;
 
     @GetMapping("/getallExportOrder")
     public ResponseEntity<ApiResponse<List<ExportOrderResponse>>> getAllExportOrders() {
@@ -261,5 +261,32 @@ public class ExportOrderController {
                         .build()
         );
     }
+
+    @PostMapping("/search-full")
+    public ResponseEntity<ApiResponse<List<AllExportOrderResponse>>> searchFullExportOrders(
+            @RequestBody SearchExportOrderRequest request
+    ) {
+        List<AllExportOrderResponse> data = exportOrderSearchService.searchExportOrders(request);
+        return ResponseEntity.ok(
+                ApiResponse.<List<AllExportOrderResponse>>builder()
+                        .message("Tìm kiếm chi tiết đơn xuất thành công")
+                        .data(data)
+                        .build()
+        );
+    }
+
+    @PostMapping("/search-board")
+    public ResponseEntity<ApiResponse<List<ExportOrderBoardResponse>>> searchExportOrdersBoard(
+            @RequestBody SearchExportOrder2Request request
+    ) {
+        List<ExportOrderBoardResponse> data = exportOrderSearchService.searchExportOrders2(request);
+        return ResponseEntity.ok(
+                ApiResponse.<List<ExportOrderBoardResponse>>builder()
+                        .message("Tìm kiếm đơn xuất (board view) thành công")
+                        .data(data)
+                        .build()
+        );
+    }
+
 
 }
