@@ -8,7 +8,11 @@ import com.example.warehousesystem.repository.ImportOrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,18 +35,31 @@ public class ImportDashboardService {
         Long itemsFromReturn = importOrderRepository.sumItemsByReturnGoods(
                 request.getWarehouseId(), request.getStartDate(), request.getEndDate(), "returnGoods");
 
-        // 2. Chart Data
+        // 2. Chart Data (raw từ DB)
         List<Object[]> rawData = importOrderRepository.getImportChartData(
                 request.getWarehouseId(), request.getStartDate(), request.getEndDate());
 
-        List<ImportChartResponse> chartData = rawData.stream()
-                .map(row -> {
-                    String importDate = (String) row[0];
-                    Long orders = row[1] != null ? ((Number) row[1]).longValue() : 0L;
-                    Long items = row[2] != null ? ((Number) row[2]).longValue() : 0L;
-                    return ImportChartMapper.toResponse(importDate, items, orders);
-                })
-                .collect(Collectors.toList());
+        // Map để dễ tra cứu
+        Map<LocalDate, ImportChartResponse> chartMap = new HashMap<>();
+        for (Object[] row : rawData) {
+            LocalDate importDate = LocalDate.parse((String) row[0]); // row[0] là yyyy-MM-dd
+            Long orders = row[1] != null ? ((Number) row[1]).longValue() : 0L;
+            Long items = row[2] != null ? ((Number) row[2]).longValue() : 0L;
+
+            chartMap.put(importDate, ImportChartMapper.toResponse(importDate.toString(), items, orders));
+        }
+
+        // Fill liên tiếp theo từng ngày
+        List<ImportChartResponse> chartData = new ArrayList<>();
+        LocalDate current = request.getStartDate();
+        while (!current.isAfter(request.getEndDate())) {
+            ImportChartResponse response = chartMap.getOrDefault(
+                    current,
+                    ImportChartMapper.toResponse(current.toString(), 0L, 0L)
+            );
+            chartData.add(response);
+            current = current.plusDays(1);
+        }
 
         return ImportDashboardResponse.builder()
                 .totalImportOrders(totalOrders)
