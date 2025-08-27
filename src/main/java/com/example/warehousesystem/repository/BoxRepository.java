@@ -98,4 +98,13 @@ public interface BoxRepository extends JpaRepository<Box, Integer> {
             @Param("skuId") Integer skuId,
             @Param("shelfCodes") List<String> shelfCodes
     );
+
+    // Đếm số box trong warehouse
+    @Query("""
+        SELECT COUNT(bx)
+        FROM Box bx
+        WHERE bx.isDeleted = false AND bx.bin.shelf.warehouse.id = :warehouseId
+        """)
+    long countByWarehouseId(@Param("warehouseId") Integer warehouseId);
+
 }

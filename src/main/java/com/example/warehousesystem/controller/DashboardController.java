@@ -3,6 +3,7 @@ package com.example.warehousesystem.controller;
 import com.example.warehousesystem.dto.request.*;
 import com.example.warehousesystem.dto.response.*;
 import com.example.warehousesystem.service.*;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -19,46 +20,63 @@ import java.util.List;
 public class DashboardController {
 
     private final ImportDashboardService importDashboardService;
-
+    private final ExportDashboardService exportDashboardService;
     private final SkuTypeRatioChartService skuTypeRatioChartService;
     private final OptimizationIndexService optimizationIndexService;
-    private final StorageStatusService storageStatusService;
+    private final StorageDashboardService storageDashboardService;
     private final ReportPdfService reportPdfService;
 
-    @PostMapping("/import-dashboard")
-    public ResponseEntity<ApiResponse<ImportDashboardResponse>> getImportDashboard(
+    @PostMapping("/1.1-import-kpi")
+    public ResponseEntity<ApiResponse<ImportKpiResponse>> getImportKpis(
             @RequestBody ImportDashboardRequest request) {
-        ImportDashboardResponse data = importDashboardService.getImportDashboardData(request);
+        ImportKpiResponse data = importDashboardService.getImportKpis(request);
         return ResponseEntity.ok(
-                ApiResponse.<ImportDashboardResponse>builder()
-                        .message("Lấy dữ liệu Dashboard nhập kho thành công")
+                ApiResponse.<ImportKpiResponse>builder()
+                        .message("Lấy KPI nhập kho thành công")
+                        .data(data)
+                        .build()
+        );
+    }
+
+    @PostMapping("/1.2-import-chart")
+    public ResponseEntity<ApiResponse<List<ImportChartResponse>>> getImportChart(
+            @RequestBody ImportDashboardRequest request) {
+        List<ImportChartResponse> data = importDashboardService.getImportChartData(request);
+        return ResponseEntity.ok(
+                ApiResponse.<List<ImportChartResponse>>builder()
+                        .message("Lấy dữ liệu biểu đồ nhập kho thành công")
                         .data(data)
                         .build()
         );
     }
 
 
-//    @PostMapping("/export-chart")
-//    public ResponseEntity<ApiResponse<List<ExportChartData>>> getExportChart(@RequestBody ExportChartRequest request) {
-//        List<ExportChartData> data = exportChartService.getExportChartData(request);
-//        return ResponseEntity.ok(
-//                ApiResponse.<List<ExportChartData>>builder()
-//                        .message("Lấy dữ liệu biểu đồ xuất kho thành công")
-//                        .data(data)
-//                        .build()
-//        );
-//    }
+    @PostMapping("2.1-export-kpis")
+    public ResponseEntity<ApiResponse<ExportKpiResponse>> getExportKpis(
+            @Valid @RequestBody ExportChartRequest request) {
 
-//    @PostMapping("/summary-chart")
-//    public ResponseEntity<ApiResponse<List<SummaryChartResponse>>> getSummaryChart(@RequestBody SummaryChartRequest request) {
-//        List<SummaryChartResponse> data = summaryChartService.getSummaryChart(request);
-//        return ResponseEntity.ok(
-//                ApiResponse.<List<SummaryChartResponse>>builder()
-//                        .message("Lấy dữ liệu biểu đồ tổng kết thành công")
-//                        .data(data)
-//                        .build()
-//        );
-//    }
+        ExportKpiResponse data = exportDashboardService.getKpis(request);
+        return ResponseEntity.ok(
+                ApiResponse.<ExportKpiResponse>builder()
+                        .message("Lấy KPI xuất kho thành công")
+                        .data(data)
+                        .build()
+        );
+    }
+
+    // API 2: Chart (manual/haravan theo ngày)
+    @PostMapping("/2.2-export-chart")
+    public ResponseEntity<ApiResponse<List<ExportChartResponse>>> getExportChart(
+            @Valid @RequestBody ExportChartRequest request) {
+
+        List<ExportChartResponse> data = exportDashboardService.getChart(request);
+        return ResponseEntity.ok(
+                ApiResponse.<List<ExportChartResponse>>builder()
+                        .message("Lấy dữ liệu biểu đồ xuất kho thành công")
+                        .data(data)
+                        .build()
+        );
+    }
 
     @GetMapping("/sku-type-ratio")
     public ResponseEntity<ApiResponse<List<SkuTypeRatioChartResponse>>> getSkuRatioChart() {
@@ -82,15 +100,24 @@ public class DashboardController {
         );
     }
 
-    @PostMapping("/storage-status")
-    public ResponseEntity<ApiResponse<StorageStatusResponse>> getStorageStatus(@RequestBody StorageStatusRequest request) {
-        StorageStatusResponse data = storageStatusService.getStorageStatus(request);
-        return ResponseEntity.ok(
-                ApiResponse.<StorageStatusResponse>builder()
-                        .message("Lấy dữ liệu tình trạng sức chứa thành công")
-                        .data(data)
-                        .build()
-        );
+    @GetMapping("/3.1-storage-kpis")
+    public StorageKpiResponse getKpis(@RequestParam(required = false) Integer warehouseId) {
+        return storageDashboardService.getKpis(warehouseId);
+    }
+
+    @GetMapping("/3.2-storage-donut")
+    public StorageDonutResponse getDonut(@RequestParam(required = false) Integer warehouseId) {
+        return storageDashboardService.getDonut(warehouseId);
+    }
+
+    @GetMapping("/3.3-storage-shelf-chart")
+    public List<ShelfCapacityResponse> getShelfChart(@RequestParam(required = false) Integer warehouseId) {
+        return storageDashboardService.getShelfChart(warehouseId);
+    }
+
+    @GetMapping("/3.4storage-top-bins")
+    public List<BinUsageResponse> getTopBins(@RequestParam(required = false) Integer warehouseId) {
+        return storageDashboardService.getTopBins(warehouseId);
     }
 
     @PostMapping(value = "/warehouse-summary-pdf", produces = MediaType.APPLICATION_PDF_VALUE)

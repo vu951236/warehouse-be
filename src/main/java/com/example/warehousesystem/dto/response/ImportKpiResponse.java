@@ -9,13 +9,10 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 // Response tổng hợp Dashboard Nhập kho
-public class ImportDashboardResponse {
+public class ImportKpiResponse {
     // KPI Cards
     private Long totalImportOrders;   // số đơn nhập confirmed
     private Long totalItemsImported;  // tổng số item nhập
     private Long itemsFromFactory;    // item nhập từ nhà máy
     private Long itemsFromReturn;     // item nhập từ hoàn trả
-
-    // Chart Data
-    private List<ImportChartResponse> chartData;
 }

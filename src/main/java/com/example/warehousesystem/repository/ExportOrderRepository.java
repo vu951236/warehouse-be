@@ -14,7 +14,70 @@ import java.util.Optional;
 public interface ExportOrderRepository extends JpaRepository<ExportOrder, Integer> {
     Optional<ExportOrder> findByExportCode(String exportCode);
 
+    // 1. Tổng số đơn confirmed
+    @Query(value = """
+    SELECT COUNT(DISTINCT eo.id)
+    FROM exportorder eo
+    JOIN exportorderdetail eod ON eo.id = eod.export_order_id
+    JOIN sku s ON eod.sku_id = s.id
+    JOIN box b ON b.sku_id = s.id
+    JOIN bin bi ON b.bin_id = bi.id
+    JOIN shelf sh ON bi.shelf_id = sh.id
+    JOIN warehouse w ON sh.warehouse_id = w.id
+    WHERE eo.status = 'confirmed'
+      AND (:warehouseId IS NULL OR w.id = :warehouseId)
+      AND DATE(eo.created_at) BETWEEN :fromDate AND :toDate
+""", nativeQuery = true)
+    Long countConfirmedExportOrders(
+            @Param("warehouseId") Integer warehouseId,
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate
+    );
 
+    // 2. Tổng số lượng confirmed
+    @Query(value = """
+    SELECT COALESCE(SUM(eod.quantity), 0)
+    FROM exportorder eo
+    JOIN exportorderdetail eod ON eo.id = eod.export_order_id
+    JOIN sku s ON eod.sku_id = s.id
+    JOIN box b ON b.sku_id = s.id
+    JOIN bin bi ON b.bin_id = bi.id
+    JOIN shelf sh ON bi.shelf_id = sh.id
+    JOIN warehouse w ON sh.warehouse_id = w.id
+    WHERE eo.status = 'confirmed'
+      AND (:warehouseId IS NULL OR w.id = :warehouseId)
+      AND DATE(eo.created_at) BETWEEN :fromDate AND :toDate
+""", nativeQuery = true)
+    Long sumConfirmedExportQuantity(
+            @Param("warehouseId") Integer warehouseId,
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate
+    );
+
+    // 3. Chart Data
+    @Query(value = """
+    SELECT 
+        DATE(eo.created_at) AS export_date,
+        SUM(CASE WHEN eo.source = 'manual' THEN eod.quantity ELSE 0 END) AS manual_quantity,
+        SUM(CASE WHEN eo.source = 'haravan' THEN eod.quantity ELSE 0 END) AS haravan_quantity
+    FROM exportorder eo
+    JOIN exportorderdetail eod ON eo.id = eod.export_order_id
+    JOIN sku s ON eod.sku_id = s.id
+    JOIN box b ON b.sku_id = s.id
+    JOIN bin bi ON b.bin_id = bi.id
+    JOIN shelf sh ON bi.shelf_id = sh.id
+    JOIN warehouse w ON sh.warehouse_id = w.id
+    WHERE eo.status = 'confirmed'
+      AND (:warehouseId IS NULL OR w.id = :warehouseId)
+      AND DATE(eo.created_at) BETWEEN :fromDate AND :toDate
+    GROUP BY DATE(eo.created_at)
+    ORDER BY export_date
+""", nativeQuery = true)
+    List<Object[]> getExportChartData(
+            @Param("warehouseId") Integer warehouseId,
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate
+    );
 
     // Chart thông tin tổng kết+Chỉ số tối ưu hoá nhập – xuất
     @Query(value = """

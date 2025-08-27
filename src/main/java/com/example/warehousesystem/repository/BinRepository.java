@@ -76,4 +76,35 @@ public interface BinRepository extends JpaRepository<Bin, Integer> {
     @Query("SELECT b FROM Bin b WHERE b.shelf.shelfCode IN :shelfCodes")
     List<Bin> findBinsWithAvailableCapacityInShelves(@Param("shelfCodes") List<String> shelfCodes);
 
+    // Đếm số bin trong warehouse
+    @Query("SELECT COUNT(b) FROM Bin b WHERE b.isDeleted = false AND b.shelf.warehouse.id = :warehouseId")
+    long countByWarehouseId(@Param("warehouseId") Integer warehouseId);
+
+    // Tổng capacity của bin trong warehouse
+    @Query("SELECT COALESCE(SUM(b.capacity),0) FROM Bin b WHERE b.isDeleted = false AND b.shelf.warehouse.id = :warehouseId")
+    Double sumCapacityByWarehouseId(@Param("warehouseId") Integer warehouseId);
+
+    // Tổng used_capacity của tất cả box trong warehouse
+    @Query("""
+        SELECT COALESCE(SUM(bx.usedCapacity),0)
+        FROM Bin b
+        LEFT JOIN Box bx ON bx.bin.id = b.id AND bx.isDeleted = false
+        WHERE b.isDeleted = false AND b.shelf.warehouse.id = :warehouseId
+        """)
+    Double sumUsedCapacityByWarehouseId(@Param("warehouseId") Integer warehouseId);
+
+    // Top 10 bin đầy nhất
+    @Query("""
+        SELECT b.binCode,
+               b.capacity,
+               COALESCE(SUM(bx.usedCapacity),0) AS usedCapacity
+        FROM Bin b
+        LEFT JOIN Box bx ON bx.bin.id = b.id AND bx.isDeleted = false
+        WHERE b.isDeleted = false AND b.shelf.warehouse.id = :warehouseId
+        GROUP BY b.id, b.binCode, b.capacity
+        ORDER BY (COALESCE(SUM(bx.usedCapacity),0) / NULLIF(b.capacity,0)) DESC
+        """)
+    List<Object[]> findTop10ByUsage(@Param("warehouseId") Integer warehouseId);
+
+
 }
