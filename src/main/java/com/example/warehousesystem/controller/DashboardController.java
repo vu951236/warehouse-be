@@ -19,7 +19,7 @@ import java.util.List;
 public class DashboardController {
 
     private final ImportDashboardService importDashboardService;
-    private final ExportChartService exportChartService;
+
     private final SkuTypeRatioChartService skuTypeRatioChartService;
     private final OptimizationIndexService optimizationIndexService;
     private final StorageStatusService storageStatusService;
@@ -38,16 +38,16 @@ public class DashboardController {
     }
 
 
-    @PostMapping("/export-chart")
-    public ResponseEntity<ApiResponse<List<ExportChartResponse>>> getExportChart(@RequestBody ExportChartRequest request) {
-        List<ExportChartResponse> data = exportChartService.getExportChartData(request);
-        return ResponseEntity.ok(
-                ApiResponse.<List<ExportChartResponse>>builder()
-                        .message("Lấy dữ liệu biểu đồ xuất kho thành công")
-                        .data(data)
-                        .build()
-        );
-    }
+//    @PostMapping("/export-chart")
+//    public ResponseEntity<ApiResponse<List<ExportChartData>>> getExportChart(@RequestBody ExportChartRequest request) {
+//        List<ExportChartData> data = exportChartService.getExportChartData(request);
+//        return ResponseEntity.ok(
+//                ApiResponse.<List<ExportChartData>>builder()
+//                        .message("Lấy dữ liệu biểu đồ xuất kho thành công")
+//                        .data(data)
+//                        .build()
+//        );
+//    }
 
 //    @PostMapping("/summary-chart")
 //    public ResponseEntity<ApiResponse<List<SummaryChartResponse>>> getSummaryChart(@RequestBody SummaryChartRequest request) {

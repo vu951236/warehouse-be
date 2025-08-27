@@ -14,55 +14,7 @@ import java.util.Optional;
 public interface ExportOrderRepository extends JpaRepository<ExportOrder, Integer> {
     Optional<ExportOrder> findByExportCode(String exportCode);
 
-    // 1. KPI - Tổng số đơn xuất confirmed
-    @Query("""
-        SELECT COUNT(DISTINCT eo.id)
-        FROM ExportOrder eo
-        WHERE eo.status = com.example.warehousesystem.entity.ExportOrder.Status.confirmed
-          AND (CAST(:warehouseId AS integer) IS NULL OR eo.createdBy.warehouse.id = :warehouseId)
-          AND eo.createdAt BETWEEN :fromDate AND :toDate
-    """)
-    Long countConfirmedOrders(
-            @Param("warehouseId") Integer warehouseId,
-            @Param("fromDate") LocalDate fromDate,
-            @Param("toDate") LocalDate toDate
-    );
 
-    // 2. KPI - Tổng số item xuất
-    @Query("""
-        SELECT COALESCE(SUM(eod.quantity), 0)
-        FROM ExportOrder eo
-        JOIN ExportOrderDetail eod ON eo.id = eod.exportOrder.id
-        WHERE eo.status = com.example.warehousesystem.entity.ExportOrder.Status.confirmed
-          AND (CAST(:warehouseId AS integer) IS NULL OR eo.createdBy.warehouse.id = :warehouseId)
-          AND eo.createdAt BETWEEN :fromDate AND :toDate
-    """)
-    Long sumConfirmedItems(
-            @Param("warehouseId") Integer warehouseId,
-            @Param("fromDate") LocalDate fromDate,
-            @Param("toDate") LocalDate toDate
-    );
-
-    // 3. Biểu đồ xuất hàng (stacked column chart)
-    @Query("""
-        SELECT eo.createdAt AS exportDate,
-               COUNT(DISTINCT eo.id) AS totalOrders,
-               COALESCE(SUM(eod.quantity), 0) AS totalItems,
-               SUM(CASE WHEN eo.source = com.example.warehousesystem.entity.ExportOrder.Source.manual THEN eod.quantity ELSE 0 END) AS manualItems,
-               SUM(CASE WHEN eo.source = com.example.warehousesystem.entity.ExportOrder.Source.haravan THEN eod.quantity ELSE 0 END) AS haravanItems
-        FROM ExportOrder eo
-        JOIN ExportOrderDetail eod ON eo.id = eod.exportOrder.id
-        WHERE eo.status = com.example.warehousesystem.entity.ExportOrder.Status.confirmed
-          AND (CAST(:warehouseId AS integer) IS NULL OR eo.createdBy.warehouse.id = :warehouseId)
-          AND eo.createdAt BETWEEN :fromDate AND :toDate
-        GROUP BY eo.createdAt
-        ORDER BY eo.createdAt
-    """)
-    List<Object[]> getExportChartData(
-            @Param("warehouseId") Integer warehouseId,
-            @Param("fromDate") LocalDate fromDate,
-            @Param("toDate") LocalDate toDate
-    );
 
     // Chart thông tin tổng kết+Chỉ số tối ưu hoá nhập – xuất
     @Query(value = """
