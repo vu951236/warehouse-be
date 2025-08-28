@@ -47,25 +47,13 @@ public class ImportDashboardService {
         List<Object[]> rawData = importOrderRepository.getImportChartData(
                 request.getWarehouseId(), request.getStartDate(), request.getEndDate());
 
-        Map<LocalDate, ImportChartResponse> chartMap = new HashMap<>();
+        List<ImportChartResponse> chartData = new ArrayList<>();
         for (Object[] row : rawData) {
             LocalDate importDate = LocalDate.parse((String) row[0]);
             Long orders = row[1] != null ? ((Number) row[1]).longValue() : 0L;
             Long items = row[2] != null ? ((Number) row[2]).longValue() : 0L;
 
-            chartMap.put(importDate, ImportChartMapper.toResponse(importDate.toString(), items, orders));
-        }
-
-        // Fill đủ ngày
-        List<ImportChartResponse> chartData = new ArrayList<>();
-        LocalDate current = request.getStartDate();
-        while (!current.isAfter(request.getEndDate())) {
-            ImportChartResponse response = chartMap.getOrDefault(
-                    current,
-                    ImportChartMapper.toResponse(current.toString(), 0L, 0L)
-            );
-            chartData.add(response);
-            current = current.plusDays(1);
+            chartData.add(ImportChartMapper.toResponse(importDate.toString(), items, orders));
         }
 
         return chartData;

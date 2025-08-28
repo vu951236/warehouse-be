@@ -21,14 +21,15 @@ public class DashboardController {
 
     private final ImportDashboardService importDashboardService;
     private final ExportDashboardService exportDashboardService;
-    private final SkuTypeRatioChartService skuTypeRatioChartService;
-    private final OptimizationIndexService optimizationIndexService;
     private final StorageDashboardService storageDashboardService;
     private final ReportPdfService reportPdfService;
+    private final QualityService qualityService;
+
+    // ==================== Import ====================
 
     @PostMapping("/1.1-import-kpi")
     public ResponseEntity<ApiResponse<ImportKpiResponse>> getImportKpis(
-            @RequestBody ImportDashboardRequest request) {
+            @Valid @RequestBody ImportDashboardRequest request) {
         ImportKpiResponse data = importDashboardService.getImportKpis(request);
         return ResponseEntity.ok(
                 ApiResponse.<ImportKpiResponse>builder()
@@ -40,7 +41,7 @@ public class DashboardController {
 
     @PostMapping("/1.2-import-chart")
     public ResponseEntity<ApiResponse<List<ImportChartResponse>>> getImportChart(
-            @RequestBody ImportDashboardRequest request) {
+            @Valid @RequestBody ImportDashboardRequest request) {
         List<ImportChartResponse> data = importDashboardService.getImportChartData(request);
         return ResponseEntity.ok(
                 ApiResponse.<List<ImportChartResponse>>builder()
@@ -50,11 +51,11 @@ public class DashboardController {
         );
     }
 
+    // ==================== Export ====================
 
-    @PostMapping("2.1-export-kpis")
+    @PostMapping("/2.1-export-kpis")
     public ResponseEntity<ApiResponse<ExportKpiResponse>> getExportKpis(
             @Valid @RequestBody ExportChartRequest request) {
-
         ExportKpiResponse data = exportDashboardService.getKpis(request);
         return ResponseEntity.ok(
                 ApiResponse.<ExportKpiResponse>builder()
@@ -64,11 +65,9 @@ public class DashboardController {
         );
     }
 
-    // API 2: Chart (manual/haravan theo ngày)
     @PostMapping("/2.2-export-chart")
     public ResponseEntity<ApiResponse<List<ExportChartResponse>>> getExportChart(
             @Valid @RequestBody ExportChartRequest request) {
-
         List<ExportChartResponse> data = exportDashboardService.getChart(request);
         return ResponseEntity.ok(
                 ApiResponse.<List<ExportChartResponse>>builder()
@@ -78,54 +77,105 @@ public class DashboardController {
         );
     }
 
-    @GetMapping("/sku-type-ratio")
-    public ResponseEntity<ApiResponse<List<SkuTypeRatioChartResponse>>> getSkuRatioChart() {
-        List<SkuTypeRatioChartResponse> data = skuTypeRatioChartService.getSkuTypeRatioChart();
+    // ==================== Storage ====================
+
+    @PostMapping("/3.1-storage-kpis")
+    public ResponseEntity<ApiResponse<StorageKpiResponse>> getStorageKpis(
+            @Valid @RequestBody StorageDashboardRequest request) {
+        StorageKpiResponse data = storageDashboardService.getKpis(request);
         return ResponseEntity.ok(
-                ApiResponse.<List<SkuTypeRatioChartResponse>>builder()
-                        .message("Lấy dữ liệu tỉ lệ loại hàng thành công")
+                ApiResponse.<StorageKpiResponse>builder()
+                        .message("Lấy KPI lưu trữ thành công")
                         .data(data)
                         .build()
         );
     }
 
-    @PostMapping("/optimization-index")
-    public ResponseEntity<ApiResponse<List<OptimizationIndexResponse>>> getOptimizationIndex(@RequestBody OptimizationIndexRequest request) {
-        List<OptimizationIndexResponse> data = optimizationIndexService.getOptimizationData(request);
+    @PostMapping("/3.2-storage-donut")
+    public ResponseEntity<ApiResponse<StorageDonutResponse>> getStorageDonut(
+            @Valid @RequestBody StorageDashboardRequest request) {
+        StorageDonutResponse data = storageDashboardService.getDonut(request);
         return ResponseEntity.ok(
-                ApiResponse.<List<OptimizationIndexResponse>>builder()
-                        .message("Lấy dữ liệu chỉ số tối ưu hóa thành công")
+                ApiResponse.<StorageDonutResponse>builder()
+                        .message("Lấy dữ liệu donut chart lưu trữ thành công")
                         .data(data)
                         .build()
         );
     }
 
-    @GetMapping("/3.1-storage-kpis")
-    public StorageKpiResponse getKpis(@RequestParam(required = false) Integer warehouseId) {
-        return storageDashboardService.getKpis(warehouseId);
+    @PostMapping("/3.3-storage-shelf-chart")
+    public ResponseEntity<ApiResponse<List<ShelfCapacityResponse>>> getShelfChart(
+            @Valid @RequestBody StorageDashboardRequest request) {
+        List<ShelfCapacityResponse> data = storageDashboardService.getShelfChart(request);
+        return ResponseEntity.ok(
+                ApiResponse.<List<ShelfCapacityResponse>>builder()
+                        .message("Lấy dữ liệu dung lượng theo kệ thành công")
+                        .data(data)
+                        .build()
+        );
     }
 
-    @GetMapping("/3.2-storage-donut")
-    public StorageDonutResponse getDonut(@RequestParam(required = false) Integer warehouseId) {
-        return storageDashboardService.getDonut(warehouseId);
+    @PostMapping("/3.4-storage-top-bins")
+    public ResponseEntity<ApiResponse<List<BinUsageResponse>>> getTopBins(
+            @Valid @RequestBody StorageDashboardRequest request) {
+        List<BinUsageResponse> data = storageDashboardService.getTopBins(request);
+        return ResponseEntity.ok(
+                ApiResponse.<List<BinUsageResponse>>builder()
+                        .message("Lấy top 10 bin đầy nhất thành công")
+                        .data(data)
+                        .build()
+        );
     }
 
-    @GetMapping("/3.3-storage-shelf-chart")
-    public List<ShelfCapacityResponse> getShelfChart(@RequestParam(required = false) Integer warehouseId) {
-        return storageDashboardService.getShelfChart(warehouseId);
+    // ==================== Quality ====================
+
+    @PostMapping("/4.1-kpi")
+    public ResponseEntity<ApiResponse<QualityKpiResponse>> getQualityKpis(
+            @Valid @RequestBody QualityRequest request) {
+        QualityKpiResponse data = qualityService.getKpis(request);
+        return ResponseEntity.ok(
+                ApiResponse.<QualityKpiResponse>builder()
+                        .message("Lấy KPI chất lượng thành công")
+                        .data(data)
+                        .build()
+        );
     }
 
-    @GetMapping("/3.4storage-top-bins")
-    public List<BinUsageResponse> getTopBins(@RequestParam(required = false) Integer warehouseId) {
-        return storageDashboardService.getTopBins(warehouseId);
+    @PostMapping("/4.2-trend")
+    public ResponseEntity<ApiResponse<List<QualityTrendResponse>>> getTrend(
+            @Valid @RequestBody QualityRequest request) {
+        List<QualityTrendResponse> data = qualityService.getTrend(request);
+        return ResponseEntity.ok(
+                ApiResponse.<List<QualityTrendResponse>>builder()
+                        .message("Lấy dữ liệu trend chất lượng thành công")
+                        .data(data)
+                        .build()
+        );
     }
+
+    @PostMapping("/4.3-top-damaged-sku")
+    public ResponseEntity<ApiResponse<List<TopDamagedSkuResponse>>> getTopDamagedSku(
+            @Valid @RequestBody QualityRequest request) {
+        List<TopDamagedSkuResponse> data = qualityService.getTopDamagedSku(request);
+        return ResponseEntity.ok(
+                ApiResponse.<List<TopDamagedSkuResponse>>builder()
+                        .message("Lấy top 10 SKU hỏng nhiều nhất thành công")
+                        .data(data)
+                        .build()
+        );
+    }
+
+    // ==================== Report PDF ====================
 
     @PostMapping(value = "/warehouse-summary-pdf", produces = MediaType.APPLICATION_PDF_VALUE)
-    public ResponseEntity<byte[]> exportWarehouseReport(@RequestBody StorageStatusRequest request) throws IOException {
+    public ResponseEntity<byte[]> exportWarehouseReport(
+            @Valid @RequestBody StorageStatusRequest request) throws IOException {
         byte[] pdfBytes = reportPdfService.generateWarehouseReportPdf(request);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentDisposition(ContentDisposition.builder("inline").filename("warehouse-summary.pdf").build());
+        headers.setContentDisposition(
+                ContentDisposition.builder("inline").filename("warehouse-summary.pdf").build()
+        );
 
         return ResponseEntity.ok()
                 .headers(headers)

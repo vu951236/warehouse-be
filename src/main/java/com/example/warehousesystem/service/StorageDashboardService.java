@@ -1,5 +1,6 @@
 package com.example.warehousesystem.service;
 
+import com.example.warehousesystem.dto.request.StorageDashboardRequest;
 import com.example.warehousesystem.dto.response.*;
 import com.example.warehousesystem.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -19,10 +20,10 @@ public class StorageDashboardService {
     private final BoxRepository boxRepository;
 
     // 1. KPI
-    public StorageKpiResponse getKpis(Integer warehouseId) {
-        long shelfCount = shelfRepository.countByWarehouseId(warehouseId);
-        long binCount = binRepository.countByWarehouseId(warehouseId);
-        long boxCount = boxRepository.countByWarehouseId(warehouseId);
+    public StorageKpiResponse getKpis(StorageDashboardRequest req) {
+        long shelfCount = shelfRepository.countByWarehouseId(req.getWarehouseId());
+        long binCount = binRepository.countByWarehouseId(req.getWarehouseId());
+        long boxCount = boxRepository.countByWarehouseId(req.getWarehouseId());
 
         return StorageKpiResponse.builder()
                 .totalShelves(shelfCount)
@@ -32,9 +33,9 @@ public class StorageDashboardService {
     }
 
     // 2. Donut chart
-    public StorageDonutResponse getDonut(Integer warehouseId) {
-        Double totalCapacity = binRepository.sumCapacityByWarehouseId(warehouseId);
-        Double usedCapacity = binRepository.sumUsedCapacityByWarehouseId(warehouseId);
+    public StorageDonutResponse getDonut(StorageDashboardRequest req) {
+        Double totalCapacity = binRepository.sumCapacityByWarehouseId(req.getWarehouseId());
+        Double usedCapacity = binRepository.sumUsedCapacityByWarehouseId(req.getWarehouseId());
 
         if (totalCapacity == null) totalCapacity = 0.0;
         if (usedCapacity == null) usedCapacity = 0.0;
@@ -51,8 +52,8 @@ public class StorageDashboardService {
     }
 
     // 3. Bar chart theo shelf
-    public List<ShelfCapacityResponse> getShelfChart(Integer warehouseId) {
-        List<Object[]> rows = shelfRepository.getShelfCapacity(warehouseId);
+    public List<ShelfCapacityResponse> getShelfChart(StorageDashboardRequest req) {
+        List<Object[]> rows = shelfRepository.getShelfCapacity(req.getWarehouseId());
 
         return rows.stream().map(r -> {
             String shelfName = (String) r[0];
@@ -70,22 +71,24 @@ public class StorageDashboardService {
     }
 
     // 4. Top 10 bin đầy nhất
-    public List<BinUsageResponse> getTopBins(Integer warehouseId) {
-        List<Object[]> rows = binRepository.findTop10ByUsage(warehouseId);
+    public List<BinUsageResponse> getTopBins(StorageDashboardRequest req) {
+        List<Object[]> rows = binRepository.findTop10ByUsage(req.getWarehouseId());
 
         return rows.stream().map(r -> {
-            String code = (String) r[0];
-            double capacity = ((Number) r[1]).doubleValue();
-            double used = ((Number) r[2]).doubleValue();
-            double usedPct = capacity == 0 ? 0 : (used / capacity) * 100;
+                    String code = (String) r[0];
+                    double capacity = ((Number) r[1]).doubleValue();
+                    double used = ((Number) r[2]).doubleValue();
+                    double usedPct = capacity == 0 ? 0 : (used / capacity) * 100;
 
-            return BinUsageResponse.builder()
-                    .binCode(code)
-                    .capacity(round(capacity))
-                    .usedCapacity(round(used))
-                    .usedPercentage(round(usedPct))
-                    .build();
-        }).collect(Collectors.toList());
+                    return BinUsageResponse.builder()
+                            .binCode(code)
+                            .capacity(round(capacity))
+                            .usedCapacity(round(used))
+                            .usedPercentage(round(usedPct))
+                            .build();
+                })
+                .limit(10) // chỉ lấy 10 bin
+                .collect(Collectors.toList());
     }
 
     private double round(double v) {

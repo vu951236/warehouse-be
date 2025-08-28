@@ -41,36 +41,20 @@ public class ExportDashboardService {
                 req.getWarehouseId(), req.getStartDate(), req.getEndDate()
         );
 
-        // Map date -> response (manualQty, haravanQty)
-        Map<LocalDate, ExportChartResponse> byDate = new HashMap<>();
+        List<ExportChartResponse> result = new ArrayList<>();
         for (Object[] r : rows) {
             LocalDate date = ((java.sql.Date) r[0]).toLocalDate(); // export_date
-            Long manual = ((Number) r[1]).longValue();
-            Long haravan = ((Number) r[2]).longValue();
+            Long manual = r[1] != null ? ((Number) r[1]).longValue() : 0L;
+            Long haravan = r[2] != null ? ((Number) r[2]).longValue() : 0L;
 
-            byDate.putIfAbsent(date, ExportChartResponse.builder()
+            result.add(ExportChartResponse.builder()
                     .date(date)
-                    .manualQuantity(0L)
-                    .haravanQuantity(0L)
+                    .manualQuantity(manual)
+                    .haravanQuantity(haravan)
                     .build());
-
-            ExportChartResponse e = byDate.get(date);
-            e.setManualQuantity(manual);
-            e.setHaravanQuantity(haravan);
-        }
-
-
-        // Fill dữ liệu cho tất cả ngày trong khoảng chọn
-        List<ExportChartResponse> result = new ArrayList<>();
-        for (LocalDate d = req.getStartDate(); !d.isAfter(req.getEndDate()); d = d.plusDays(1)) {
-            result.add(byDate.getOrDefault(d,
-                    ExportChartResponse.builder()
-                            .date(d)
-                            .manualQuantity(0L)
-                            .haravanQuantity(0L)
-                            .build()));
         }
 
         return result;
     }
+
 }

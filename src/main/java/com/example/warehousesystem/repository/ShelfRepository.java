@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,11 +48,16 @@ public interface ShelfRepository extends JpaRepository<Shelf, Integer> {
 
     Optional<Shelf> findByShelfCode(String shelfCode);
 
-    // Đếm số shelf trong 1 warehouse
-    @Query("SELECT COUNT(s) FROM Shelf s WHERE s.isDeleted = false AND s.warehouse.id = :warehouseId")
+    // Đếm số shelf trong warehouse
+    @Query("""
+        SELECT COUNT(s) 
+        FROM Shelf s 
+        WHERE s.isDeleted = false 
+          AND s.warehouse.id = :warehouseId
+    """)
     long countByWarehouseId(@Param("warehouseId") Integer warehouseId);
 
-    // Lấy sức chứa từng shelf (tổng capacity & usedCapacity của các box trong bin thuộc shelf đó)
+    // Lấy sức chứa của từng shelf
     @Query("""
         SELECT s.shelfCode,
                COALESCE(SUM(b.capacity),0),
@@ -61,7 +67,7 @@ public interface ShelfRepository extends JpaRepository<Shelf, Integer> {
         LEFT JOIN Box bx ON bx.bin.id = b.id AND bx.isDeleted = false
         WHERE s.isDeleted = false AND s.warehouse.id = :warehouseId
         GROUP BY s.shelfCode
-        """)
+    """)
     List<Object[]> getShelfCapacity(@Param("warehouseId") Integer warehouseId);
 
 

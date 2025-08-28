@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -116,4 +117,88 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
     Long countDamagedItemsBySKU(@Param("sku") SKU sku);
 
     List<Item> findBySkuAndStatus(SKU sku, Item.Status status);
+
+    // 1. Đếm item theo status trong khoảng ngày & kho
+    @Query("""
+        SELECT COUNT(i)
+        FROM Item i
+        JOIN i.box b
+        JOIN b.bin bin
+        JOIN bin.shelf sh
+        WHERE i.status = :status
+          AND i.isDeleted = false
+          AND sh.warehouse.id = :warehouseId
+          AND i.createdAt BETWEEN :startDate AND :endDate
+    """)
+    Long countByStatusAndWarehouseId(
+            @Param("status") Item.Status status,
+            @Param("warehouseId") Integer warehouseId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
+    // 2. Tổng item nhập trong khoảng ngày
+    @Query("""
+        SELECT COUNT(i)
+        FROM Item i
+        JOIN i.box b
+        JOIN b.bin bin
+        JOIN bin.shelf sh
+        WHERE i.isDeleted = false
+          AND sh.warehouse.id = :warehouseId
+          AND i.createdAt BETWEEN :startDate AND :endDate
+    """)
+    Long countTotalImported(
+            @Param("warehouseId") Integer warehouseId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
+    // 3. Dữ liệu trend: count damaged & returned theo ngày
+    @Query("""
+        SELECT i.createdAt,
+               SUM(CASE WHEN i.status = 'damaged' THEN 1 ELSE 0 END),
+               SUM(CASE WHEN i.status = 'returned' THEN 1 ELSE 0 END)
+        FROM Item i
+        JOIN i.box b
+        JOIN b.bin bin
+        JOIN bin.shelf sh
+        WHERE i.isDeleted = false
+          AND sh.warehouse.id = :warehouseId
+          AND i.createdAt BETWEEN :startDate AND :endDate
+        GROUP BY i.createdAt
+        ORDER BY i.createdAt
+    """)
+    List<Object[]> getDamagedReturnedTrend(
+            @Param("warehouseId") Integer warehouseId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
+    // 4. Top 10 SKU có hàng lỗi nhiều nhất
+    @Query("""
+        SELECT i.sku.skuCode,
+               COUNT(i),
+               (SELECT COUNT(ii)
+                FROM Item ii
+                WHERE ii.sku = i.sku
+                  AND ii.isDeleted = false
+                  AND ii.box.bin.shelf.warehouse.id = :warehouseId
+                  AND ii.createdAt BETWEEN :startDate AND :endDate)
+        FROM Item i
+        JOIN i.box b
+        JOIN b.bin bin
+        JOIN bin.shelf sh
+        WHERE i.isDeleted = false
+          AND i.status = 'damaged'
+          AND sh.warehouse.id = :warehouseId
+          AND i.createdAt BETWEEN :startDate AND :endDate
+        GROUP BY i.sku.skuCode
+        ORDER BY COUNT(i) DESC
+    """)
+    List<Object[]> getTopDamagedSku(
+            @Param("warehouseId") Integer warehouseId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
 }
