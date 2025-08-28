@@ -1,5 +1,6 @@
 package com.example.warehousesystem.controller;
 
+import com.example.warehousesystem.dto.request.SearchUserRequest;
 import com.example.warehousesystem.dto.request.UserLockRequest;
 import com.example.warehousesystem.dto.request.UserCreateRequest;
 import com.example.warehousesystem.dto.request.UserUpdateRequest;
@@ -93,6 +94,17 @@ public class AdminController {
                         .build()
         );
     }
-
+    
+    @PostMapping("/search")
+    public ResponseEntity<ApiResponse<List<UserResponse>>> searchUsers(@RequestBody SearchUserRequest request) {
+        List<UserResponse> users = userService.searchUsers(request);
+        return ResponseEntity.ok(
+                ApiResponse.<List<UserResponse>>builder()
+                        .code(200)
+                        .message("Tìm kiếm người dùng thành công")
+                        .data(users)
+                        .build()
+        );
+    }
 
 }
