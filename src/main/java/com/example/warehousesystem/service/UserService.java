@@ -214,5 +214,17 @@ public class UserService {
         userMapper.toUserResponse(user);
     }
 
+    @PreAuthorize("hasRole('admin')")
+    public List<UserResponse> searchUsers(SearchUserRequest request) {
+        List<User> users = userRepository.searchUsers(
+                request.getUserCode(),
+                request.getFullName(),
+                request.getRole()
+        );
+
+        return users.stream()
+                .map(userMapper::toUserResponse)
+                .collect(Collectors.toList());
+    }
 
 }

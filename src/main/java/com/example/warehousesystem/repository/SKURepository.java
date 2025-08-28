@@ -65,7 +65,26 @@ public interface SKURepository extends JpaRepository<SKU, Integer> {
 """, nativeQuery = true)
     List<Object[]> findSkuCodesByBinId();
 
-    @Query("SELECT COUNT(i) FROM Item i WHERE i.sku.id = :skuId AND i.isDeleted = false")
+    @Query("SELECT COUNT(i) FROM Item i " +
+            "WHERE i.sku.id = :skuId " +
+            "AND i.isDeleted = false " +
+            "AND i.status = com.example.warehousesystem.entity.Item.Status.available")
     Long countItemsBySkuId(@Param("skuId") Integer skuId);
+
+    @Query("SELECT s FROM SKU s " +
+            "WHERE (:skuCode IS NULL OR s.skuCode LIKE %:skuCode%) " +
+            "AND (:size IS NULL OR s.size = :size) " +
+            "AND (:color IS NULL OR s.color = :color) " +
+            "AND (:type IS NULL OR s.type = :type) " +
+            "AND (:minUnitVolume IS NULL OR s.unitVolume >= :minUnitVolume) " +
+            "AND (:maxUnitVolume IS NULL OR s.unitVolume <= :maxUnitVolume)")
+    List<SKU> searchSkus(
+            @Param("skuCode") String skuCode,
+            @Param("size") String size,
+            @Param("color") String color,
+            @Param("type") String type,
+            @Param("minUnitVolume") Double minUnitVolume,
+            @Param("maxUnitVolume") Double maxUnitVolume
+    );
 
 }

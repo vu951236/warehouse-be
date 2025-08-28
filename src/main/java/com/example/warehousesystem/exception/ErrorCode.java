@@ -40,7 +40,8 @@ public enum ErrorCode {
     EMAIL_ALREADY_EXISTS(1015, "Email already exists", HttpStatus.CONFLICT),
     INVALID_REQUEST(1016,"Invalid Request" , HttpStatus.BAD_REQUEST),
     NOT_FOUND(1017,"Temp not found", HttpStatus.BAD_REQUEST),
-    IMPORT_ORDER_NOT_FOUND(1018, "Import order not found", HttpStatus.NOT_FOUND);
+    IMPORT_ORDER_NOT_FOUND(1018, "Import order not found", HttpStatus.NOT_FOUND),
+    INVALID_ROLE(1019, "Invalid role", HttpStatus.BAD_REQUEST);
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;

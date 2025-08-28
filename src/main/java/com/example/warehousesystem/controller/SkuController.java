@@ -1,5 +1,6 @@
 package com.example.warehousesystem.controller;
 
+import com.example.warehousesystem.dto.request.SearchSkuRequest;
 import com.example.warehousesystem.dto.response.*;
 import com.example.warehousesystem.service.SkuService;
 import lombok.RequiredArgsConstructor;
@@ -63,6 +64,35 @@ public class SkuController {
                         .build()
         );
     }
+
+    @PostMapping("/search")
+    public ResponseEntity<ApiResponse<List<SkuDetailResponse>>> searchSkus(
+            @RequestBody SearchSkuRequest request
+    ) {
+        List<SkuDetailResponse> results = skuService.searchSkus(request);
+        return ResponseEntity.ok(
+                ApiResponse.<List<SkuDetailResponse>>builder()
+                        .code(200)
+                        .message("Tìm kiếm SKU thành công")
+                        .data(results)
+                        .build()
+        );
+    }
+
+    @PostMapping("/damaged/search")
+    public ResponseEntity<ApiResponse<List<SKUDamagedResponse>>> searchDamagedSkus(
+            @RequestBody SearchSkuRequest request
+    ) {
+        List<SKUDamagedResponse> results = skuService.searchDamagedSkus(request);
+        return ResponseEntity.ok(
+                ApiResponse.<List<SKUDamagedResponse>>builder()
+                        .code(200)
+                        .message("Tìm kiếm SKU lỗi thành công")
+                        .data(results)
+                        .build()
+        );
+    }
+
 
 
 }

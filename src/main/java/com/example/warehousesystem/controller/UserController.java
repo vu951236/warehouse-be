@@ -7,9 +7,11 @@ import com.example.warehousesystem.dto.response.UserResponse;
 import com.example.warehousesystem.service.UserService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -67,4 +69,17 @@ public class UserController {
                 .data(userService.updateProfile(userId, request))
                 .build();
     }
+
+    @PostMapping("/search")
+    public ResponseEntity<ApiResponse<List<UserResponse>>> searchUsers(@RequestBody SearchUserRequest request) {
+        List<UserResponse> users = userService.searchUsers(request);
+        return ResponseEntity.ok(
+                ApiResponse.<List<UserResponse>>builder()
+                        .code(200)
+                        .message("Tìm kiếm người dùng thành công")
+                        .data(users)
+                        .build()
+        );
+    }
+
 }

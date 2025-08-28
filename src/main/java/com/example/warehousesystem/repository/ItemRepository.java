@@ -201,4 +201,23 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate
     );
+
+    @Query("SELECT i.sku FROM Item i " +
+            "WHERE i.status = com.example.warehousesystem.entity.Item.Status.damaged " +
+            "AND (:skuCode IS NULL OR i.sku.skuCode LIKE %:skuCode%) " +
+            "AND (:size IS NULL OR i.sku.size = :size) " +
+            "AND (:color IS NULL OR i.sku.color = :color) " +
+            "AND (:type IS NULL OR i.sku.type = :type) " +
+            "AND (:minUnitVolume IS NULL OR i.sku.unitVolume >= :minUnitVolume) " +
+            "AND (:maxUnitVolume IS NULL OR i.sku.unitVolume <= :maxUnitVolume) " +
+            "GROUP BY i.sku")
+    List<SKU> searchDamagedSkus(
+            @Param("skuCode") String skuCode,
+            @Param("size") String size,
+            @Param("color") String color,
+            @Param("type") String type,
+            @Param("minUnitVolume") Double minUnitVolume,
+            @Param("maxUnitVolume") Double maxUnitVolume
+    );
+
 }

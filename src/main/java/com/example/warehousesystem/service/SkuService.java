@@ -1,5 +1,6 @@
 package com.example.warehousesystem.service;
 
+import com.example.warehousesystem.dto.request.SearchSkuRequest;
 import com.example.warehousesystem.dto.response.*;
 import com.example.warehousesystem.entity.Item;
 import com.example.warehousesystem.entity.SKU;
@@ -113,6 +114,43 @@ public class SkuService {
                 .damagedItems(damagedItemDetails)
                 .build();
     }
+
+    public List<SkuDetailResponse> searchSkus(SearchSkuRequest request) {
+        List<SKU> skus = skuRepository.searchSkus(
+                request.getSkuCode(),
+                request.getSize(),
+                request.getColor(),
+                request.getType(),
+                request.getMinUnitVolume(),
+                request.getMaxUnitVolume()
+        );
+
+        return skus.stream()
+                .map(sku -> {
+                    Long itemCount = skuRepository.countItemsBySkuId(sku.getId());
+                    return skuMapper.toResponse(sku, itemCount);
+                })
+                .collect(Collectors.toList());
+    }
+
+    public List<SKUDamagedResponse> searchDamagedSkus(SearchSkuRequest request) {
+        List<SKU> skus = itemRepository.searchDamagedSkus(
+                request.getSkuCode(),
+                request.getSize(),
+                request.getColor(),
+                request.getType(),
+                request.getMinUnitVolume(),
+                request.getMaxUnitVolume()
+        );
+
+        return skus.stream()
+                .map(sku -> {
+                    Long damagedCount = itemRepository.countDamagedItemsBySKU(sku);
+                    return SKUDamagedMapper.toResponse(sku, damagedCount);
+                })
+                .collect(Collectors.toList());
+    }
+
 
 
 }
