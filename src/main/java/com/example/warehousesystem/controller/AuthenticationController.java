@@ -27,9 +27,8 @@ public class AuthenticationController {
     public ApiResponse<AuthenticationResponse> login(@RequestBody AuthenticationRequest request, HttpServletResponse response) {
         AuthenticationResponse authenticationResponse = authenticationService.login(request);
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token",authenticationResponse.getRefreshToken())
-                .secure(true)
+                .secure(false)
                 .httpOnly(true)
-                .sameSite("None")
                 .maxAge(30*24*60*60)
                 .path("/")
                 .build();
@@ -50,9 +49,8 @@ public class AuthenticationController {
 
         // Xóa cookie refresh_token
         ResponseCookie clearCookie = ResponseCookie.from("refresh_token", "")
-                .secure(true) 
+                .secure(false)
                 .httpOnly(true)
-                .sameSite("None")
                 .maxAge(0)
                 .path("/")
                 .build();
