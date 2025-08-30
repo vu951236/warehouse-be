@@ -7,6 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class SkuDetailResponse {
+    private Integer skuId;
     private String skuCode;
     private Long itemCount;
     private String name;

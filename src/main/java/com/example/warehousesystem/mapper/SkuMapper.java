@@ -11,6 +11,7 @@ public class SkuMapper {
         if (sku == null) return null;
 
         return SkuDetailResponse.builder()
+                .skuId(sku.getId())
                 .skuCode(sku.getSkuCode())
                 .itemCount(itemCount)
                 .name(sku.getName())

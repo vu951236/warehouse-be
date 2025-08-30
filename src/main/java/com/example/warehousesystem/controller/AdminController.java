@@ -94,7 +94,7 @@ public class AdminController {
                         .build()
         );
     }
-    
+
     @PostMapping("/search")
     public ResponseEntity<ApiResponse<List<UserResponse>>> searchUsers(@RequestBody SearchUserRequest request) {
         List<UserResponse> users = userService.searchUsers(request);
