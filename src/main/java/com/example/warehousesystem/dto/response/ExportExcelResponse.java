@@ -8,19 +8,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 // Xuất hàng
-public class ExportItemResponse {
-    private Integer itemId;
-    private String barcode;
+public class ExportExcelResponse {
     private String skuCode;
-    private Integer boxId;
-    private String boxCode;
-    private String binCode;
-    private String shelfCode;
 
     // Thêm thông tin xuất
     private String exportCode;
-    private LocalDateTime exportDate;
-    private String exportDateString;
+    private String exportDate;
     private Integer quantity;
     private String note;
 

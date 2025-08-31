@@ -1,7 +1,9 @@
 package com.example.warehousesystem.repository;
 
 import com.example.warehousesystem.entity.ExportOrder;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -129,4 +131,10 @@ public interface ExportOrderRepository extends JpaRepository<ExportOrder, Intege
     ORDER BY eo.createdAt ASC
 """)
     List<ExportOrder> findUrgentOrders(@Param("status") ExportOrder.Status status, Pageable pageable);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE ExportOrder e SET e.note = :note WHERE e.exportCode = :exportCode")
+    int updateNoteByExportCode(@Param("exportCode") String exportCode, @Param("note") String note);
+
 }

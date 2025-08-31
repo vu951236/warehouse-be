@@ -4,22 +4,22 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:mysql://103.97.126.29:3306/gnnajcqt_warehousesystem
+    username: gnnajcqt_warehousesystem
+    password: warehouse123
 
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
+    username: hoangvuvo907@gmail.com
+    password: rijw fplk zodm uczx
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
-    from: ${MAIL_FROM}
+    from: hoangvuvo907@gmail.com
 
   jpa:
     hibernate:
@@ -31,10 +31,13 @@ spring:
         physical_naming_strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 
 jwt:
-  signerKey: ${JWT_SECRET}
+  signerKey: abcDEF123!@#xyz789JWTKeySecret_0123456789012345678901234567890123456789
   valid_duration: 3600
-  refresh_token: 30
+  refresh_token: 30 # days
 
 server:
   address: 0.0.0.0
-  port: ${PORT:8080}
+  port: 8080
+
+frontend:
+  domain: http://localhost:5173

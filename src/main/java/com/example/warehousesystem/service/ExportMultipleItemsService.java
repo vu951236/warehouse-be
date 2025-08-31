@@ -2,13 +2,13 @@ package com.example.warehousesystem.service;
 
 import com.example.warehousesystem.dto.request.ExportItemRequest;
 import com.example.warehousesystem.dto.request.PickingRouteRequest;
-import com.example.warehousesystem.dto.response.ExportItemResponse;
-import com.example.warehousesystem.dto.response.ExportWithPickingRouteResponse;
-import com.example.warehousesystem.dto.response.PickingRouteResponse;
-import com.example.warehousesystem.dto.response.SKUStatusResponse;
+import com.example.warehousesystem.dto.response.*;
 import com.example.warehousesystem.entity.*;
 import com.example.warehousesystem.mapper.ItemExportMapper;
 import com.example.warehousesystem.repository.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
@@ -35,6 +35,7 @@ public class ExportMultipleItemsService {
     private final SKURepository skuRepository;
     private final UserRepository userRepository;
     private final PickingRouteService pickingRouteService;
+    private final ExportLogRepository exportLogRepository;
 
     private Integer getCurrentUserId() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -44,10 +45,10 @@ public class ExportMultipleItemsService {
     }
 
     @Transactional
-    public ExportWithPickingRouteResponse exportQueuedItems(List<ExportItemRequest.ExportQueueDTO> dtos) {
+    public ExportWithPickingRouteResponse exportQueuedItems(List<ExportItemRequest.ExportQueueDTO> dtos) throws JsonProcessingException {
         List<ExportItemResponse> responses = new ArrayList<>();
 
-        // Kiểm tra tất cả SKU trước: nếu bất kỳ SKU nào không đủ queued, bỏ cả lô
+        // --- Kiểm tra SKU ---
         for (ExportItemRequest.ExportQueueDTO dto : dtos) {
             SKU skuEntity = skuRepository.findBySkuCode(dto.getSku())
                     .orElseThrow(() -> new RuntimeException("SKU không tồn tại: " + dto.getSku()));
@@ -61,7 +62,7 @@ public class ExportMultipleItemsService {
             }
         }
 
-        // Nếu đủ tất cả SKU thì tạo ExportOrder
+        // --- Tạo ExportOrder ---
         String exportCode = "EX" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         User createdBy = userRepository.findById(getCurrentUserId())
                 .orElseThrow(() -> new RuntimeException("User không tồn tại"));
@@ -77,7 +78,7 @@ public class ExportMultipleItemsService {
                 .build();
         exportOrder = exportOrderRepository.save(exportOrder);
 
-        // Lặp từng SKU để tạo ExportOrderDetail và update trạng thái Item
+        // --- Xử lý từng SKU ---
         for (ExportItemRequest.ExportQueueDTO dto : dtos) {
             SKU skuEntity = skuRepository.findBySkuCode(dto.getSku()).orElseThrow();
 
@@ -105,7 +106,7 @@ public class ExportMultipleItemsService {
                     .build());
         }
 
-        // Tạo PickingRouteRequest
+        // --- Tạo PickingRouteRequest ---
         PickingRouteRequest routeRequest = new PickingRouteRequest();
         routeRequest.setSkuList(responses.stream()
                 .map(r -> new PickingRouteRequest.SKURequest(r.getSkuCode(), r.getQuantity()))
@@ -113,7 +114,37 @@ public class ExportMultipleItemsService {
 
         List<PickingRouteResponse> pickingRoutes = pickingRouteService.getOptimalPickingRoute(routeRequest);
 
+        // --- Lưu log vào bảng export_log ---
+        ObjectMapper objectMapper = new ObjectMapper(); // Jackson
+        String pickingRouteJson = objectMapper.writeValueAsString(pickingRoutes);
+
+        for (ExportItemResponse response : responses) {
+            ExportLog log = ExportLog.builder()
+                    .exportCode(response.getExportCode())
+                    .skuCode(response.getSkuCode())
+                    .quantity(response.getQuantity())
+                    .exportedBy(Long.valueOf(createdBy.getId()))
+                    .exportDate(response.getExportDate())
+                    .exportDateString(response.getExportDateString())
+                    .destination(exportOrder.getDestination())
+                    .status(exportOrder.getStatus().name())
+                    .source(exportOrder.getSource().name())
+                    .urgent(exportOrder.getUrgent())
+                    .pickingRoute(pickingRouteJson)
+                    .build();
+            exportLogRepository.save(log);
+        }
+
         return new ExportWithPickingRouteResponse(responses, pickingRoutes);
+    }
+
+    @Transactional
+    public void updateNoteForExportCode(String exportCode, String note) {
+        // Cập nhật export_log
+        exportLogRepository.updateNoteByExportCode(exportCode, note);
+
+        // Cập nhật export_order
+        exportOrderRepository.updateNoteByExportCode(exportCode, note);
     }
 
 
@@ -175,6 +206,37 @@ public class ExportMultipleItemsService {
             return new SKUStatusResponse(sku.getSkuCode(), available, queued);
         }).toList();
     }
+
+    public ExportInfoResponse getLatestExportInfo() throws JsonProcessingException {
+        // Lấy tất cả bản ghi log của exportCode mới nhất
+        List<ExportLog> logs = exportLogRepository.findLatestExportLogs();
+        if (logs.isEmpty()) {
+            return null;
+        }
+
+        ExportLog latestLog = logs.get(0);
+        String pickingRouteJson = latestLog.getPickingRoute(); // JSON lộ trình
+
+        // Deserialize JSON thành List<PickingRouteResponse>
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<PickingRouteResponse> pickingRoutes = new ArrayList<>();
+        if (pickingRouteJson != null && !pickingRouteJson.isEmpty()) {
+            pickingRoutes = objectMapper.readValue(
+                    pickingRouteJson,
+                    new TypeReference<List<PickingRouteResponse>>() {}
+            );
+        }
+
+        // Tạo DTO trả về
+        ExportInfoResponse dto = new ExportInfoResponse();
+        dto.setExportCode(latestLog.getExportCode());
+        dto.setExportDate(latestLog.getExportDate());
+        dto.setNote(latestLog.getNote());
+        dto.setPickingRoutes(pickingRoutes); // Set danh sách đã deserialize
+
+        return dto;
+    }
+
 
 
 }

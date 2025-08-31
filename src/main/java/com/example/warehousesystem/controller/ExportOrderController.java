@@ -4,6 +4,7 @@ import com.example.warehousesystem.Annotation.SystemLog;
 import com.example.warehousesystem.dto.request.*;
 import com.example.warehousesystem.dto.response.*;
 import com.example.warehousesystem.service.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -19,7 +20,8 @@ import org.springframework.web.bind.annotation.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/admin/export-orders")
@@ -74,8 +76,7 @@ public class ExportOrderController {
 
     @PostMapping("/multiple/export-with-route")
     @SystemLog(action = "Xuất hàng nhiều SKU kèm đường đi", targetTable = "export_order")
-    public ResponseEntity<InputStreamResource> exportMultipleWithRouteToExcel(@RequestBody ExportItemRequest request) throws Exception {
-        // 1. Xuất hàng và lấy đường đi (service mới nhận List<ExportQueueDTO>)
+    public ResponseEntity<ExportExcelWithRouteResponse> exportMultipleWithRoute(@RequestBody ExportItemRequest request) throws Exception {
         ExportWithPickingRouteResponse result = exportMultipleItemsService.exportQueuedItems(request.getItems());
 
         Workbook workbook = new XSSFWorkbook();
@@ -88,15 +89,44 @@ public class ExportOrderController {
         header1.createCell(2).setCellValue("Ngày xuất");
         header1.createCell(3).setCellValue("SKU");
         header1.createCell(4).setCellValue("Số lượng");
+        header1.createCell(5).setCellValue("Ghi chú");
 
         int rowNum1 = 1;
-        for (ExportItemResponse r : result.getExportedItems()) {
-            Row row = sheet1.createRow(rowNum1++);
-            row.createCell(0).setCellValue(rowNum1 - 1);
-            row.createCell(1).setCellValue(r.getExportCode());
-            row.createCell(2).setCellValue(r.getExportDateString());
-            row.createCell(3).setCellValue(r.getSkuCode());
-            row.createCell(4).setCellValue(r.getQuantity());
+
+        Map<String, List<ExportExcelResponse>> grouped = result.getExportedItems().stream()
+                .map(r -> new ExportExcelResponse(
+                        r.getSkuCode(),
+                        r.getExportCode(),
+                        r.getExportDateString(),
+                        r.getQuantity(),
+                        r.getNote()
+                ))
+                .collect(Collectors.groupingBy(ExportExcelResponse::getExportCode));
+
+        List<Map<String, Object>> mergedExports = new ArrayList<>();
+
+        for (Map.Entry<String, List<ExportExcelResponse>> entry : grouped.entrySet()) {
+            String exportCode = entry.getKey();
+            List<ExportExcelResponse> items = entry.getValue();
+
+            String exportDate = items.get(0).getExportDate();
+            String note = items.get(0).getNote();
+
+            for (ExportExcelResponse r : items) {
+                Row row = sheet1.createRow(rowNum1++);
+                row.createCell(0).setCellValue(rowNum1 - 1);
+                row.createCell(1).setCellValue(r.getExportCode());
+                row.createCell(2).setCellValue(r.getExportDate());
+                row.createCell(3).setCellValue(r.getSkuCode());
+                row.createCell(4).setCellValue(r.getQuantity());
+                row.createCell(5).setCellValue(r.getNote() != null ? r.getNote() : "");
+            }
+
+            Map<String, Object> merged = new HashMap<>();
+            merged.put("exportCode", exportCode);
+            merged.put("exportDate", exportDate);
+            merged.put("note", note);
+            mergedExports.add(merged);
         }
 
         // --- Sheet 2: Đường đi lấy hàng ---
@@ -120,19 +150,40 @@ public class ExportOrderController {
             row.createCell(5).setCellValue(String.join(", ", p.getBarcodes()));
         }
 
-        // --- Xuất file ---
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         workbook.write(out);
         workbook.close();
+        String base64Excel = Base64.getEncoder().encodeToString(out.toByteArray());
 
-        ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Disposition", "attachment; filename=exported_items_with_route.xlsx");
+        ExportExcelWithRouteResponse response = new ExportExcelWithRouteResponse(
+                base64Excel,
+                mergedExports,
+                result.getPickingRoutes()
+        );
 
-        return ResponseEntity.ok()
-                .headers(headers)
-                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                .body(new InputStreamResource(in));
+        Map<String, Object> apiResult = new HashMap<>();
+        apiResult.put("exportedItems", mergedExports);
+        apiResult.put("pickingRoutes", result.getPickingRoutes());
+        apiResult.put("excelFileBase64", base64Excel);
+
+        return ResponseEntity.ok(response);
+    }
+
+
+    @PutMapping("/export/update-note")
+    public ResponseEntity<String> updateNote(@RequestParam String exportCode,
+                                             @RequestParam String note) {
+        exportMultipleItemsService.updateNoteForExportCode(exportCode, note);
+        return ResponseEntity.ok("Note updated successfully for exportCode: " + exportCode);
+    }
+
+    @GetMapping("/export/latest")
+    public ResponseEntity<ExportInfoResponse> getLatestExport() throws JsonProcessingException {
+        ExportInfoResponse latestExport = exportMultipleItemsService.getLatestExportInfo();
+        if (latestExport == null) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(latestExport);
     }
 
     @PostMapping("/multiple/move-to-queue")
