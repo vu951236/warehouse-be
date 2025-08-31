@@ -1,5 +1,6 @@
 package com.example.warehousesystem.controller;
 
+import com.example.warehousesystem.Annotation.SystemLog;
 import com.example.warehousesystem.dto.ExcelItemDTO;
 import com.example.warehousesystem.dto.request.*;
 import com.example.warehousesystem.dto.response.*;
@@ -36,6 +37,7 @@ public class ImportOrderController {
 
 
     @PostMapping("/search")
+    @SystemLog(action = "Tìm kiếm đơn nhập", targetTable = "importorder")
     public ResponseEntity<List<ImportOrderBoardResponse>> searchImportOrders(
             @RequestBody ImportOrderSearchRequest request
     ) {
@@ -43,6 +45,7 @@ public class ImportOrderController {
     }
 
     @PostMapping("/search-merged")
+    @SystemLog(action = "Tìm kiếm đơn nhập (gộp dữ liệu)", targetTable = "importorder")
     public ResponseEntity<List<ImportOrderBoardResponse>> searchImportOrdersMerged(
             @RequestBody ImportOrderSearch2Request request
     ) {
@@ -50,6 +53,7 @@ public class ImportOrderController {
     }
 
     @PostMapping("/import-by-scan")
+    @SystemLog(action = "Nhập kho bằng quét barcode", targetTable = "importorder")
     public ResponseEntity<ApiResponse<ImportItemsResponse>> importItemsByScan(
             @RequestBody ImportScanBarcodeRequest request
     ) {
@@ -61,6 +65,7 @@ public class ImportOrderController {
     }
 
     @GetMapping("/temp-items")
+    @SystemLog(action = "Lấy danh sách bản ghi tạm", targetTable = "importorder_temp")
     public ResponseEntity<ApiResponse<List<TempImportExcelResponse>>> getTempItems() {
         return ResponseEntity.ok(ApiResponse.<List<TempImportExcelResponse>>builder()
                 .message("Lấy dữ liệu tạm thành công")
@@ -69,6 +74,7 @@ public class ImportOrderController {
     }
 
     @DeleteMapping("/delete/temp/{id}")
+    @SystemLog(action = "Xóa bản ghi tạm", targetTable = "importorder_temp")
     public ResponseEntity<ApiResponse<String>> deleteTempItem(@PathVariable Long id) {
         tempImportExcelService.deleteTempItem(id);
         return ResponseEntity.ok(ApiResponse.<String>builder()
@@ -78,6 +84,7 @@ public class ImportOrderController {
     }
 
     @PostMapping(value = "/upload-excel-to-temp", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @SystemLog(action = "Upload Excel lưu vào bảng tạm", targetTable = "importorder_temp")
     public ResponseEntity<ApiResponse<String>> uploadExcelToTemp(
             @RequestParam("file") MultipartFile file
     ) throws IOException {
@@ -90,6 +97,7 @@ public class ImportOrderController {
     }
 
     @PostMapping("/import-from-temp")
+    @SystemLog(action = "Nhập kho từ bảng tạm", targetTable = "importorder")
     public ResponseEntity<ApiResponse<ImportItemsResponse>> importFromTemp(@RequestBody ImportFromTempRequest request) {
         return ResponseEntity.ok(ApiResponse.<ImportItemsResponse>builder()
                 .message("Nhập kho thành công")
@@ -131,6 +139,7 @@ public class ImportOrderController {
     }
 
     @PostMapping("/search-by-sku")
+    @SystemLog(action = "Xem lịch sử nhập theo SKU", targetTable = "importorder")
     public ResponseEntity<ApiResponse<List<SearchImportBySKUResponse>>> getImportHistoryBySku(
             @RequestBody SearchImportBySKURequest request
     ) {
@@ -142,6 +151,7 @@ public class ImportOrderController {
     }
 
     @GetMapping("/{importOrderId}")
+    @SystemLog(action = "Xem chi tiết đơn nhập", targetTable = "importorder")
     public ResponseEntity<ApiResponse<List<ImportOrderDetailResponse>>> getImportDetails(
             @PathVariable Integer importOrderId
     ) {
@@ -153,9 +163,9 @@ public class ImportOrderController {
     }
 
     @GetMapping("/export-excel")
+    @SystemLog(action = "Xuất danh sách đơn nhập ra Excel", targetTable = "importorder")
     public ResponseEntity<Resource> exportImportOrders() throws IOException {
         ByteArrayResource resource = importOrderExportService.exportImportOrders();
-
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=import_orders_excel.xlsx")
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
@@ -163,8 +173,8 @@ public class ImportOrderController {
                 .body(resource);
     }
 
-
     @GetMapping("/getallImportOrder")
+    @SystemLog(action = "Lấy danh sách tất cả đơn nhập", targetTable = "importorder")
     public ResponseEntity<ApiResponse<List<ImportOrderResponse>>> getAllImportOrders() {
         return ResponseEntity.ok(ApiResponse.<List<ImportOrderResponse>>builder()
                 .message("Lấy tất cả đơn nhập thành công")
@@ -173,6 +183,7 @@ public class ImportOrderController {
     }
 
     @GetMapping("/{orderId}/details")
+    @SystemLog(action = "Lấy chi tiết đơn nhập theo ID", targetTable = "importorder")
     public ResponseEntity<ApiResponse<List<ImportOrderDetailResponse>>> getImportOrderDetails(@PathVariable Integer orderId) {
         return ResponseEntity.ok(ApiResponse.<List<ImportOrderDetailResponse>>builder()
                 .message("Lấy chi tiết đơn nhập thành công")
@@ -181,6 +192,7 @@ public class ImportOrderController {
     }
 
     @GetMapping("/allDetails")
+    @SystemLog(action = "Lấy toàn bộ chi tiết đơn nhập", targetTable = "importorder")
     public ResponseEntity<ApiResponse<List<ImportOrderBoardResponse>>> getAllImportOrderDetails() {
         return ResponseEntity.ok(ApiResponse.<List<ImportOrderBoardResponse>>builder()
                 .message("Lấy toàn bộ chi tiết nhập hàng thành công")
@@ -189,6 +201,7 @@ public class ImportOrderController {
     }
 
     @GetMapping("/allDetails/merged-sku")
+    @SystemLog(action = "Lấy toàn bộ chi tiết nhập hàng (gộp SKU)", targetTable = "importorder")
     public ResponseEntity<ApiResponse<List<ImportOrderBoardResponse>>> getAllImportOrderDetailsMergedWithSkuList() {
         return ResponseEntity.ok(ApiResponse.<List<ImportOrderBoardResponse>>builder()
                 .message("Lấy toàn bộ chi tiết nhập hàng (gộp SKU) thành công")
@@ -197,6 +210,7 @@ public class ImportOrderController {
     }
 
     @PostMapping("/import-single-item")
+    @SystemLog(action = "Nhập kho một sản phẩm", targetTable = "importorder")
     public ResponseEntity<ApiResponse<Object>> importSingleItem(@RequestBody ImportSingleItemRequest request) {
         return ResponseEntity.ok(
                 ApiResponse.builder()
@@ -207,6 +221,7 @@ public class ImportOrderController {
     }
 
     @GetMapping("/import-orders/{id}/fullDetail")
+    @SystemLog(action = "Xem đầy đủ thông tin đơn nhập theo ID", targetTable = "importorder")
     public ResponseEntity<ApiResponse<ImportOrderFullResponse>> getFullImportOrder(@PathVariable Integer id) {
         return ResponseEntity.ok(
                 ApiResponse.<ImportOrderFullResponse>builder()
@@ -217,6 +232,7 @@ public class ImportOrderController {
     }
 
     @GetMapping("/detail/{detailId}/full")
+    @SystemLog(action = "Xem đầy đủ thông tin đơn nhập theo detailId", targetTable = "importorder")
     public ResponseEntity<ApiResponse<ImportOrderFullResponse>> getFullImportOrderByDetailId(
             @PathVariable Integer detailId
     ) {
@@ -229,8 +245,8 @@ public class ImportOrderController {
         );
     }
 
-    // WMS-19: Tải xuống mẫu nhập
     @GetMapping("/template")
+    @SystemLog(action = "Tải xuống template nhập kho", targetTable = "importorder")
     public ResponseEntity<Resource> downloadImportTemplate() throws IOException {
         ByteArrayResource resource = importTemplateService.generateTemplate();
         return ResponseEntity.ok()
@@ -240,8 +256,8 @@ public class ImportOrderController {
                 .body(resource);
     }
 
-    // WMS-21: Chỉnh sửa phiếu nhập tạm
     @PutMapping("/temp/update")
+    @SystemLog(action = "Cập nhật bản ghi tạm", targetTable = "importorder_temp")
     public ResponseEntity<ApiResponse<String>> updateTempItem(@RequestBody UpdateTempImportRequest request) {
         tempImportExcelService.updateTempImport(request);
         return ResponseEntity.ok(ApiResponse.<String>builder()
@@ -250,8 +266,8 @@ public class ImportOrderController {
                 .build());
     }
 
-    // WMS-24: Giả lập bắn mã
     @GetMapping("/{id}/simulate-barcode")
+    @SystemLog(action = "Giả lập bắn mã barcode", targetTable = "importorder")
     public ResponseEntity<ApiResponse<List<String>>> simulateBarcode(
             @PathVariable("id") Integer importOrderId,
             @RequestParam(defaultValue = "5") int count
@@ -264,6 +280,7 @@ public class ImportOrderController {
     }
 
     @PostMapping("/create")
+    @SystemLog(action = "Tạo phiếu nhập", targetTable = "importorder")
     public ResponseEntity<ApiResponse<ImportOrderFullResponse>> createImportOrder(
             @RequestBody ImportOrderRequest request
     ) {
@@ -275,5 +292,4 @@ public class ImportOrderController {
                         .build()
         );
     }
-
 }

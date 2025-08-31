@@ -7,6 +7,7 @@ import com.example.warehousesystem.dto.response.ApiResponse;
 import com.example.warehousesystem.dto.response.BinDetailResponse;
 import com.example.warehousesystem.dto.response.BinResponse;
 import com.example.warehousesystem.service.BinService;
+import com.example.warehousesystem.Annotation.SystemLog;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -26,6 +27,7 @@ public class BinController {
      * API tìm kiếm danh sách bin theo điều kiện
      */
     @PostMapping("/search")
+    @SystemLog(action = "Tìm kiếm bin", targetTable = "bin")
     public ResponseEntity<ApiResponse<List<BinResponse>>> searchBins(@RequestBody SearchBinRequest request) {
         List<BinResponse> responses = binService.searchBins(request);
         return ResponseEntity.ok(
@@ -40,6 +42,7 @@ public class BinController {
      * API xóa ngăn hàng theo binCode
      */
     @DeleteMapping("/{binCode}")
+    @SystemLog(action = "Xoá bin", targetTable = "bin")
     public ResponseEntity<ApiResponse<Void>> deleteBin(@PathVariable String binCode) {
         binService.deleteBin(binCode);
         return ResponseEntity.ok(
@@ -53,6 +56,7 @@ public class BinController {
      * API export danh sách bin ra PDF
      */
     @GetMapping("/export/pdf")
+    @SystemLog(action = "Xuất danh sách bin ra PDF", targetTable = "bin")
     public ResponseEntity<byte[]> exportBinToPdf() {
         byte[] pdfBytes = binService.exportBinToPdf();
         return ResponseEntity.ok()
@@ -65,6 +69,7 @@ public class BinController {
      * API cập nhật capacity của một bin
      */
     @PutMapping("/update")
+    @SystemLog(action = "Cập nhật thông tin bin", targetTable = "bin")
     public ResponseEntity<ApiResponse<BinResponse>> updateBin(@RequestBody UpdateBinRequest request) {
         BinResponse response = binService.updateBin(request);
         return ResponseEntity.ok(
@@ -75,7 +80,11 @@ public class BinController {
         );
     }
 
+    /**
+     * API lấy danh sách bin theo shelfId
+     */
     @GetMapping("/{shelfId}/bins")
+    @SystemLog(action = "Lấy danh sách bin theo kệ", targetTable = "bin")
     public ResponseEntity<ApiResponse<List<AllBinResponse>>> getBinsByShelf(@PathVariable Integer shelfId) {
         List<AllBinResponse> bins = binService.getBinsByShelfId(shelfId);
         return ResponseEntity.ok(
@@ -86,7 +95,11 @@ public class BinController {
         );
     }
 
+    /**
+     * API lấy chi tiết 1 bin
+     */
     @GetMapping("/{binId}/detail")
+    @SystemLog(action = "Xem chi tiết bin", targetTable = "bin")
     public ResponseEntity<ApiResponse<BinDetailResponse>> getBinDetail(@PathVariable Integer binId) {
         BinDetailResponse detail = binService.getBinDetail(binId);
         return ResponseEntity.ok(

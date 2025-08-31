@@ -1,5 +1,6 @@
 package com.example.warehousesystem.controller;
 
+import com.example.warehousesystem.Annotation.SystemLog;
 import com.example.warehousesystem.dto.request.*;
 import com.example.warehousesystem.dto.response.*;
 import com.example.warehousesystem.service.*;
@@ -27,6 +28,7 @@ public class DashboardController {
 
     // ==================== Import ====================
 
+    @SystemLog(action = "Xem KPI nhập kho", targetTable = "import")
     @PostMapping("/1.1-import-kpi")
     public ResponseEntity<ApiResponse<ImportKpiResponse>> getImportKpis(
             @Valid @RequestBody ImportDashboardRequest request) {
@@ -39,6 +41,7 @@ public class DashboardController {
         );
     }
 
+    @SystemLog(action = "Xem biểu đồ nhập kho", targetTable = "import")
     @PostMapping("/1.2-import-chart")
     public ResponseEntity<ApiResponse<List<ImportChartResponse>>> getImportChart(
             @Valid @RequestBody ImportDashboardRequest request) {
@@ -53,6 +56,7 @@ public class DashboardController {
 
     // ==================== Export ====================
 
+    @SystemLog(action = "Xem KPI xuất kho", targetTable = "export")
     @PostMapping("/2.1-export-kpis")
     public ResponseEntity<ApiResponse<ExportKpiResponse>> getExportKpis(
             @Valid @RequestBody ExportChartRequest request) {
@@ -65,6 +69,7 @@ public class DashboardController {
         );
     }
 
+    @SystemLog(action = "Xem biểu đồ xuất kho", targetTable = "export")
     @PostMapping("/2.2-export-chart")
     public ResponseEntity<ApiResponse<List<ExportChartResponse>>> getExportChart(
             @Valid @RequestBody ExportChartRequest request) {
@@ -79,6 +84,7 @@ public class DashboardController {
 
     // ==================== Storage ====================
 
+    @SystemLog(action = "Xem KPI lưu trữ", targetTable = "storage")
     @PostMapping("/3.1-storage-kpis")
     public ResponseEntity<ApiResponse<StorageKpiResponse>> getStorageKpis(
             @Valid @RequestBody StorageDashboardRequest request) {
@@ -91,6 +97,7 @@ public class DashboardController {
         );
     }
 
+    @SystemLog(action = "Xem donut chart lưu trữ", targetTable = "storage")
     @PostMapping("/3.2-storage-donut")
     public ResponseEntity<ApiResponse<StorageDonutResponse>> getStorageDonut(
             @Valid @RequestBody StorageDashboardRequest request) {
@@ -103,6 +110,7 @@ public class DashboardController {
         );
     }
 
+    @SystemLog(action = "Xem biểu đồ dung lượng theo kệ", targetTable = "storage")
     @PostMapping("/3.3-storage-shelf-chart")
     public ResponseEntity<ApiResponse<List<ShelfCapacityResponse>>> getShelfChart(
             @Valid @RequestBody StorageDashboardRequest request) {
@@ -115,6 +123,7 @@ public class DashboardController {
         );
     }
 
+    @SystemLog(action = "Xem top bin đầy nhất", targetTable = "storage")
     @PostMapping("/3.4-storage-top-bins")
     public ResponseEntity<ApiResponse<List<BinUsageResponse>>> getTopBins(
             @Valid @RequestBody StorageDashboardRequest request) {
@@ -129,6 +138,7 @@ public class DashboardController {
 
     // ==================== Quality ====================
 
+    @SystemLog(action = "Xem KPI chất lượng", targetTable = "quality")
     @PostMapping("/4.1-kpi")
     public ResponseEntity<ApiResponse<QualityKpiResponse>> getQualityKpis(
             @Valid @RequestBody QualityRequest request) {
@@ -141,6 +151,7 @@ public class DashboardController {
         );
     }
 
+    @SystemLog(action = "Xem trend chất lượng", targetTable = "quality")
     @PostMapping("/4.2-trend")
     public ResponseEntity<ApiResponse<List<QualityTrendResponse>>> getTrend(
             @Valid @RequestBody QualityRequest request) {
@@ -153,6 +164,7 @@ public class DashboardController {
         );
     }
 
+    @SystemLog(action = "Xem top SKU hỏng nhiều nhất", targetTable = "quality")
     @PostMapping("/4.3-top-damaged-sku")
     public ResponseEntity<ApiResponse<List<TopDamagedSkuResponse>>> getTopDamagedSku(
             @Valid @RequestBody QualityRequest request) {
@@ -167,6 +179,7 @@ public class DashboardController {
 
     // ==================== Report PDF ====================
 
+    @SystemLog(action = "Xuất báo cáo PDF tổng hợp kho", targetTable = "report")
     @PostMapping(value = "/warehouse-summary-pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<byte[]> exportWarehouseReport(
             @Valid @RequestBody StorageStatusRequest request) throws IOException {

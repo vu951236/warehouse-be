@@ -8,6 +8,7 @@ import com.example.warehousesystem.dto.response.ApiResponse;
 import com.example.warehousesystem.dto.response.BoxDetailResponse;
 import com.example.warehousesystem.dto.response.BoxResponse;
 import com.example.warehousesystem.service.BoxService;
+import com.example.warehousesystem.Annotation.SystemLog;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -27,6 +28,7 @@ public class BoxController {
      * Tạo mới box
      */
     @PostMapping("/create")
+    @SystemLog(action = "Tạo mới box", targetTable = "box")
     public ResponseEntity<ApiResponse<BoxResponse>> createBox(@RequestBody CreateBoxRequest request) {
         BoxResponse response = boxService.createBox(request);
         return ResponseEntity.ok(
@@ -41,6 +43,7 @@ public class BoxController {
      * Cập nhật box
      */
     @PutMapping("/update")
+    @SystemLog(action = "Cập nhật box", targetTable = "box")
     public ResponseEntity<ApiResponse<BoxResponse>> updateBox(@RequestBody UpdateBoxRequest request) {
         BoxResponse response = boxService.updateBox(request);
         return ResponseEntity.ok(
@@ -55,6 +58,7 @@ public class BoxController {
      * Xoá mềm box theo boxCode
      */
     @DeleteMapping("/{boxCode}")
+    @SystemLog(action = "Xoá box", targetTable = "box")
     public ResponseEntity<ApiResponse<Void>> deleteBox(@PathVariable String boxCode) {
         boxService.deleteBox(boxCode);
         return ResponseEntity.ok(
@@ -68,6 +72,7 @@ public class BoxController {
      * Tìm kiếm các box theo điều kiện
      */
     @PostMapping("/search")
+    @SystemLog(action = "Tìm kiếm box", targetTable = "box")
     public ResponseEntity<ApiResponse<List<BoxResponse>>> searchBoxes(@RequestBody SearchBoxRequest request) {
         List<BoxResponse> responses = boxService.searchBoxs(request);
         return ResponseEntity.ok(
@@ -82,6 +87,7 @@ public class BoxController {
      * Xuất PDF danh sách box
      */
     @GetMapping("/export/pdf")
+    @SystemLog(action = "Xuất danh sách box ra PDF", targetTable = "box")
     public ResponseEntity<byte[]> exportBoxesToPdf() {
         byte[] pdfBytes = boxService.exportBoxToPdf();
         return ResponseEntity.ok()
@@ -90,7 +96,11 @@ public class BoxController {
                 .body(pdfBytes);
     }
 
+    /**
+     * Lấy danh sách box theo binId
+     */
     @GetMapping("/bin/{binId}/boxes")
+    @SystemLog(action = "Lấy danh sách box theo bin", targetTable = "box")
     public ResponseEntity<ApiResponse<List<AllBoxResponse>>> getBoxesByBin(@PathVariable Integer binId) {
         List<AllBoxResponse> boxes = boxService.getBoxesByBinId(binId);
         return ResponseEntity.ok(
@@ -101,7 +111,11 @@ public class BoxController {
         );
     }
 
+    /**
+     * Lấy chi tiết 1 box
+     */
     @GetMapping("/{boxId}/detail")
+    @SystemLog(action = "Xem chi tiết box", targetTable = "box")
     public ResponseEntity<ApiResponse<BoxDetailResponse>> getBoxDetail(@PathVariable Integer boxId) {
         BoxDetailResponse response = boxService.getBoxDetail(boxId);
         return ResponseEntity.ok(

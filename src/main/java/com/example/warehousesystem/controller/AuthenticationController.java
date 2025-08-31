@@ -1,5 +1,6 @@
 package com.example.warehousesystem.controller;
 
+import com.example.warehousesystem.Annotation.SystemLog;
 import com.example.warehousesystem.dto.request.ForgotPasswordRequest;
 import com.example.warehousesystem.dto.response.ApiResponse;
 import com.example.warehousesystem.dto.request.AuthenticationRequest;
@@ -24,6 +25,7 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
 
     @PostMapping
+    @SystemLog(action = "Đăng nhập hệ thống", targetTable = "auth")
     public ApiResponse<AuthenticationResponse> login(@RequestBody AuthenticationRequest request, HttpServletResponse response) {
         AuthenticationResponse authenticationResponse = authenticationService.login(request);
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token",authenticationResponse.getRefreshToken())
@@ -40,6 +42,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/logout")
+    @SystemLog(action = "Đăng xuất hệ thống", targetTable = "auth")
     ApiResponse<Void> logout(@RequestBody IntrospectRequest request,
                              @CookieValue(name = "refresh_token", required = false) String refreshToken,
                              HttpServletResponse response) throws ParseException, JOSEException {
@@ -61,6 +64,7 @@ public class AuthenticationController {
 
 
     @PostMapping("/refresh-token")
+    @SystemLog(action = "Làm mới access token", targetTable = "auth")
     public ApiResponse<AuthenticationResponse> refreshToken(
             @CookieValue(name = "refresh_token", required = false) String refreshToken) throws ParseException, JOSEException {
         if (refreshToken == null) {
@@ -74,12 +78,12 @@ public class AuthenticationController {
     }
 
     @PostMapping("/forgot-password")
+    @SystemLog(action = "Yêu cầu quên mật khẩu", targetTable = "auth")
     public ApiResponse<Void> forgotPassword(@RequestBody ForgotPasswordRequest request) {
         authenticationService.forgotPassword(request);
         return ApiResponse.<Void>builder()
                 .message("Nếu email tồn tại, mật khẩu mới đã được gửi.")
                 .build();
     }
-
 
 }

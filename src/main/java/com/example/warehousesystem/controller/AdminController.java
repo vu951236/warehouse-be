@@ -1,5 +1,6 @@
 package com.example.warehousesystem.controller;
 
+import com.example.warehousesystem.Annotation.SystemLog;
 import com.example.warehousesystem.dto.request.SearchUserRequest;
 import com.example.warehousesystem.dto.request.UserLockRequest;
 import com.example.warehousesystem.dto.request.UserCreateRequest;
@@ -23,6 +24,7 @@ public class AdminController {
     private final UserService userService;
 
     @PostMapping("/create")
+    @SystemLog(action = "Tạo người dùng", targetTable = "user")
     public ResponseEntity<ApiResponse<UserResponse>> createUser(@RequestBody UserCreateRequest request) {
         UserResponse response = userService.createUser(request);
         return ResponseEntity.ok(
@@ -34,6 +36,7 @@ public class AdminController {
     }
 
     @PutMapping("/update/{userId}")
+    @SystemLog(action = "Cập nhật thông tin người dùng", targetTable = "user")
     public ResponseEntity<ApiResponse<UserResponse>> updateUser(
             @PathVariable Integer userId,
             @RequestBody UserUpdateRequest request
@@ -48,6 +51,7 @@ public class AdminController {
     }
 
     @GetMapping("/getUsers")
+    @SystemLog(action = "Lấy danh sách người dùng", targetTable = "user")
     public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
         List<UserResponse> users = userService.getAllUsers();
         return ResponseEntity.ok(
@@ -59,6 +63,7 @@ public class AdminController {
     }
 
     @PutMapping("/{userId}/lock")
+    @SystemLog(action = "Khóa/Mở khóa người dùng", targetTable = "user")
     public ResponseEntity<ApiResponse<UserLockResponse>> lockOrUnlockUser(
             @PathVariable Integer userId,
             @RequestBody UserLockRequest request
@@ -74,6 +79,7 @@ public class AdminController {
 
     @PutMapping("/{userId}/reset-password")
     @PreAuthorize("hasRole('admin')")
+    @SystemLog(action = "Đặt lại mật khẩu người dùng", targetTable = "user")
     public ResponseEntity<ApiResponse<Void>> resetPasswordToDefault(@PathVariable Integer userId) {
         userService.resetPasswordToDefault(userId);
         return ResponseEntity.ok(
@@ -85,6 +91,7 @@ public class AdminController {
 
     @GetMapping("/user/{userId}")
     @PreAuthorize("hasRole('admin')")
+    @SystemLog(action = "Xem thông tin chi tiết người dùng", targetTable = "user")
     public ResponseEntity<ApiResponse<UserResponse>> getUserById(@PathVariable Integer userId) {
         UserResponse response = userService.getUserById(userId);
         return ResponseEntity.ok(
@@ -96,6 +103,7 @@ public class AdminController {
     }
 
     @PostMapping("/search")
+    @SystemLog(action = "Tìm kiếm người dùng", targetTable = "user")
     public ResponseEntity<ApiResponse<List<UserResponse>>> searchUsers(@RequestBody SearchUserRequest request) {
         List<UserResponse> users = userService.searchUsers(request);
         return ResponseEntity.ok(

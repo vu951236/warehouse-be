@@ -1,5 +1,6 @@
 package com.example.warehousesystem.controller;
 
+import com.example.warehousesystem.Annotation.SystemLog;
 import com.example.warehousesystem.dto.request.SearchItemRequest;
 import com.example.warehousesystem.dto.request.UpdateItemRequest;
 import com.example.warehousesystem.dto.response.ApiResponse;
@@ -24,6 +25,7 @@ public class ItemController {
      * Xóa item theo mã barcode
      */
     @DeleteMapping("/{barcode}")
+    @SystemLog(action = "Xóa item", targetTable = "item")
     public ResponseEntity<ApiResponse<Void>> deleteItem(@PathVariable String barcode) {
         itemService.deleteItem(barcode);
         return ResponseEntity.ok(
@@ -37,6 +39,7 @@ public class ItemController {
      * Cập nhật item (vị trí box + trạng thái)
      */
     @PutMapping("/update")
+    @SystemLog(action = "Cập nhật item", targetTable = "item")
     public ResponseEntity<ApiResponse<ItemResponse>> updateItem(@RequestBody UpdateItemRequest request) {
         ItemResponse updatedItem = itemService.updateItem(request);
         return ResponseEntity.ok(
@@ -51,6 +54,7 @@ public class ItemController {
      * Tìm kiếm item theo điều kiện
      */
     @PostMapping("/search")
+    @SystemLog(action = "Tìm kiếm item", targetTable = "item")
     public ResponseEntity<ApiResponse<List<ItemResponse>>> searchItems(@RequestBody SearchItemRequest request) {
         List<ItemResponse> items = itemService.searchItems(request);
         return ResponseEntity.ok(
@@ -65,6 +69,7 @@ public class ItemController {
      * Xuất danh sách item ra file PDF
      */
     @GetMapping("/export/pdf")
+    @SystemLog(action = "Xuất item ra PDF", targetTable = "item")
     public ResponseEntity<byte[]> exportItemToPdf() {
         byte[] pdfBytes = itemService.exportItemToPdf();
 

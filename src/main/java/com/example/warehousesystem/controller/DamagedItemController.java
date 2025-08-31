@@ -4,6 +4,7 @@ import com.example.warehousesystem.dto.request.TransferItemRequest;
 import com.example.warehousesystem.dto.response.ApiResponse;
 import com.example.warehousesystem.dto.response.DamagedItemResponse;
 import com.example.warehousesystem.service.DamagedItemService;
+import com.example.warehousesystem.Annotation.SystemLog;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,11 @@ public class DamagedItemController {
 
     private final DamagedItemService damagedItemService;
 
+    /**
+     * Đánh dấu sản phẩm lỗi
+     */
     @PostMapping("/mark")
+    @SystemLog(action = "Đánh dấu sản phẩm lỗi", targetTable = "damaged_item")
     public ResponseEntity<ApiResponse<Void>> markDamaged(
             @RequestParam String barcode
     ) {
@@ -29,7 +34,12 @@ public class DamagedItemController {
                         .build()
         );
     }
+
+    /**
+     * Chuyển sản phẩm lỗi sang bảng chính
+     */
     @PostMapping("/transfer")
+    @SystemLog(action = "Chuyển sản phẩm lỗi", targetTable = "damaged_item")
     public ResponseEntity<ApiResponse<Void>> transferDamagedItems(
             @RequestBody List<TransferItemRequest> requests
     ) {
@@ -42,7 +52,11 @@ public class DamagedItemController {
         );
     }
 
+    /**
+     * Lấy danh sách sản phẩm lỗi
+     */
     @GetMapping
+    @SystemLog(action = "Lấy danh sách sản phẩm lỗi", targetTable = "damaged_item")
     public ResponseEntity<ApiResponse<List<DamagedItemResponse>>> getAllDamagedItems() {
         List<DamagedItemResponse> responses = damagedItemService.getAllDamagedItems();
         return ResponseEntity.ok(
@@ -54,7 +68,11 @@ public class DamagedItemController {
         );
     }
 
+    /**
+     * Cập nhật ghi chú sản phẩm lỗi
+     */
     @PutMapping("/update-note")
+    @SystemLog(action = "Cập nhật ghi chú sản phẩm lỗi", targetTable = "damaged_item")
     public ResponseEntity<ApiResponse<Void>> updateNote(
             @RequestParam String barcode,
             @RequestParam String note
@@ -68,7 +86,11 @@ public class DamagedItemController {
         );
     }
 
+    /**
+     * Xóa sản phẩm lỗi
+     */
     @DeleteMapping("/delete")
+    @SystemLog(action = "Xoá sản phẩm lỗi", targetTable = "damaged_item")
     public ResponseEntity<ApiResponse<Void>> deleteDamagedItem(
             @RequestParam String barcode
     ) {
@@ -80,6 +102,5 @@ public class DamagedItemController {
                         .build()
         );
     }
-
 
 }

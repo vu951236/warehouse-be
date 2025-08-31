@@ -1,5 +1,6 @@
 package com.example.warehousesystem.controller;
 
+import com.example.warehousesystem.Annotation.SystemLog;
 import com.example.warehousesystem.dto.request.*;
 import com.example.warehousesystem.dto.response.*;
 import com.example.warehousesystem.service.*;
@@ -36,6 +37,7 @@ public class ExportOrderController {
     private final ExportOrderSearchService exportOrderSearchService;
 
     @GetMapping("/getallExportOrder")
+    @SystemLog(action = "Lấy tất cả đơn xuất", targetTable = "export_order")
     public ResponseEntity<ApiResponse<List<ExportOrderResponse>>> getAllExportOrders() {
         List<ExportOrderResponse> data = exportOrderService.getAllExportOrders();
         return ResponseEntity.ok(
@@ -47,6 +49,7 @@ public class ExportOrderController {
     }
 
     @GetMapping("/{orderId}/details")
+    @SystemLog(action = "Lấy chi tiết đơn xuất", targetTable = "export_order")
     public ResponseEntity<ApiResponse<List<ExportOrderDetailResponse>>> getExportOrderDetails(@PathVariable Integer orderId) {
         List<ExportOrderDetailResponse> data = exportOrderService.getExportOrderDetailsByOrderId(orderId);
         return ResponseEntity.ok(
@@ -58,6 +61,7 @@ public class ExportOrderController {
     }
 
     @PostMapping("/search")
+    @SystemLog(action = "Tìm kiếm đơn xuất", targetTable = "export_order")
     public ResponseEntity<ApiResponse<List<ExportOrderResponse>>> searchExportOrders(@RequestBody ExportOrderSearchRequest request) {
         List<ExportOrderResponse> data = exportOrderService.searchExportOrders(request);
         return ResponseEntity.ok(
@@ -69,6 +73,7 @@ public class ExportOrderController {
     }
 
     @PostMapping("/multiple/export-with-route")
+    @SystemLog(action = "Xuất hàng nhiều SKU kèm đường đi", targetTable = "export_order")
     public ResponseEntity<InputStreamResource> exportMultipleWithRouteToExcel(@RequestBody ExportItemRequest request) throws Exception {
         // 1. Xuất hàng và lấy đường đi (service mới nhận List<ExportQueueDTO>)
         ExportWithPickingRouteResponse result = exportMultipleItemsService.exportQueuedItems(request.getItems());
@@ -131,24 +136,28 @@ public class ExportOrderController {
     }
 
     @PostMapping("/multiple/move-to-queue")
+    @SystemLog(action = "Chuyển item sang trạng thái queued", targetTable = "export_order")
     public ResponseEntity<String> moveItemsToQueue(@RequestBody ExportItemRequest request) {
         exportMultipleItemsService.moveItemsToQueue(request.getItems());
         return ResponseEntity.ok("Chuyển item sang queued thành công!");
     }
 
     @PostMapping("/multiple/move-back-from-queue")
+    @SystemLog(action = "Chuyển item từ queued về available", targetTable = "export_order")
     public ResponseEntity<String> moveItemsBackFromQueue(@RequestBody ExportItemRequest request) {
         exportMultipleItemsService.moveItemsBackFromQueue(request.getItems());
         return ResponseEntity.ok("Chuyển item từ queued về available thành công!");
     }
 
     @GetMapping("/sku-status")
+    @SystemLog(action = "Lấy trạng thái SKU", targetTable = "export_order")
     public ResponseEntity<List<SKUStatusResponse>> getAllSkuStatus() {
         List<SKUStatusResponse> list = exportMultipleItemsService.getAllSkuStatus();
         return ResponseEntity.ok(list);
     }
 
     @PostMapping("/excel")
+    @SystemLog(action = "Xuất hàng từ file Excel", targetTable = "export_order")
     public ResponseEntity<ApiResponse<List<ExportItemResponse>>> exportItemsByExcel(@RequestBody ExportExcelItemRequest request) {
         List<ExportItemResponse> data = exportService.exportMultipleItemsByExcel(request);
         return ResponseEntity.ok(
@@ -160,9 +169,9 @@ public class ExportOrderController {
     }
 
     @GetMapping("/export/template")
+    @SystemLog(action = "Tải template Excel đơn xuất", targetTable = "export_order")
     public ResponseEntity<ByteArrayResource> downloadTemplate() {
         ByteArrayResource resource = templateService.generateExportExcelTemplate();
-
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=export_template.xlsx")
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
@@ -171,6 +180,7 @@ public class ExportOrderController {
     }
 
     @PostMapping("/search-by-sku")
+    @SystemLog(action = "Tìm kiếm xuất hàng theo SKU", targetTable = "export_order")
     public ResponseEntity<ApiResponse<List<SearchExportBySKUResponse>>> searchExportBySku(@RequestBody SearchExportBySKURequest request) {
         List<SearchExportBySKUResponse> data = searchExportBySKUService.searchBySku(request);
         return ResponseEntity.ok(
@@ -182,6 +192,7 @@ public class ExportOrderController {
     }
 
     @PostMapping("/optimal")
+    @SystemLog(action = "Lấy đường đi lấy hàng tối ưu", targetTable = "export_order")
     public ResponseEntity<ApiResponse<List<PickingRouteResponse>>> getOptimalPickingRoute(@RequestBody PickingRouteRequest request) {
         List<PickingRouteResponse> data = pickingRouteService.getOptimalPickingRoute(request);
         return ResponseEntity.ok(
@@ -192,7 +203,8 @@ public class ExportOrderController {
         );
     }
 
-    @PostMapping
+    @PostMapping("/urgent")
+    @SystemLog(action = "Lấy danh sách đơn hàng gấp", targetTable = "export_order")
     public ResponseEntity<ApiResponse<List<UrgentOrderResponse>>> getUrgentOrders(@RequestBody UrgentOrderRequest request) {
         List<UrgentOrderResponse> data = urgentOrderService.getUrgentOrders(request);
         return ResponseEntity.ok(
@@ -204,13 +216,12 @@ public class ExportOrderController {
     }
 
     @GetMapping("/export-excel")
+    @SystemLog(action = "Xuất Excel danh sách đơn xuất", targetTable = "export_order")
     public ResponseEntity<byte[]> exportExcel() throws IOException {
         ByteArrayInputStream stream = exportExcelExportService.exportAllExportOrdersToExcel();
         byte[] bytes = stream.readAllBytes();
-
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Disposition", "attachment; filename=export_orders.xlsx");
-
         return ResponseEntity
                 .ok()
                 .headers(headers)
@@ -219,6 +230,7 @@ public class ExportOrderController {
     }
 
     @GetMapping("/getAllExportOrderDetails")
+    @SystemLog(action = "Lấy tất cả chi tiết đơn xuất", targetTable = "export_order")
     public ResponseEntity<ApiResponse<List<AllExportOrderResponse>>> getAllExportOrderDetails() {
         List<AllExportOrderResponse> data = exportOrderService.getAllExportOrderDetails();
         return ResponseEntity.ok(
@@ -230,6 +242,7 @@ public class ExportOrderController {
     }
 
     @GetMapping("/{orderId}/full")
+    @SystemLog(action = "Lấy đầy đủ thông tin đơn xuất theo orderId", targetTable = "export_order")
     public ResponseEntity<ApiResponse<ExportOrderFullResponse>> getFullExportOrderById(@PathVariable Integer orderId) {
         ExportOrderFullResponse data = exportOrderService.getFullExportOrderById(orderId);
         return ResponseEntity.ok(
@@ -241,6 +254,7 @@ public class ExportOrderController {
     }
 
     @GetMapping("/detail/{detailId}/full")
+    @SystemLog(action = "Lấy đầy đủ thông tin đơn xuất theo detailId", targetTable = "export_order")
     public ResponseEntity<ApiResponse<ExportOrderFullResponse>> getFullExportOrderByDetailId(@PathVariable Integer detailId) {
         ExportOrderFullResponse data = exportOrderService.getFullExportOrderByDetailId(detailId);
         return ResponseEntity.ok(
@@ -252,6 +266,7 @@ public class ExportOrderController {
     }
 
     @GetMapping("/getAllExportOrder/board")
+    @SystemLog(action = "Lấy danh sách đơn xuất (gộp SKU)", targetTable = "export_order")
     public ResponseEntity<ApiResponse<List<ExportOrderBoardResponse>>> getAllExportOrderDetailsMergedWithSkuList() {
         List<ExportOrderBoardResponse> data = exportOrderService.getAllExportOrderDetailsMergedWithSkuList();
         return ResponseEntity.ok(
@@ -263,6 +278,7 @@ public class ExportOrderController {
     }
 
     @PostMapping("/search-full")
+    @SystemLog(action = "Tìm kiếm chi tiết đơn xuất", targetTable = "export_order")
     public ResponseEntity<ApiResponse<List<AllExportOrderResponse>>> searchFullExportOrders(
             @RequestBody SearchExportOrderRequest request
     ) {
@@ -276,6 +292,7 @@ public class ExportOrderController {
     }
 
     @PostMapping("/search-board")
+    @SystemLog(action = "Tìm kiếm đơn xuất (board view)", targetTable = "export_order")
     public ResponseEntity<ApiResponse<List<ExportOrderBoardResponse>>> searchExportOrdersBoard(
             @RequestBody SearchExportOrder2Request request
     ) {
@@ -287,6 +304,5 @@ public class ExportOrderController {
                         .build()
         );
     }
-
 
 }

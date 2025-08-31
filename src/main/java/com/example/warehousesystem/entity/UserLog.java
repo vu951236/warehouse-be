@@ -33,9 +33,9 @@ public class UserLog {
     @Column(name = "target_id")
     private Integer targetId;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "timestamp")
-    private LocalDate timestamp;
+    private LocalDateTime timestamp;
 
     @Column(name = "ip_address", length = 100)
     private String ipAddress;
