@@ -1,5 +1,6 @@
 package com.example.warehousesystem.service;
 
+import com.example.warehousesystem.dto.request.DashboardRequest;
 import com.example.warehousesystem.dto.request.ExportChartRequest;
 import com.example.warehousesystem.dto.response.ExportChartResponse;
 import com.example.warehousesystem.dto.response.ExportKpiResponse;
@@ -19,7 +20,7 @@ public class ExportDashboardService {
     /**
      * Lấy KPI: tổng số đơn xuất confirmed + tổng quantity
      */
-    public ExportKpiResponse getKpis(ExportChartRequest req) {
+    public ExportKpiResponse getKpis(DashboardRequest req) {
         Long totalOrders = exportOrderRepository.countConfirmedExportOrders(
                 req.getWarehouseId(), req.getStartDate(), req.getEndDate()
         );

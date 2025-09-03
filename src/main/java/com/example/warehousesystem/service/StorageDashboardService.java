@@ -1,5 +1,6 @@
 package com.example.warehousesystem.service;
 
+import com.example.warehousesystem.dto.request.DashboardRequest;
 import com.example.warehousesystem.dto.request.StorageDashboardRequest;
 import com.example.warehousesystem.dto.response.*;
 import com.example.warehousesystem.repository.*;
@@ -20,7 +21,7 @@ public class StorageDashboardService {
     private final BoxRepository boxRepository;
 
     // 1. KPI
-    public StorageKpiResponse getKpis(StorageDashboardRequest req) {
+    public StorageKpiResponse getKpis(DashboardRequest req) {
         long shelfCount = shelfRepository.countByWarehouseId(req.getWarehouseId());
         long binCount = binRepository.countByWarehouseId(req.getWarehouseId());
         long boxCount = boxRepository.countByWarehouseId(req.getWarehouseId());

@@ -1,5 +1,6 @@
 package com.example.warehousesystem.service;
 
+import com.example.warehousesystem.dto.request.DashboardRequest;
 import com.example.warehousesystem.dto.request.QualityRequest;
 import com.example.warehousesystem.dto.response.QualityKpiResponse;
 import com.example.warehousesystem.dto.response.QualityTrendResponse;
@@ -20,7 +21,7 @@ public class QualityService {
     private final ItemRepository itemRepository;
 
     // 1. KPI
-    public QualityKpiResponse getKpis(QualityRequest req) {
+    public QualityKpiResponse getKpis(DashboardRequest req) {
         Long totalDamaged = itemRepository.countByStatusAndWarehouseId(
                 Item.Status.damaged, req.getWarehouseId(), req.getStartDate(), req.getEndDate()
         );

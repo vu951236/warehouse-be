@@ -25,13 +25,29 @@ public class DashboardController {
     private final StorageDashboardService storageDashboardService;
     private final ReportPdfService reportPdfService;
     private final QualityService qualityService;
+    private final DashboardService dashboardService;
+
+    @SystemLog(action = "Xem KPI tổng hợp 4 loại", targetTable = "dashboard")
+    @PostMapping("/Full4KPI")
+    public ResponseEntity<ApiResponse<DashboardResponse>> getDashboard(
+            @Valid @RequestBody DashboardRequest request) {
+
+        DashboardResponse data = dashboardService.getDashboard(request);
+
+        return ResponseEntity.ok(
+                ApiResponse.<DashboardResponse>builder()
+                        .message("Lấy KPI tổng hợp thành công")
+                        .data(data)
+                        .build()
+        );
+    }
 
     // ==================== Import ====================
 
     @SystemLog(action = "Xem KPI nhập kho", targetTable = "import")
     @PostMapping("/1.1-import-kpi")
     public ResponseEntity<ApiResponse<ImportKpiResponse>> getImportKpis(
-            @Valid @RequestBody ImportDashboardRequest request) {
+            @Valid @RequestBody DashboardRequest request) {
         ImportKpiResponse data = importDashboardService.getImportKpis(request);
         return ResponseEntity.ok(
                 ApiResponse.<ImportKpiResponse>builder()
@@ -59,7 +75,7 @@ public class DashboardController {
     @SystemLog(action = "Xem KPI xuất kho", targetTable = "export")
     @PostMapping("/2.1-export-kpis")
     public ResponseEntity<ApiResponse<ExportKpiResponse>> getExportKpis(
-            @Valid @RequestBody ExportChartRequest request) {
+            @Valid @RequestBody DashboardRequest request) {
         ExportKpiResponse data = exportDashboardService.getKpis(request);
         return ResponseEntity.ok(
                 ApiResponse.<ExportKpiResponse>builder()
@@ -87,7 +103,7 @@ public class DashboardController {
     @SystemLog(action = "Xem KPI lưu trữ", targetTable = "storage")
     @PostMapping("/3.1-storage-kpis")
     public ResponseEntity<ApiResponse<StorageKpiResponse>> getStorageKpis(
-            @Valid @RequestBody StorageDashboardRequest request) {
+            @Valid @RequestBody DashboardRequest request) {
         StorageKpiResponse data = storageDashboardService.getKpis(request);
         return ResponseEntity.ok(
                 ApiResponse.<StorageKpiResponse>builder()
@@ -141,7 +157,7 @@ public class DashboardController {
     @SystemLog(action = "Xem KPI chất lượng", targetTable = "quality")
     @PostMapping("/4.1-kpi")
     public ResponseEntity<ApiResponse<QualityKpiResponse>> getQualityKpis(
-            @Valid @RequestBody QualityRequest request) {
+            @Valid @RequestBody DashboardRequest request) {
         QualityKpiResponse data = qualityService.getKpis(request);
         return ResponseEntity.ok(
                 ApiResponse.<QualityKpiResponse>builder()

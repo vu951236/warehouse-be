@@ -1,5 +1,6 @@
 package com.example.warehousesystem.service;
 
+import com.example.warehousesystem.dto.request.DashboardRequest;
 import com.example.warehousesystem.dto.request.ImportDashboardRequest;
 import com.example.warehousesystem.dto.response.ImportChartResponse;
 import com.example.warehousesystem.dto.response.ImportKpiResponse;
@@ -21,7 +22,7 @@ public class ImportDashboardService {
     private final ImportOrderRepository importOrderRepository;
 
     // API KPI
-    public ImportKpiResponse getImportKpis(ImportDashboardRequest request) {
+    public ImportKpiResponse getImportKpis(DashboardRequest request) {
         Long totalOrders = importOrderRepository.countConfirmedOrders(
                 request.getWarehouseId(), request.getStartDate(), request.getEndDate());
 
