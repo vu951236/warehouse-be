@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -112,7 +113,9 @@ public class ImportFromTempService {
                     Item item = ItemImportMapper.toItem(targetBox, sku);
                     String barcode;
                     do {
-                        barcode = sku.getSkuCode() + "-" + UUID.randomUUID().toString().substring(0, 8);
+                        barcode = sku.getSkuCode() + "-" +
+                                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) +
+                                (int)(Math.random() * 100);
                     } while (itemRepository.existsByBarcode(barcode));
                     item.setBarcode(barcode);
                     itemRepository.save(item);

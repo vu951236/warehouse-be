@@ -52,15 +52,15 @@ public class ImportOrderController {
         return ResponseEntity.ok(importOrderSearchService.searchImportOrdersMerged(request));
     }
 
-    @PostMapping("/import-by-scan")
-    @SystemLog(action = "Nhập kho bằng quét barcode", targetTable = "importorder")
-    public ResponseEntity<ApiResponse<ImportItemsResponse>> importItemsByScan(
+    @PostMapping("/upload-barcode-to-temp")
+    @SystemLog(action = "Upload barcode lưu vào bảng tạm", targetTable = "importorder_temp")
+    public ResponseEntity<ApiResponse<String>> uploadBarcodeToTemp(
             @RequestBody ImportScanBarcodeRequest request
     ) {
-        ImportItemsResponse result = importScanBarcodeService.importItemsByScan(request);
-        return ResponseEntity.ok(ApiResponse.<ImportItemsResponse>builder()
-                .message("Nhập kho bằng form quét mã thành công")
-                .data(result)
+        importScanBarcodeService.saveScannedBarcodes(request);
+        return ResponseEntity.ok(ApiResponse.<String>builder()
+                .message("Đã lưu barcode vào bảng tạm thành công")
+                .data("success")
                 .build());
     }
 

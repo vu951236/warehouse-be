@@ -4,6 +4,7 @@ import com.example.warehousesystem.dto.ScanBarcodeDTO;
 import com.example.warehousesystem.entity.ImportOrder;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -14,6 +15,7 @@ import java.util.List;
 public class ImportScanBarcodeRequest {
     private List<ScanBarcodeDTO> scannedItems; // Danh sách mã quét
     private ImportOrder.Source source;
-    private Integer userId;                    // Người nhập
-    private String note;                       // Ghi chú
+    private String note;       // Ghi chú
+    private LocalDate importDate;  // Ngày nhập kho
+    private String importOrderCode; // Mã đơn nhập
 }
