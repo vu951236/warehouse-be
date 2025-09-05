@@ -12,8 +12,7 @@ import lombok.NoArgsConstructor;
 //Cập nhập thông tin tài khoản
 public class UserUpdateRequest {
     private String email;
-    private String password;
+    private String username;
     private String fullName;
     private String role;
-    private Boolean isActive;
 }

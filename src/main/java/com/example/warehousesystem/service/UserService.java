@@ -70,7 +70,6 @@ public class UserService {
     public UserResponse updateUser(Integer userId,UserUpdateRequest request) {
         User user = userRepository.findById(userId).orElseThrow(()-> new AppException(ErrorCode.USER_NOT_FOUND));
         userMapper.updateUser(user, request);
-        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
