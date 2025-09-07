@@ -38,18 +38,26 @@ public class ImportOrderController {
 
     @PostMapping("/search")
     @SystemLog(action = "Tìm kiếm đơn nhập", targetTable = "importorder")
-    public ResponseEntity<List<ImportOrderBoardResponse>> searchImportOrders(
+    public ResponseEntity<ApiResponse<List<ImportOrderBoardResponse>>> searchImportOrders(
             @RequestBody ImportOrderSearchRequest request
     ) {
-        return ResponseEntity.ok(importOrderSearchService.searchImportOrders(request));
+        List<ImportOrderBoardResponse> result = importOrderSearchService.searchImportOrders(request);
+        return ResponseEntity.ok(ApiResponse.<List<ImportOrderBoardResponse>>builder()
+                .message("Tìm kiếm thành công")
+                .data(result)
+                .build());
     }
 
     @PostMapping("/search-merged")
     @SystemLog(action = "Tìm kiếm đơn nhập (gộp dữ liệu)", targetTable = "importorder")
-    public ResponseEntity<List<ImportOrderBoardResponse>> searchImportOrdersMerged(
+    public ResponseEntity<ApiResponse<List<ImportOrderBoardResponse>>> searchImportOrdersMerged(
             @RequestBody ImportOrderSearch2Request request
     ) {
-        return ResponseEntity.ok(importOrderSearchService.searchImportOrdersMerged(request));
+        List<ImportOrderBoardResponse> result = importOrderSearchService.searchImportOrdersMerged(request);
+        return ResponseEntity.ok(ApiResponse.<List<ImportOrderBoardResponse>>builder()
+                .message("Tìm kiếm gộp dữ liệu thành công")
+                .data(result)
+                .build());
     }
 
     @PostMapping("/upload-barcode-to-temp")
