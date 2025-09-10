@@ -3,10 +3,7 @@ package com.example.warehousesystem.service;
 
 import com.example.warehousesystem.dto.ScanBarcodeDTO;
 import com.example.warehousesystem.dto.request.ImportScanBarcodeRequest;
-import com.example.warehousesystem.dto.response.ImportItemsResponse;
 import com.example.warehousesystem.entity.*;
-import com.example.warehousesystem.exception.AppException;
-import com.example.warehousesystem.exception.ErrorCode;
 import com.example.warehousesystem.mapper.ItemImportMapper;
 import com.example.warehousesystem.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,9 +32,7 @@ public class ImportScanBarcodeService {
     public void saveScannedBarcodes(ImportScanBarcodeRequest request) {
         Long userId = getCurrentUserId();
 
-        String importCode = request.getImportOrderCode() != null
-                ? request.getImportOrderCode()
-                : ItemImportMapper.generateImportCode();
+        String importCode = ItemImportMapper.generateImportCode();
 
         LocalDate importDate = request.getImportDate() != null
                 ? request.getImportDate()

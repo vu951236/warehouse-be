@@ -1,7 +1,4 @@
 spring:
-  application:
-    name: WarehouseSystem
-
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${DB_URL}
@@ -23,12 +20,8 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
-    show-sql: true
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
-        physical_naming_strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+      ddl-auto: update
+      physical_naming_strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 
 jwt:
   signerKey: ${JWT_SECRET}
@@ -38,3 +31,10 @@ jwt:
 server:
   address: 0.0.0.0
   port: ${PORT:8080}
+
+frontend:
+  domain: ${DOMAIN_FE}
+  port: ${PORT:8080}
+
+profiles:
+  active: ${SPRING_PROFILES_ACTIVE:dev}

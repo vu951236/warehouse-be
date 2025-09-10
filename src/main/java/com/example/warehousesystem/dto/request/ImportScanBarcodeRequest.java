@@ -11,11 +11,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-// Nhập kho bằng cách quét mã vạch (QR code)
 public class ImportScanBarcodeRequest {
-    private List<ScanBarcodeDTO> scannedItems; // Danh sách mã quét
+    private List<ScanBarcodeDTO> scannedItems;
     private ImportOrder.Source source;
-    private String note;       // Ghi chú
-    private LocalDate importDate;  // Ngày nhập kho
-    private String importOrderCode; // Mã đơn nhập
+    private String note;
+    private LocalDate importDate;
 }

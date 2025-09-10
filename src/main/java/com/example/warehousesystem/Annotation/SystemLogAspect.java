@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -19,15 +20,16 @@ import jakarta.servlet.http.HttpServletRequest;
 public class SystemLogAspect {
 
     private final UserLogService userLogService;
-    private final HttpServletRequest request;
     private final UserRepository userRepository;
+
+    @Autowired
+    private HttpServletRequest request;
 
     @Around("@annotation(systemLog)")
     public Object logAction(ProceedingJoinPoint joinPoint, SystemLog systemLog) throws Throwable {
-        // Thực thi method gốc
         Object result = joinPoint.proceed();
 
-        // Lấy thông tin user từ SecurityContext
+        // Lấy thông tin user
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = null;
         if (authentication != null && authentication.isAuthenticated()
@@ -39,7 +41,7 @@ public class SystemLogAspect {
         // Lấy IP
         String ipAddress = extractClientIp();
 
-        // Lấy targetId từ tham số (nếu có)
+        // Lấy targetId từ tham số hoặc result
         Integer targetId = null;
         for (Object arg : joinPoint.getArgs()) {
             try {
@@ -47,8 +49,6 @@ public class SystemLogAspect {
                 if (targetId != null) break;
             } catch (Exception ignored) {}
         }
-
-        // Nếu vẫn chưa có, thử lấy từ result (trường hợp entity có getId)
         if (targetId == null && result != null) {
             try {
                 targetId = (Integer) result.getClass().getMethod("getId").invoke(result);
