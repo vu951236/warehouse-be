@@ -85,33 +85,27 @@ public class UserService {
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
-    public ProfileResponse updateProfile(Integer userId, ProfileUpdateRequest request) {
+    public ProfileResponse updateProfile(ProfileUpdateRequest request) {
         var context = SecurityContextHolder.getContext();
         var username = context.getAuthentication().getName();
 
         User currentUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        if (!currentUser.getId().equals(userId) &&
-                (currentUser.getRole() == null || !"admin".equalsIgnoreCase(String.valueOf(currentUser.getRole())))) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
-        }
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-
-        if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
+        if (request.getEmail() != null && !request.getEmail().equals(currentUser.getEmail())) {
             if (userRepository.existsByEmail(request.getEmail())) {
                 throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS);
             }
-            user.setEmail(request.getEmail());
+            currentUser.setEmail(request.getEmail());
         }
-        user.setFullName(request.getFullName());
 
-        User updatedUser = userRepository.save(user);
+        currentUser.setFullName(request.getFullName());
+
+        User updatedUser = userRepository.save(currentUser);
 
         return userMapper.toProfileResponse(updatedUser);
     }
+
 
     @PreAuthorize("hasRole('admin')")
     public UserLockResponse lockOrUnlockUser(Integer userId, UserLockRequest request) {

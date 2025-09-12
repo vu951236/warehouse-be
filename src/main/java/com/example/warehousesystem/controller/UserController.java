@@ -82,15 +82,15 @@ public class UserController {
     /**
      * Cập nhật thông tin hồ sơ người dùng
      */
-    @PutMapping("/{userId}/update-profile")
+    @PutMapping("/update-profile")
     @SystemLog(action = "Cập nhật hồ sơ người dùng", targetTable = "user")
     public ApiResponse<ProfileResponse> updateProfile(
-            @PathVariable Integer userId,
             @RequestBody ProfileUpdateRequest request
     ) {
         return ApiResponse.<ProfileResponse>builder()
-                .data(userService.updateProfile(userId, request))
+                .data(userService.updateProfile(request))
                 .build();
     }
+
 
 }
