@@ -4,6 +4,8 @@ package com.example.warehousesystem.service;
 import com.example.warehousesystem.dto.ScanBarcodeDTO;
 import com.example.warehousesystem.dto.request.ImportScanBarcodeRequest;
 import com.example.warehousesystem.entity.*;
+import com.example.warehousesystem.exception.AppException;
+import com.example.warehousesystem.exception.ErrorCode;
 import com.example.warehousesystem.mapper.ItemImportMapper;
 import com.example.warehousesystem.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import java.util.*;
 public class ImportScanBarcodeService {
 
     private final UserRepository userRepository;
+    private final SKURepository skuRepository;
     private final TempImportExcelRepository tempImportExcelRepository;
 
     private Long getCurrentUserId() {
@@ -41,6 +44,12 @@ public class ImportScanBarcodeService {
         Map<String, Integer> skuCountMap = new HashMap<>();
         for (ScanBarcodeDTO dto : request.getScannedItems()) {
             String skuCode = extractSkuCodeFromBarcode(dto.getBarcode());
+
+            boolean exists = skuRepository.findBySkuCode(skuCode).isPresent();
+            if (!exists) {
+                throw new AppException(ErrorCode.SKU_NOT_FOUND);
+            }
+
             skuCountMap.put(skuCode, skuCountMap.getOrDefault(skuCode, 0) + 1);
         }
 
@@ -58,7 +67,6 @@ public class ImportScanBarcodeService {
 
         tempImportExcelRepository.saveAll(entities);
     }
-
 
     private String extractSkuCodeFromBarcode(String barcode) {
         if (barcode == null || !barcode.contains("-")) {
